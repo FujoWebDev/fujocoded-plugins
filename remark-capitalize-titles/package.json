@@ -3,7 +3,20 @@
   "type": "module",
   "version": "0.0.1",
   "description": "Make titles consistent with remark",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
   "files": [
     "dist",
     "LICENSE",
@@ -11,7 +24,8 @@
     "package.json"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
   },
   "keywords": [
     "remark"
@@ -24,6 +38,7 @@
   },
   "devDependencies": {
     "@types/title": "^3.4.3",
+    "tsup": "^8.1.0",
     "typescript": "^5.4.5",
     "unified": "^11.0.4"
   }
