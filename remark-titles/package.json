@@ -1,10 +1,11 @@
 {
   "name": "@fujocoded/remark-titles",
+  "type": "module",
   "version": "0.0.1",
   "description": "Make titles consistent with remark",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "keywords": [
     "remark"
@@ -14,5 +15,10 @@
   "dependencies": {
     "title": "^3.5.3",
     "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/title": "^3.4.3",
+    "typescript": "^5.4.5",
+    "unified": "^11.0.4"
   }
 }

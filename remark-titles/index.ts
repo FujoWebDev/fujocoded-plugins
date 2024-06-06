@@ -1,7 +1,8 @@
 import title from "title";
 import { visit } from "unist-util-visit";
+import type { Pluggable } from "unified";
 
-export default ({ options } = { options: [] }) =>
+export default ({ options } = { options: [] }): Pluggable =>
   (tree) => {
     visit(tree, "heading", (node) => {
       visit(node, "text", (textNode) => {
