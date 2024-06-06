@@ -1,0 +1,18 @@
+{
+  "name": "@fujocoded/remark-titles",
+  "version": "0.0.1",
+  "description": "Make titles consistent with remark",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "remark"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "title": "^3.5.3",
+    "unist-util-visit": "^5.0.0"
+  }
+}
