@@ -1,6 +1,8 @@
-# MDX Plugins
+# FujoCoded Plugins
 
-A repository of MDX plugins for true fujin. Includes plugins for:
+A repository of plugins for true webdev fujin. Includes plugins for:
 
 - Remark
 - Rehype
+- Zod
+- Astro
