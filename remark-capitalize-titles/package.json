@@ -38,6 +38,8 @@
   },
   "devDependencies": {
     "@types/title": "^3.4.3",
+    "mdast": "^3.0.0",
+    "remark": "^15.0.1",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5",
     "unified": "^11.0.4"
