@@ -15,6 +15,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./defaults": {
+      "import": {
+        "types": "./dist/capitalizations.d.ts",
+        "default": "./dist/capitalizations.js"
+      },
+      "require": {
+        "types": "./dist/capitalizations.d.cts",
+        "default": "./dist/capitalizations.cjs"
+      }
     }
   },
   "files": [
@@ -24,7 +34,9 @@
     "package.json"
   ],
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "build": "npm run build:plugin && npm run build:capitalizations",
+    "build:capitalizations": "tsup capitalizations.ts --format cjs,esm --dts",
+    "build:plugin": "tsup index.ts --format cjs,esm --dts",
     "validate": " npx publint"
   },
   "keywords": [
