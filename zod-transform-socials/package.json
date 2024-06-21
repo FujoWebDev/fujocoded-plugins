@@ -1,0 +1,43 @@
+{
+  "name": "@fujocoded/zod-transform-socials",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "A Zod schema + transformer for social URLs",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
+  },
+  "keywords": [
+    "zod"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "social-links": "^1.14.0",
+    "zod": "^3.23.8"
+  }
+}
