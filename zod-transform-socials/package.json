@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/zod-transform-socials",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "description": "A Zod schema + transformer for social URLs",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -37,6 +37,7 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
+    "@fujocoded/zod-transform-socials": "^0.0.4",
     "social-links": "^1.14.0",
     "zod": "^3.23.8"
   }

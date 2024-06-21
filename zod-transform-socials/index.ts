@@ -40,3 +40,5 @@ export const SocialLinks = z
   .array(SocialsSchema)
   .default([])
   .transform((socialUrls) => socialUrls.map(transformSocial));
+
+export type SocialLinksData = z.infer<typeof SocialLinks>;

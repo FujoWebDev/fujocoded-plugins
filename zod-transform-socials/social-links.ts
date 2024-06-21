@@ -79,6 +79,46 @@ const carrdMatches: ProfileMatch[] = [
 ];
 socialLinks.addProfile("carrd", carrdMatches);
 
+const kickstarterMatches: ProfileMatch[] = [
+  {
+    // https://www.kickstarter.com/projects/essential-randomness/the-fujoshi-guide-to-web-development
+    match: "https?://www.kickstarter.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
+    group: 1,
+  },
+];
+socialLinks.addProfile("kickstarter", kickstarterMatches);
+
+const gitHubMatches: ProfileMatch[] = [
+  {
+    // https://github.com/FujoWebDev/AO3.js
+    match: "https?://github.com/([a-z0-9-]+/[a-z0-9-\\.]+)/?",
+    group: 1,
+  },
+  {
+    // https://github.com/orgs/FujoWebDev/
+    match: "https?://github.com/orgs/([a-z0-9-]+)/?",
+    group: 1,
+  },
+];
+
+const npmMatches: ProfileMatch[] = [
+  {
+    // https://www.npmjs.com/package/@bobaboard/ao3.js
+    match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
+    group: 1,
+  },
+];
+socialLinks.addProfile("npm", npmMatches);
+
+// Social Links does not give us a way to add extra matches
+// but we chose to make it happen anyway.
+// @ts-expect-error
+socialLinks.profiles.set("github", [
+  // @ts-expect-error
+  ...socialLinks.profiles.get("github"),
+  ...gitHubMatches,
+]);
+
 // Extracted on 6/20/24
 type LIBRARY_TYPES =
   | "behance"
@@ -113,10 +153,10 @@ type CUSTOM_TYPES =
   | "bsky"
   | "dreamwidth"
   | "inprnt"
-  // | "kickstarter"
+  | "kickstarter"
   | "ko-fi"
   | "neocities"
-  // | "npm"
+  | "npm"
   | "tumblr";
 
 export type SOCIAL_TYPES = LIBRARY_TYPES | CUSTOM_TYPES | "custom";
