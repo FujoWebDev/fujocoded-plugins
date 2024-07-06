@@ -25,7 +25,7 @@ const isCodeWithSingleText = <
   );
 };
 
-export const rehypeCodeParam: Plugin<
+export const rehypeCodeParams: Plugin<
   PluginArgs[],
   hast.Root
 > = ({}: PluginArgs = {}): Transformer<hast.Root> => {
