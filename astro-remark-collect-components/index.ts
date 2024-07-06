@@ -42,13 +42,6 @@ export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
             `[astro-remark-collect-components]: No config found for ${node.name}`
           );
         }
-        const slug = node.attributes.find(
-          (attribute: any) => "name" in attribute && attribute.name == "slug"
-        )?.value as string;
-
-        if (slug) {
-          return;
-        }
 
         const values = componentConfig.attributes.reduce(
           (aggregate, current) => {
