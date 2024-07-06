@@ -1,0 +1,49 @@
+{
+  "name": "@fujocoded/astro-remark-collect-components",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Allows adding a list of components and attributes in an MDX file to Astro's frontmatter",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
+  },
+  "keywords": [
+    "remark"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "mdast-util-mdx-jsx": "^3.1.2",
+    "remark": "^15.0.1",
+    "tsup": "^8.1.0",
+    "typescript": "^5.4.5",
+    "unified": "^11.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
