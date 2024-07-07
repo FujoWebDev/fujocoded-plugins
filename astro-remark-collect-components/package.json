@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/astro-remark-collect-components",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Allows adding a list of components and attributes in an MDX file to Astro's frontmatter",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

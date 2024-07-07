@@ -24,7 +24,7 @@ export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
       );
     }
     components.forEach((c) => {
-      (file.data.astro as any).frontmatter[c.name] = [];
+      (file.data.astro as any).frontmatter[c.frontmatterName] = [];
     });
     return visit(
       tree,
@@ -48,16 +48,18 @@ export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
             aggregate[current] = node.attributes.find(
               (attribute) =>
                 "name" in attribute &&
-                attribute.name == "slug" &&
+                attribute.name == current &&
                 typeof attribute.value == "string"
-            ) as unknown as string | undefined;
+            )?.value as unknown as string | undefined;
 
             return aggregate;
           },
           {} as Record<string, string | undefined>
         );
 
-        (file.data.astro as any).frontmatter[componentConfig.name].push(values);
+        (file.data.astro as any).frontmatter[
+          componentConfig.frontmatterName
+        ].push(values);
       }
     );
   };
