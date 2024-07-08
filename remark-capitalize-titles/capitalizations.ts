@@ -5,4 +5,5 @@ export const DEFAULT_CAPITALIZATIONS = [
   "FujoWebDev",
   "FujoGuide",
   "NPM",
+  "SHA",
 ];
