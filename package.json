@@ -1,0 +1,11 @@
+{
+  "name": "fujocoded-plugins",
+  "private": true,
+  "scripts": {
+    "sherif": "npx sherif@latest"
+  },
+  "workspaces": [
+    "./*"
+  ],
+  "packageManager": "^npm@10.2.4"
+}
