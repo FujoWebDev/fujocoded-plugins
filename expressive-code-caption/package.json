@@ -1,0 +1,48 @@
+{
+  "name": "@fujocoded/expressive-code-caption",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Allow adding caption at the end of expressive code blocks.",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
+  },
+  "keywords": [
+    "remark"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "mdast-util-to-hast": "^13.2.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@expressive-code/core": "^0.35.3"
+  }
+}
