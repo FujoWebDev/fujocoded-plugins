@@ -12,7 +12,7 @@ export function pluginCodeCaption() {
   return definePlugin({
     name: "Code caption",
     baseStyles: `
-      figure:last-child {
+      figcaption:last-child {
         background-color: black;
       }`,
     hooks: {
