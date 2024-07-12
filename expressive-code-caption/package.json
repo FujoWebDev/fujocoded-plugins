@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/expressive-code-caption",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Allow adding caption at the end of expressive code blocks.",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
