@@ -2,15 +2,12 @@ import z from "zod";
 import { extractSocialData, getSocialIcon } from "./socials.ts";
 import type { SOCIAL_TYPES as INNER_SOCIAL_TYPES } from "./social-links.ts";
 
-export const SocialsSchema = z.union([
-  z.string().url(),
-  z.object({
-    icon: z.string().optional(),
-    platform: z.string().optional(),
-    url: z.string().url(),
-    username: z.string().optional(),
-  }),
-]);
+export const SocialsSchema = z.object({
+  icon: z.string().optional(),
+  platform: z.string().optional(),
+  url: z.string().url(),
+  username: z.string().optional(),
+});
 
 export type SocialsSchema = z.infer<typeof SocialsSchema>;
 
