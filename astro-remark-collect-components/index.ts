@@ -4,26 +4,60 @@ import type { Plugin, Transformer } from "unified";
 import type mdast from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 
+type ComponentConfig = {
+  name: string;
+  attributes: string[];
+  defaults: Record<string, string> | undefined;
+  frontmatterName: string;
+};
+
 type PluginArgs = {
-  components: [
-    {
-      name: string;
-      attributes: string[];
-      frontmatterName: string;
-    }
+  configs: [
+    | ComponentConfig
+    | {
+        components: Omit<ComponentConfig, "frontmatterName">[];
+        frontmatterName: string;
+      }
   ];
 };
 
+const getConfigWithNodeName = (
+  configs: PluginArgs["configs"],
+  nodeName: string
+) => {
+  return configs
+    .map((componentConfig) => {
+      if (!("components" in componentConfig)) {
+        return componentConfig.name == nodeName ? componentConfig : null;
+      }
+      // Check if component has config for node
+      const config = componentConfig.components.find(
+        (component) => component.name == nodeName
+      );
+      if (!config) {
+        return null;
+      }
+      return {
+        ...config,
+        frontmatterName: componentConfig.frontmatterName,
+      };
+    })
+    .filter(<T>(x: T): x is NonNullable<T> => Boolean(x));
+};
+
 export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
-  components,
+  configs,
 }: PluginArgs): Transformer<mdast.Root> => {
+  const componentNames = configs.flatMap((config) =>
+    "components" in config ? config.components.map((c) => c.name) : config.name
+  );
   return (tree, file) => {
     if (!(file.data.astro as any)) {
       throw new Error(
         `[astro-remark-collect-components]: Plugin can only be used within Astro context`
       );
     }
-    components.forEach((c) => {
+    configs.forEach((c) => {
       (file.data.astro as any).frontmatter[c.frontmatterName] = [];
     });
     return visit(
@@ -32,19 +66,25 @@ export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
         return (
           node.type == "mdxJsxFlowElement" &&
           "name" in node &&
-          components.flatMap((c) => c.name).includes(node.name as string)
+          // Check that there is at least a component that includes this file in its name
+          componentNames.includes(node.name as string)
         );
       },
       (node) => {
-        const componentConfig = components.find((c) => c.name == node.name);
-        if (!componentConfig) {
+        if (!node.name) {
+          throw new Error(
+            `[astro-remark-collect-components]: Trying to process node with undefined name.`
+          );
+        }
+        const configsWithNode = getConfigWithNodeName(configs, node.name);
+        if (!configsWithNode.length) {
           throw new Error(
             `[astro-remark-collect-components]: No config found for ${node.name}`
           );
         }
 
-        const values = componentConfig.attributes.reduce(
-          (aggregate, current) => {
+        for (const config of configsWithNode) {
+          const values = config.attributes.reduce((aggregate, current) => {
             aggregate[current] = node.attributes.find(
               (attribute) =>
                 "name" in attribute &&
@@ -52,14 +92,19 @@ export const astroRemarkCollectComponents: Plugin<PluginArgs[], mdast.Root> = ({
                 typeof attribute.value == "string"
             )?.value as unknown as string | undefined;
 
-            return aggregate;
-          },
-          {} as Record<string, string | undefined>
-        );
+            // If the value of the attribute wasn't found, we get the default from the component defaults,
+            // assuming that such default exists;
+            if (!aggregate[current]) {
+              aggregate[current] = config.defaults?.[current];
+            }
 
-        (file.data.astro as any).frontmatter[
-          componentConfig.frontmatterName
-        ].push(values);
+            return aggregate;
+          }, {} as Record<string, string | undefined>);
+
+          (file.data.astro as any).frontmatter[config.frontmatterName].push(
+            values
+          );
+        }
       }
     );
   };
