@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/remark-capitalize-titles",
   "type": "module",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Make titles consistent with remark",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
