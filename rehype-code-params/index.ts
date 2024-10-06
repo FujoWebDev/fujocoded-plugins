@@ -35,7 +35,7 @@ export const rehypeCodeParams: Plugin<
       (node) => {
         return (
           isCodeWithSingleText(node) &&
-          PARAMETER_REGEX.test(node.children[0].value)
+          new RegExp(PARAMETER_REGEX).test(node.children[0].value)
         );
       },
       (node) => {
@@ -47,7 +47,11 @@ export const rehypeCodeParams: Plugin<
         const newChildren: (hast.Element | hast.Text)[] = [];
         for (const match of matches) {
           if (match.startsWith("[") && match.endsWith("]")) {
-            const paramSpan = h("span.rehype-param", match);
+            const paramSpan = h("span.rehype-param", [
+              h("span.opening-bracket", "["),
+              h("span.text", match.substring(1, match.length - 1)),
+              h("span.closing-bracket", "]"),
+            ]);
             newChildren.push(paramSpan);
             continue;
           }
