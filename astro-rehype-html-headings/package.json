@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/astro-rehype-html-headings",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Adds a list of headings to Astro's frontmatter that include rendered HTML code",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

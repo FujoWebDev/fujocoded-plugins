@@ -7,7 +7,6 @@ import { toHtml } from "hast-util-to-html";
 import { filter } from "unist-util-filter";
 import { toString } from "mdast-util-to-string";
 
-type PluginArgs = {};
 declare module "vfile" {
   interface DataMap {
     astro: Record<string, unknown> & {
@@ -24,9 +23,9 @@ declare module "vfile" {
 }
 
 export const astroRehypeHtmlHeadings: Plugin<
-  PluginArgs[],
+  [],
   hast.Root
-> = ({}: PluginArgs): Transformer<hast.Root> => {
+> = (): Transformer<hast.Root> => {
   return (tree, file) => {
     if (!file.data.astro) {
       throw new Error(
@@ -34,26 +33,21 @@ export const astroRehypeHtmlHeadings: Plugin<
       );
     }
 
+    file.data.astro!.frontmatter.headings = [];
     return visit(tree, "element", (node) => {
-      file.data.astro!.frontmatter.headings = [];
-      visit(tree, "element", (node) => {
-        if (!headingRank(node)) {
-          return;
-        }
-        const newTree = filter(
-          node,
-          (node) => node.type != "mdxJsxTextElement"
-        );
-        if (!newTree) {
-          return;
-        }
+      if (!headingRank(node)) {
+        return;
+      }
+      const newTree = filter(node, (node) => node.type != "mdxJsxTextElement");
+      if (!newTree) {
+        return;
+      }
 
-        file.data.astro!.frontmatter["headings"].push({
-          text: toString(newTree),
-          html: toHtml(newTree.children),
-          depth: parseInt(node.tagName.substring(1)),
-          slug: node.properties.id as string,
-        });
+      file.data.astro!.frontmatter["headings"].push({
+        text: toString(newTree),
+        html: toHtml(newTree.children),
+        depth: parseInt(node.tagName.substring(1)),
+        slug: node.properties.id as string,
       });
     });
   };
