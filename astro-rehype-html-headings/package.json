@@ -1,0 +1,50 @@
+{
+  "name": "@fujocoded/astro-rehype-html-headings",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Adds a list of headings to Astro's frontmatter that include rendered HTML code",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
+  },
+  "keywords": [
+    "rehype",
+    "astro"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "hast-util-heading-rank": "^3.0.0",
+    "unist-util-filter": "^5.0.1",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.4",
+    "tsup": "^8.1.0",
+    "typescript": "^5.6.2",
+    "unified": "^11.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
