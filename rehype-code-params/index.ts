@@ -8,7 +8,7 @@ import type * as hast from "hast";
 type PluginArgs = {};
 
 // We match command parameters of the form --flag [parameter_name]
-const PARAMETER_REGEX = /(\[[a-z0-9_\-]+\])/gi;
+const PARAMETER_REGEX = /(\[[a-z0-9_\- ]+\])/gi;
 
 const isCodeWithSingleText = <
   T extends hast.Element & {
