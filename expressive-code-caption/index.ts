@@ -53,11 +53,32 @@ export function pluginCodeCaption() {
           }
         }
       },
-      postprocessRenderedBlock: async (context) => {
-        const blockData = captionData.getOrCreateFor(context.codeBlock);
-        if (!blockData.caption) return;
-        context.renderData.blockAst.children.push(
-          h("figcaption", toHast(fromMarkdown(blockData.caption)))
+      postprocessRenderedBlockGroup: async (context) => {
+        // Find the block that has a caption, if any
+        const captionBlock = context.renderedGroupContents.find(
+          (groupContent) => {
+            const blockData = captionData.getOrCreateFor(
+              groupContent.codeBlock
+            );
+            return !!blockData.caption;
+          }
+        );
+        if (!captionBlock) {
+          return;
+        }
+        const root = context.renderData.groupAst;
+        // turn the div into a figure
+        root.tagName = "figure";
+        // add a figcaption child with the caption
+        root.children.push(
+          h(
+            "figcaption",
+            toHast(
+              fromMarkdown(
+                captionData.getOrCreateFor(captionBlock.codeBlock).caption!
+              )
+            )
+          )
         );
       },
     },
