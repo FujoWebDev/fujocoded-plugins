@@ -22,7 +22,7 @@ const CODE_REGEX = /(\`[a-z0-9_\-\s]+\`)/gi;
 
 const plugin: Plugin<PluginArgs[], mdast.Root> =
   (
-    { special, componentNames }: PluginArgs = {
+    { special, componentNames = [] }: PluginArgs = {
       special: DEFAULT_CAPITALIZATIONS_,
       componentNames: [],
     }
