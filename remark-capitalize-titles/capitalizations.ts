@@ -6,4 +6,11 @@ export const DEFAULT_CAPITALIZATIONS = [
   "FujoGuide",
   "NPM",
   "SHA",
+  "SHAs",
+  "Next Up",
+  "Mean To",
+  "About",
+  "Through",
+  "Along",
+  "TL;DR",
 ];

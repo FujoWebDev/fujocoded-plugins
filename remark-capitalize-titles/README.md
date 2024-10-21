@@ -30,3 +30,9 @@ export default defineConfig({
   ],
 });
 ```
+
+### TODOs:
+
+- [ ] Fix issue where a title in a heading that has a previous sibling will be capitalized as if the first
+      word was the beginning of the sentence
+- [ ] Something like "`head`ing" in titles where the word is compounded with a code thing will capitalize "ing".
