@@ -79,10 +79,7 @@ const fanfictions = await getCollection("fanfictions");
       fic.data.locked ? (
         <li>Locked</li>
       ) : (
-        <li>
-          {fic.data.title} by{" "}
-          {typeof fic.data.authors[0] == "object" && fic.data.authors[0].pseud}{" "}
-          ({fic.data.rating})
+        <li>{fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})
         </li>
       )
     )
