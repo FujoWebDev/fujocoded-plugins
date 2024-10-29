@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/astro-ao3-loader",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Allows loading a series of AO3 works for the Astro Content Layer",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
