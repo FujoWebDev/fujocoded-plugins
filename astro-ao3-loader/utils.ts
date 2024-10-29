@@ -26,7 +26,7 @@ export const getNextFicGroupFetcher = (
 };
 
 const CACHE = new Map();
-export const setFetcher =
+export const getFetcher =
   (logger: LoaderContext["logger"]) =>
   async (...params: Parameters<typeof globalThis.fetch>) => {
     try {
