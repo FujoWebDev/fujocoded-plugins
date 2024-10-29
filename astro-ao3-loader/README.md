@@ -1,7 +1,8 @@
 # Astro AO3 loader
 
-> [!WARNING] This is an experimental library with basic functionality. If you
-> want to help us build it, contact us via GitHub, Fandom Coders, or at
+> [!WARNING]
+> This is an experimental library with only basic functionality. If you
+> want to help us expand it, contact us via GitHub, Fandom Coders, or at
 > contacts@fujocoded.com.
 >
 > If you've never joined an open source project before, this is an excellent
