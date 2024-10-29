@@ -11,15 +11,13 @@ const UnlockedWorkSummarySchema = z.object({
     "Mature",
     "Explicit",
   ]),
-  authors: z.union([
-    z.literal("Anonymous"),
-    z
-      .object({
-        username: z.string(),
-        pseud: z.string(),
-      })
-      .array(),
-  ]),
+  authors: z
+    .object({
+      username: z.string(),
+      pseud: z.string(),
+      anonymous: z.boolean(),
+    })
+    .array(),
 });
 
 const LockedWorkSummarySchema = z.object({
