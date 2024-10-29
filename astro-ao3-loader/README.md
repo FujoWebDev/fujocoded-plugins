@@ -67,7 +67,6 @@ You can then use this like any other collection in Astro:
 
 ```astro
 ---
----
 import { getCollection } from "astro:content";
 
 const fanfictions = await getCollection("fanfictions");
