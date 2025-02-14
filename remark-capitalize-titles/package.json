@@ -33,7 +33,7 @@
   "author": "FujoCoded LLC",
   "license": "MIT",
   "dependencies": {
-    "title": "^3.5.3",
+    "title": "^4.0.1",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
