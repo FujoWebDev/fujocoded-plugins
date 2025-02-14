@@ -4,12 +4,12 @@ export const socialLinks = new SocialLinks();
 
 const tumblrMatches: ProfileMatch[] = [
   {
-    match: "https?://([a-z0-9-]+).tumblr.com/?",
+    match: "https?://([a-z0-9-]+).tumblr.com/?.*",
     // TODO: more may be necessary for things like extracting usernames
     group: 1,
   },
   {
-    match: "https?://www.tumblr.com/([a-z0-9-]+)",
+    match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
     // TODO: more may be necessary for things like extracting usernames
     group: 1,
   },
@@ -41,7 +41,11 @@ socialLinks.addProfile("neocities", neocitiesMatches);
 
 const blueSkyMatches: ProfileMatch[] = [
   {
-    match: "https?://([a-z0-9-]+).bsky.social",
+    match: "https?://([a-z0-9-]+).bsky.social/?.*",
+    group: 1,
+  },
+  {
+    match: "https?://bsky.app/profile/([a-z0-9-]+).bsky.social/?.*",
     group: 1,
   },
 ];
@@ -88,6 +92,18 @@ const kickstarterMatches: ProfileMatch[] = [
 ];
 socialLinks.addProfile("kickstarter", kickstarterMatches);
 
+const npmMatches: ProfileMatch[] = [
+  {
+    // https://www.npmjs.com/package/@bobaboard/ao3.js
+    match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
+    group: 1,
+  },
+];
+socialLinks.addProfile("npm", npmMatches);
+
+// Social Links does not give us a way to add extra matches
+// but we chose to make it happen anyway.
+
 const gitHubMatches: ProfileMatch[] = [
   {
     // https://github.com/FujoWebDev/AO3.js
@@ -100,23 +116,24 @@ const gitHubMatches: ProfileMatch[] = [
     group: 1,
   },
 ];
-
-const npmMatches: ProfileMatch[] = [
-  {
-    // https://www.npmjs.com/package/@bobaboard/ao3.js
-    match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
-    group: 1,
-  },
-];
-socialLinks.addProfile("npm", npmMatches);
-
-// Social Links does not give us a way to add extra matches
-// but we chose to make it happen anyway.
 // @ts-expect-error
 socialLinks.profiles.set("github", [
   // @ts-expect-error
   ...socialLinks.profiles.get("github"),
   ...gitHubMatches,
+]);
+
+const xMatches: ProfileMatch[] = [
+  {
+    match: "(?:https?://)?(?:www.)?x.com/@?([a-z0-9-\\.]+)/?.*",
+    group: 1,
+  },
+];
+// @ts-expect-error
+socialLinks.profiles.set("twitter", [
+  // @ts-expect-error
+  ...socialLinks.profiles.get("twitter"),
+  ...xMatches,
 ]);
 
 // Extracted on 6/20/24
