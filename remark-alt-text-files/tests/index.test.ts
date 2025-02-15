@@ -3,7 +3,7 @@ import { remark } from "remark";
 import { Compatible, VFile } from "vfile";
 import { fs, vol } from "memfs";
 import { pathToFileURL } from "node:url";
-import remarkAltTextFiles from "../index.ts";
+import remarkAltTextFiles, { PluginArgs } from "../index.ts";
 
 /**
  * NOTE TO FUTURE SELF: vitest is annoying about the output of new lines on
@@ -34,6 +34,9 @@ beforeEach(() => {
 
       "./path/to/image.alt.txt":
         "This is the alt text from /path/to/image.alt.txt",
+
+      "./root/directory/path/to/image.alt.txt":
+        "This is the alt text for /path/to/image.png, relative to root/directory",
     },
     process.cwd()
   );
@@ -74,6 +77,21 @@ test("should load specific file when path is provided, from file's directory", a
 ![This is the alt text for /path/to/image.png, relative to markdown-folder](/path/to/image.png)`);
 });
 
+test("should load specific file when path is provided, from given root", async () => {
+  const result = await processMarkdown(
+    `# Hello, world!
+
+![file:./path/to/image.alt.txt](/path/to/image.png)`,
+    {
+      root: `${process.cwd()}/root/directory`,
+    }
+  );
+
+  expect(result).toBe(`# Hello, world!
+
+![This is the alt text for /path/to/image.png, relative to root/directory](/path/to/image.png)`);
+});
+
 test("should load file with same name when no path is provided", async () => {
   const result = await processMarkdown(`# Hello, world!
 
@@ -95,7 +113,9 @@ test("should fail when file does not exist", async () => {
   );
 });
 
-const processMarkdown = async (value: Compatible) => {
-  const processedTree = await remark().use(remarkAltTextFiles).process(value);
+const processMarkdown = async (value: Compatible, options?: PluginArgs) => {
+  const processedTree = await remark()
+    .use(remarkAltTextFiles, options ?? {})
+    .process(value);
   return processedTree.toString().slice(0, -1);
 };

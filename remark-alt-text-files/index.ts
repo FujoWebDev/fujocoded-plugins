@@ -6,35 +6,41 @@ import { VFile } from "vfile";
 
 import type mdast from "mdast";
 
-interface PluginArgs {
+export interface PluginArgs {
   pathPrefix?: string;
+  root?: string;
 }
 
 const getFilePath = ({
   imageNode,
   vfile,
-  pathPrefix,
+  options,
 }: {
   imageNode: mdast.Image;
   vfile: VFile;
-  pathPrefix: string;
+  options: PluginArgs & { pathPrefix: string };
 }) => {
-  let filePath = imageNode.alt!.replace(pathPrefix, "");
+  let filePath = imageNode.alt!.replace(options.pathPrefix, "");
   if (filePath == "") {
     // We use the name of the imageNode file and replace the extension with .alt.txt
     filePath = imageNode.url.replace(/\.[^.]+$/, ".alt.txt")!;
   }
 
   return join(
-    // If this was loaded from a file, then use the directory of that file
+    // If the root is provided, use it
+    // Otherwise, if this was loaded from a file, then use the directory of that file
     // Otherwise, use the current working directory
-    vfile.history[0] ? dirname(vfile.history[0]) : process.cwd(),
+    options.root
+      ? options.root
+      : vfile.history[0]
+      ? dirname(vfile.history[0])
+      : process.cwd(),
     filePath
   );
 };
 
 const plugin: Plugin<PluginArgs[], mdast.Root> =
-  ({ pathPrefix = "file:" } = {}) =>
+  ({ pathPrefix = "file:", root } = {}) =>
   async (tree, vfile) => {
     const loadingAltText: Promise<string>[] = [];
     const loadingAltFiles: string[] = [];
@@ -43,7 +49,11 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
       if (!node.alt || !node.alt.startsWith(pathPrefix)) {
         return;
       }
-      const filePath = getFilePath({ imageNode: node, vfile, pathPrefix });
+      const filePath = getFilePath({
+        imageNode: node,
+        vfile,
+        options: { pathPrefix, root },
+      });
       loadingAltText.push(
         readFile(filePath, "utf8").then((text) => (node.alt = text.trim()))
       );
