@@ -1,9 +1,11 @@
 {
-  "name": "remark-alt-text-files",
+  "name": "@fujocoded/remark-alt-text-files",
   "version": "0.0.1",
   "description": "Add alt text to your images directly from your filesystem",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "prefix": "./",
   "exports": {
     ".": {
       "import": {
@@ -22,6 +24,9 @@
     "README.md",
     "package.json"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint",
@@ -41,9 +46,13 @@
     "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "dependencies": {
+    "unist-util-visit": "^5.0.0"
+  },
   "devDependencies": {
     "memfs": "^4.17.0",
     "remark": "^15.0.1",
+    "tsup": "^8.3.6",
     "vitest": "^3.0.5"
   }
 }
