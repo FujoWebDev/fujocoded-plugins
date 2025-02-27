@@ -1,0 +1,57 @@
+{
+  "name": "@fujocoded/remark-excalidraw",
+  "version": "0.0.1",
+  "description": "Load excalidraw diagrams via remark",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "prefix": "./",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "keywords": [
+    "remark",
+    "excalidraw"
+  ],
+  "author": "FujoCoded, LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "dependencies": {
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "remark": "^15.0.1",
+    "tsup": "^8.3.6",
+    "vitest": "^3.0.5"
+  }
+}
