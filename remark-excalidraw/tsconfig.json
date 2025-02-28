@@ -18,6 +18,8 @@
     "sourceMap": true,
     "declaration": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["remark-mdx", "node"]
   }
 }

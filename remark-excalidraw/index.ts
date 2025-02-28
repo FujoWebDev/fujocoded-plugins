@@ -1,81 +1,73 @@
-import { visit } from "unist-util-visit";
+import { visitParents } from "unist-util-visit-parents";
 import type { Plugin } from "unified";
 import { readFile } from "node:fs/promises";
-import { join, dirname } from "node:path";
-import { VFile } from "vfile";
+import path, { join, dirname } from "node:path";
+import { exportToSvg } from "@excalidraw/excalidraw";
 
 import type mdast from "mdast";
 
-export interface PluginArgs {
-  pathPrefix?: string;
-  root?: string;
-}
+export interface PluginArgs {}
 
-const getFilePath = ({
-  imageNode,
-  vfile,
-  options,
-}: {
-  imageNode: mdast.Image;
-  vfile: VFile;
-  options: PluginArgs & { pathPrefix: string };
-}) => {
-  let filePath = imageNode.alt!.replace(options.pathPrefix, "");
-  if (filePath == "") {
-    // We use the name of the imageNode file and replace the extension with .alt.txt
-    filePath = imageNode.url.replace(/\.[^.]+$/, ".alt.txt")!;
-  }
+const plugin: Plugin<PluginArgs[], mdast.Root> = () => async (tree, vfile) => {
+  const loadingFilePromises: Promise<string>[] = [];
+  const attributeNodes: { value: string }[] = [];
 
-  return join(
-    // If the root is provided, use it
-    // Otherwise, if this was loaded from a file, then use the directory of that file
-    // Otherwise, use the current working directory
-    options.root
-      ? options.root
-      : vfile.history[0]
-      ? dirname(vfile.history[0])
-      : process.cwd(),
-    filePath
-  );
-};
-
-const plugin: Plugin<PluginArgs[], mdast.Root> =
-  ({ pathPrefix = "file:", root } = {}) =>
-  async (tree, vfile) => {
-    const loadingAltText: Promise<string>[] = [];
-    const loadingAltFiles: string[] = [];
-
-    visit(tree, "image", (node) => {
-      if (!node.alt || !node.alt.startsWith(pathPrefix)) {
-        return;
+  visitParents(
+    tree,
+    (node): node is mdast.Image =>
+      node.type == "image" && (node as mdast.Image).url.endsWith(".excalidraw"),
+    (node, ancestors) => {
+      const parent = ancestors[ancestors.length - 1];
+      const indexInParent =
+        parent?.children.findIndex((child) => child == node) ?? -1;
+      if (!parent || indexInParent == -1) {
+        throw Error("Node should have a parent it is a child of");
       }
-      const filePath = getFilePath({
-        imageNode: node,
-        vfile,
-        options: { pathPrefix, root },
-      });
-      loadingAltText.push(
-        readFile(filePath, "utf8").then((text) => (node.alt = text.trim()))
-      );
-      loadingAltFiles.push(
-        `${node.alt.replace(pathPrefix, "")} (as ${filePath})`
-      );
-    });
 
-    const results = await Promise.allSettled(loadingAltText);
+      const contentAttribute = {
+        type: "mdxJsxAttribute",
+        name: "fileContent",
+        value: node.url,
+      } as const;
 
-    if (results.every((result) => result.status === "fulfilled")) {
-      return tree;
+      parent.children[indexInParent] = {
+        type: "mdxJsxFlowElement",
+        name: "ExcalidrawComponent",
+        attributes: [
+          contentAttribute,
+          {
+            type: "mdxJsxAttribute",
+            name: "alt",
+            value: node.alt,
+          },
+        ],
+        children: [],
+      };
+
+      const rootPath = vfile.history[0]
+        ? dirname(vfile.history[0])
+        : process.cwd();
+      loadingFilePromises.push(
+        readFile(path.join(rootPath, node.url), "utf-8")
+      );
+      attributeNodes.push(contentAttribute);
     }
+  );
 
-    throw new Error(
-      `Failed to load alt text from files: ${results
-        .map((result, index) =>
-          result.status === "rejected" ? loadingAltFiles[index] : null
-        )
-        .filter((file) => file !== null)
-        .join(", ")}`
-    );
-  };
+  const fileContents = await Promise.all(loadingFilePromises);
+  await Promise.all(
+    fileContents.map(async (fileContent, index) => {
+      attributeNodes[index]!.value = fileContent;
+    })
+  );
+
+  if (fileContents.length > 0) {
+    tree.children.unshift({
+      type: "mdxjsEsm",
+      value:
+        'import { ExcalidrawComponent } from "@fujocoded/remark-excalidraw/component";',
+    });
+  }
+};
 
 export default plugin;

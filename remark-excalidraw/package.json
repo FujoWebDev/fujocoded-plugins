@@ -16,6 +16,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./component": {
+      "import": {
+        "types": "./dist/component.d.ts",
+        "default": "./dist/component.js"
+      },
+      "require": {
+        "types": "./dist/component.d.cts",
+        "default": "./dist/component.cjs"
+      }
     }
   },
   "files": [
@@ -29,6 +39,7 @@
   },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "build:component": "tsup component.tsx --format cjs,esm --dts --clean",
     "validate": " npx publint",
     "test": "vitest"
   },
@@ -47,10 +58,12 @@
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
+    "@types/react": "^19.0.10",
     "remark": "^15.0.1",
+    "remark-mdx": "^3.1.0",
     "tsup": "^8.3.6",
     "vitest": "^3.0.5"
   }
