@@ -38,8 +38,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "build:component": "tsup component.tsx --format cjs,esm --dts --clean",
+    "build": "tsup index.ts --format cjs,esm --dts",
+    "build:component": "tsup component.tsx --format cjs,esm --dts --external react",
     "validate": " npx publint",
     "test": "vitest"
   },
@@ -58,6 +58,7 @@
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
     "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {

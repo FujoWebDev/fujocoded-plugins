@@ -40,6 +40,11 @@ const plugin: Plugin<PluginArgs[], mdast.Root> = () => async (tree, vfile) => {
             name: "alt",
             value: node.alt,
           },
+          {
+            type: "mdxJsxAttribute",
+            name: "client:only",
+            value: "react",
+          },
         ],
         children: [],
       };
