@@ -18,8 +18,6 @@ export function ExcalidrawComponent(props: { fileContent: string }) {
         el?.appendChild(file);
         return;
       }}
-    >
-      "Hello from the!"
-    </div>
+    ></div>
   );
 }
