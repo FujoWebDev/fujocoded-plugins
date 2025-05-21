@@ -58,7 +58,7 @@
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.17.6",
+    "@excalidraw/excalidraw": "^0.18.0",
     "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {

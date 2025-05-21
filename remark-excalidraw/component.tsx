@@ -6,13 +6,12 @@ export function ExcalidrawComponent(props: { fileContent: string }) {
         if (typeof document == "undefined") {
           return;
         }
-        const { exportToSvg } = require("@excalidraw/excalidraw");
+        const { exportToSvg, THEME } = await import("@excalidraw/excalidraw");
         const file = await exportToSvg({
           ...JSON.parse(props.fileContent),
           appState: {
-            //   theme: colorMode == "dark" ? THEME.DARK : THEME.LIGHT,
-            //   exportWithDarkMode: colorMode == "dark",
-            //   exportBackground: false,
+            theme: THEME.DARK,
+            exportBackground: false,
           },
           type: "png",
         });

@@ -67,11 +67,14 @@ const plugin: Plugin<PluginArgs[], mdast.Root> = () => async (tree, vfile) => {
   );
 
   if (fileContents.length > 0) {
-    tree.children.unshift({
-      type: "mdxjsEsm",
-      value:
-        'import { ExcalidrawComponent } from "@fujocoded/remark-excalidraw/component";',
-    });
+    // TODO: this cannot be done here because this plugin runs after remark-mdx.
+    // What we can do is to add info on needing this import to the VFile, and then add
+    // a recma plugin that does the import if it finds it in the VFile.
+    // tree.children.unshift({
+    //   type: "mdxjsEsm",
+    //   value:
+    //     'import { ExcalidrawComponent } from "@fujocoded/remark-excalidraw/component";',
+    // });
   }
 };
 
