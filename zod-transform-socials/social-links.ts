@@ -4,12 +4,13 @@ export const socialLinks = new SocialLinks();
 
 const tumblrMatches: ProfileMatch[] = [
   {
-    match: "https?://([a-z0-9-]+).tumblr.com/?.*",
+    match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
     // TODO: more may be necessary for things like extracting usernames
     group: 1,
   },
+  // Must be last because it's a more general match, or www will be as a username
   {
-    match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
+    match: "https?://([a-z0-9-]+).tumblr.com/?.*",
     // TODO: more may be necessary for things like extracting usernames
     group: 1,
   },
@@ -41,11 +42,11 @@ socialLinks.addProfile("neocities", neocitiesMatches);
 
 const blueSkyMatches: ProfileMatch[] = [
   {
-    match: "https?://([a-z0-9-]+).bsky.social/?.*",
+    match: "https?://([a-z0-9-]+).bsky.(?:app|social)/?.*",
     group: 1,
   },
   {
-    match: "https?://bsky.app/profile/([a-z0-9-]+).bsky.social/?.*",
+    match: "https?://bsky.(?:app|social)/profile/([a-z0-9-.]+)/?.*",
     group: 1,
   },
 ];
