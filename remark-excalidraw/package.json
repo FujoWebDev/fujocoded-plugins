@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/remark-excalidraw",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Load excalidraw diagrams via remark",
   "type": "module",
   "main": "dist/index.cjs",
@@ -41,7 +41,8 @@
     "build": "tsup index.ts --format cjs,esm --dts",
     "build:component": "tsup component.tsx --format cjs,esm --dts --external react",
     "validate": " npx publint",
-    "test": "vitest"
+    "test": "vitest",
+    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish"
   },
   "repository": {
     "type": "git",
