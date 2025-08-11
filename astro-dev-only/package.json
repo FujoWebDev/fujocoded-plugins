@@ -1,0 +1,42 @@
+{
+  "name": "@fujocoded/astro-dev-only",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "An Astro integration for development-only pages",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint"
+  },
+  "keywords": [
+    "withastro",
+    "astro-integration"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "dependencies": {
+    "astro": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
