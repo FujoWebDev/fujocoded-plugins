@@ -3,7 +3,8 @@
 An Astro integration to remove files from your final static production build.
 Useful for drafts or other dev-only pages.
 
-> [!WARNING] This is an experimental library with basic functionality. Expect
+> [!WARNING]
+> This is an experimental library with basic functionality. Expect
 > rough edges.
 
 ## Installation
@@ -38,7 +39,8 @@ export default defineConfig({
 The integration works by literally deleting files from the resulting builds.
 It's not pretty, but it works. See notes and limitations.
 
-> [!IMPORTANT] Want to be safe? This integration supports a `dryRun` flag. Set
+> [!IMPORTANT]
+> Want to be safe? This integration supports a `dryRun` flag. Set
 > it and the integration will just print the path of the files to delete! The
 > actual files will remain!
 >
