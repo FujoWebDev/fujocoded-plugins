@@ -26,7 +26,7 @@ export function pluginCodeOutput() {
         const blockData = outputData.getOrCreateFor(context.codeBlock);
         const outputStart = context.codeBlock
           .getLines()
-          .findIndex((line) => !line.text.startsWith("> "));
+          .findIndex((line) => !line.text.startsWith(">"));
         context.codeBlock
           .getLines(0, outputStart == -1 ? undefined : outputStart)
           .forEach((line) => {
