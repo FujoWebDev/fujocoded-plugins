@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import node from "@astrojs/node";
 import devOnly from "@fujocoded/astro-dev-only";
 
 // https://astro.build/config
@@ -19,4 +20,10 @@ export default defineConfig({
       dryRun: true,
     }),
   ],
+  // These will work also in server mode! Uncomment this configuration
+  // and see for yourself 👇👀
+  // output: "server",
+  // adapter: node({
+  //   mode: "standalone",
+  // }),
 });

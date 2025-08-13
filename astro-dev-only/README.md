@@ -19,9 +19,6 @@ Add the integration to your `astro.config.mjs` file (or similar) and list the
 routes you want to remove from the final build via `routePatterns`. Accepts both
 strings (full match, with optional `index.html`) and RegExp.
 
-> [!NOTE]
-> Only pre-rendered routes are currently supported.
-
 ```ts
 // astro.config.mjs
 import { defineConfig } from "astro/config";

@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/astro-dev-only",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An Astro integration for development-only pages",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -15,6 +15,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./middleware": {
+      "import": {
+        "types": "./dist/middleware.d.ts",
+        "default": "./dist/middleware.js"
+      },
+      "require": {
+        "types": "./dist/middleware.d.cts",
+        "default": "./dist/middleware.cjs"
+      }
     }
   },
   "files": [
@@ -24,7 +34,7 @@
     "package.json"
   ],
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "build": "tsup index.ts middleware.ts --format cjs,esm --dts --clean --external 'fujocoded:dev-only-routes'",
     "validate": " npx publint"
   },
   "keywords": [

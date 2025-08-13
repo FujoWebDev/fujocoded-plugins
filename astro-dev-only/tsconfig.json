@@ -19,6 +19,7 @@
     "sourceMap": true,
     "declaration": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["./types.d.ts"]
   }
 }
