@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from "astro";
+export const getStaticPaths = (() => {
+  return [
+    {
+      params: {
+        dynamic: "dynamic",
+      },
+    },
+  ];
+}) satisfies GetStaticPaths;
+---
+
+This will only be visible in dev mode!
