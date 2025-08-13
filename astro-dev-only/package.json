@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/astro-dev-only",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An Astro integration for development-only pages",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
