@@ -37,8 +37,9 @@
   },
   "author": "FujoCoded LLC",
   "license": "MIT",
-  "dependencies": {
-    "astro": "^4.0.0"
+  "devDependencies": {
+    "astro-types-v4": "npm:astro@^4.0.0",
+    "astro-types-v5": "npm:astro@^5.0.0"
   },
   "publishConfig": {
     "access": "public"

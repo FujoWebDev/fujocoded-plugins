@@ -19,6 +19,9 @@ Add the integration to your `astro.config.mjs` file (or similar) and list the
 routes you want to remove from the final build via `routePatterns`. Accepts both
 strings (full match, with optional `index.html`) and RegExp.
 
+> [!NOTE]
+> Only pre-rendered routes are currently supported.
+
 ```ts
 // astro.config.mjs
 import { defineConfig } from "astro/config";
@@ -28,8 +31,15 @@ export default defineConfig({
   integrations: [
     devOnlyRoutes({
       routePatterns: [
-        "/your-eyes-only", // remove /your-eyes-only (also removes /your-eyes-only/index.html)
-        /^\/drafts\//, // any route under /drafts
+        // For static routes, this will remove the page generated from either
+        // - src/pages/your-eyes-only.astro
+        // - src/pages/your-eyes-only.html
+        "/your-eyes-only",
+        // For static routes, this will remove any route generated from within src/pages/drafts
+        /^\/drafts\//,
+        // Dynamic routes are also supported, in both modes
+        // NOTE: it's currently not possible to remove only SOME generated paths from a route. PR welcome!
+        "/dynamic/[...pages]",
       ],
     }),
   ],

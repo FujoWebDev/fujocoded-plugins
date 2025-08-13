@@ -1,0 +1,19 @@
+---
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths = (() => {
+  const routesToExport = [
+    "very/dynamic",
+    "incredibly/dynamic",
+    "extremly/dynamic",
+  ];
+
+  return routesToExport.map((routePath) => ({
+    params: {
+      very_dynamic: routePath,
+    },
+  }));
+}) satisfies GetStaticPaths;
+---
+
+This will only be visible in dev mode!

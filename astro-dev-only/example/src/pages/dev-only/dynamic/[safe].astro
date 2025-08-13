@@ -4,11 +4,11 @@ export const getStaticPaths = (() => {
   return [
     {
       params: {
-        very_dynamic: "very/dynamic",
+        safe: "safe",
       },
     },
   ];
 }) satisfies GetStaticPaths;
 ---
 
-This will only be visible in dev mode!
+This will be visible in production!
