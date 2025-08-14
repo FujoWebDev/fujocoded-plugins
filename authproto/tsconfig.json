@@ -1,4 +1,5 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     /* Base Options: */
     "esModuleInterop": true,
@@ -20,6 +21,6 @@
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["./types.d.ts"]
+    "types": ["./src/types.d.ts"]
   }
 }
