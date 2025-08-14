@@ -1,0 +1,30 @@
+# @fujocoded/authproto
+
+Astro integration to easily authenticateyour site visitors using ATproto. For
+Bluesky and beyond.
+
+> [!WARNING] This is not ready for prime time, only use it if you know what
+> you're doing. Come back soon for instructions for real production usage!
+
+## Current TODOs
+
+- [ ] Turn into a proper package
+- [x] Check whether you can do unstorage for saving data
+- [ ] Write a README
+- [ ] Comment the whole Auth files
+- [ ] Improve config and make it make sense
+- [ ] Figure out how to turn AstroDB into an option
+
+// Tip!
+Want to see what gets saved by the storage? Use
+
+```
+      driver: {
+        name: "fs-lite",
+        options: {
+          base: process.cwd() + "/test/",
+        },
+      },
+```
+
+Make sure not to commit!

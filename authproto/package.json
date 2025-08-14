@@ -1,0 +1,40 @@
+{
+  "name": "@fujocoded/authproto",
+  "version": "0.0.1",
+  "description": "Astro integration to easily authenticateyour site visitors using ATproto. For Bluesky and beyond.",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "validate": " npx publint",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "keywords": [
+    "astro",
+    "atproto",
+    "bluesky",
+    "authentication"
+  ],
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "dependencies": {
+    "@astrojs/db": "^0.17.1",
+    "@atproto/api": "^0.16.2",
+    "@atproto/identity": "^0.4.8",
+    "@atproto/oauth-client-node": "^0.3.3",
+    "astro": "^5.12.8",
+    "astro-integration-kit": "^0.19.0",
+    "unstorage": "^1.16.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0"
+  }
+}
