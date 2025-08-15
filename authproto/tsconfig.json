@@ -22,5 +22,6 @@
     "noEmit": true,
     "types": ["./src/types.d.ts"]
   },
+  "include": ["./src/types.d.ts"],
   "exclude": ["node_modules", ""]
 }

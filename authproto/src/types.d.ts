@@ -1,16 +1,14 @@
-namespace App {
+export declare namespace App {
+  interface SessionData {
+    "atproto-did": string | undefined;
+  }
+
   interface Locals extends Record<string, any> {
     loggedInUser: {
       did: string;
       handle: string;
       fetchHandler: import("@atproto/oauth-client-node").OAuthSession["fetchHandler"];
     } | null;
-  }
-}
-
-declare namespace App {
-  interface SessionData {
-    "atproto-did": string | undefined;
   }
 }
 

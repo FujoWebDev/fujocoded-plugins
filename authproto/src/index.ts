@@ -3,6 +3,7 @@ import path from "node:path";
 import { addVirtualImports } from "astro-integration-kit";
 import "@astrojs/db";
 import { getConfig, type ConfigOptions } from "./lib/config.js";
+import { readFile } from "node:fs/promises";
 
 /**
  * Adds all the routes necessary for OAuth and its callbacks to work:
@@ -36,19 +37,19 @@ const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
  *   authorization request
  */
 const addAtProtoRoutes = (injectRoute: (_: InjectedRoute) => void) => {
-  // injectRoute({
-  //   pattern: "/client-metadata.json",
-  //   entrypoint: path.join(
-  //     import.meta.dirname,
-  //     "./routes/client-metadata.json.ts"
-  //   ),
-  //   prerender: false,
-  // });
-  // injectRoute({
-  //   pattern: "/jwks.json",
-  //   entrypoint: path.join(import.meta.dirname, "./routes/jwks.json.ts"),
-  //   prerender: false,
-  // });
+  injectRoute({
+    pattern: "/client-metadata.json",
+    entrypoint: path.join(
+      import.meta.dirname,
+      "./routes/client-metadata.json.js"
+    ),
+    prerender: false,
+  });
+  injectRoute({
+    pattern: "/jwks.json",
+    entrypoint: path.join(import.meta.dirname, "./routes/jwks.json.js"),
+    prerender: false,
+  });
 };
 
 export default (
@@ -108,15 +109,15 @@ export default (
           `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`
         );
       }
-      // injectTypes({
-      //   filename: "types.d.ts",
-      //   content: await readFile(
-      //     path.join(import.meta.dirname, "./types.d.ts"),
-      //     {
-      //       encoding: "utf-8",
-      //     }
-      //   ),
-      // });
+      injectTypes({
+        filename: "types.d.ts",
+        content: await readFile(
+          path.join(import.meta.dirname, "./types.d.ts"),
+          {
+            encoding: "utf-8",
+          }
+        ),
+      });
     },
     "astro:db:setup": ({ extendDb }) => {
       // if (configOptions.driver?.name == "astro:db") {

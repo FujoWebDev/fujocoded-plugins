@@ -7,7 +7,7 @@ export default defineConfig([
     dts: true,
     clean: true,
     unbundle: true,
-    entry: "src/index.ts",
+    entry: ["src/index.ts", "src/types.d.ts"],
     external: [/^fujocoded:authproto/, /^astro:/],
   },
   {
