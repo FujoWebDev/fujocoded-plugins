@@ -12,21 +12,21 @@ import { getConfig, type ConfigOptions } from "./lib/config.js";
  * - `/oauth/logout`, called when the user wishes to log out
  */
 const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
-  injectRoute({
-    pattern: "/oauth/login",
-    entrypoint: path.join(import.meta.dirname, "./routes/oauth/login.ts"),
-    prerender: false,
-  });
-  injectRoute({
-    pattern: "/oauth/callback",
-    entrypoint: path.join(import.meta.dirname, "./routes/oauth/callback.ts"),
-    prerender: false,
-  });
-  injectRoute({
-    pattern: "/oauth/logout",
-    entrypoint: path.join(import.meta.dirname, "./routes/oauth/logout.ts"),
-    prerender: false,
-  });
+  // injectRoute({
+  //   pattern: "/oauth/login",
+  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/login.ts"),
+  //   prerender: false,
+  // });
+  // injectRoute({
+  //   pattern: "/oauth/callback",
+  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/callback.ts"),
+  //   prerender: false,
+  // });
+  // injectRoute({
+  //   pattern: "/oauth/logout",
+  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/logout.ts"),
+  //   prerender: false,
+  // });
 };
 
 /**
@@ -37,19 +37,19 @@ const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
  *   authorization request
  */
 const addAtProtoRoutes = (injectRoute: (_: InjectedRoute) => void) => {
-  injectRoute({
-    pattern: "/client-metadata.json",
-    entrypoint: path.join(
-      import.meta.dirname,
-      "./routes/client-metadata.json.ts"
-    ),
-    prerender: false,
-  });
-  injectRoute({
-    pattern: "/jwks.json",
-    entrypoint: path.join(import.meta.dirname, "./routes/jwks.json.ts"),
-    prerender: false,
-  });
+  // injectRoute({
+  //   pattern: "/client-metadata.json",
+  //   entrypoint: path.join(
+  //     import.meta.dirname,
+  //     "./routes/client-metadata.json.ts"
+  //   ),
+  //   prerender: false,
+  // });
+  // injectRoute({
+  //   pattern: "/jwks.json",
+  //   entrypoint: path.join(import.meta.dirname, "./routes/jwks.json.ts"),
+  //   prerender: false,
+  // });
 };
 
 export default (
@@ -58,7 +58,7 @@ export default (
     applicationDomain: "http://localhost:4321",
   }
 ): AstroIntegration => ({
-  name: "atproto-oauth",
+  name: "fujocoded:authproto",
   hooks: {
     "astro:config:setup": (setupParams) => {
       // @ts-expect-error
@@ -109,22 +109,22 @@ export default (
           `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`
         );
       }
-      injectTypes({
-        filename: "types.d.ts",
-        content: await readFile(
-          path.join(import.meta.dirname, "./types.d.ts"),
-          {
-            encoding: "utf-8",
-          }
-        ),
-      });
+      // injectTypes({
+      //   filename: "types.d.ts",
+      //   content: await readFile(
+      //     path.join(import.meta.dirname, "./types.d.ts"),
+      //     {
+      //       encoding: "utf-8",
+      //     }
+      //   ),
+      // });
     },
     "astro:db:setup": ({ extendDb }) => {
-      if (configOptions.driver?.name == "astro:db") {
-        extendDb({
-          configEntrypoint: path.join(import.meta.dirname, "./db/tables.ts"),
-        });
-      }
+      // if (configOptions.driver?.name == "astro:db") {
+      //   extendDb({
+      //     configEntrypoint: path.join(import.meta.dirname, "./db/tables.ts"),
+      //   });
+      // }
     },
   },
 });

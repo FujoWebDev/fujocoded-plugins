@@ -23,4 +23,5 @@
     "noEmit": true,
     "types": ["./src/types.d.ts"]
   }
+  // "exclude": ["fujocoded:authproto/config"]
 }
