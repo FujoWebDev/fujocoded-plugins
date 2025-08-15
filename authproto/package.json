@@ -10,14 +10,14 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
-    },
-    "./components": {
-      "import": {
-        "types": "./dist/components.d.ts",
-        "default": "./dist/components.js"
-      }
     }
   },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsdown",
     "validate": "npx publint",

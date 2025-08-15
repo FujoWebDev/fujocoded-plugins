@@ -1,7 +1,10 @@
 import { didToHandle, oauthClient } from "../lib/auth.js";
-import { defineMiddleware } from "astro:middleware";
+import { type MiddlewareHandler } from "astro";
 
-export const onRequest = defineMiddleware(async ({ locals, session }, next) => {
+export const onRequest: MiddlewareHandler = async (
+  { locals, session },
+  next
+) => {
   const userDid = await session?.get("atproto-did");
 
   if (!session || !userDid) {
@@ -26,4 +29,4 @@ export const onRequest = defineMiddleware(async ({ locals, session }, next) => {
   }
 
   return next();
-});
+};

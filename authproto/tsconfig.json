@@ -16,12 +16,11 @@
     /* If transpiling with TypeScript: */
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
-    "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "types": ["./src/types.d.ts"]
-  }
-  // "exclude": ["fujocoded:authproto/config"]
+  },
+  "exclude": ["node_modules", ""]
 }

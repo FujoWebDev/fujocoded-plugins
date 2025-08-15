@@ -1,5 +1,4 @@
 import type { AstroIntegration, InjectedRoute } from "astro";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { addVirtualImports } from "astro-integration-kit";
 import "@astrojs/db";
@@ -12,21 +11,21 @@ import { getConfig, type ConfigOptions } from "./lib/config.js";
  * - `/oauth/logout`, called when the user wishes to log out
  */
 const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
-  // injectRoute({
-  //   pattern: "/oauth/login",
-  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/login.ts"),
-  //   prerender: false,
-  // });
-  // injectRoute({
-  //   pattern: "/oauth/callback",
-  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/callback.ts"),
-  //   prerender: false,
-  // });
-  // injectRoute({
-  //   pattern: "/oauth/logout",
-  //   entrypoint: path.join(import.meta.dirname, "./routes/oauth/logout.ts"),
-  //   prerender: false,
-  // });
+  injectRoute({
+    pattern: "/oauth/login",
+    entrypoint: path.join(import.meta.dirname, "./routes/oauth/login.js"),
+    prerender: false,
+  });
+  injectRoute({
+    pattern: "/oauth/callback",
+    entrypoint: path.join(import.meta.dirname, "./routes/oauth/callback.js"),
+    prerender: false,
+  });
+  injectRoute({
+    pattern: "/oauth/logout",
+    entrypoint: path.join(import.meta.dirname, "./routes/oauth/logout.js"),
+    prerender: false,
+  });
 };
 
 /**
@@ -88,7 +87,7 @@ export default (
       // the regular requests
       addMiddleware({
         order: "pre",
-        entrypoint: path.join(import.meta.dirname, "./routes/middleware.ts"),
+        entrypoint: path.join(import.meta.dirname, "./routes/middleware.js"),
       });
     },
     "astro:config:done": async ({ injectTypes, config, logger }) => {
