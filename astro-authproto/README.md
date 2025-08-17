@@ -1,6 +1,6 @@
 # @fujocoded/authproto
 
-Astro integration to easily authenticateyour site visitors using ATproto. For
+Astro integration to easily authenticate your site visitors using ATproto. For
 Bluesky and beyond.
 
 > [!WARNING] This is not ready for prime time, only use it if you know what
@@ -8,7 +8,7 @@ Bluesky and beyond.
 
 ## Current TODOs
 
-- [ ] Turn into a proper package
+- [x] Turn into a proper package
 - [x] Check whether you can do unstorage for saving data
 - [ ] Write a README
 - [ ] Comment the whole Auth files
