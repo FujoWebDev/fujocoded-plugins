@@ -3,6 +3,15 @@ import { glob } from "glob";
 
 export default defineConfig([
   {
+    name: "components",
+    entry: ["src/components.ts"],
+    dts: true,
+    clean: true,
+    unbundle: true,
+    copy: [{ from: "src/components", to: "dist/components" }],
+    external: [/^fujocoded:authproto/, /^astro:/, /\.astro$/],
+  },
+  {
     name: "integration",
     dts: true,
     clean: true,
@@ -21,11 +30,4 @@ export default defineConfig([
     unbundle: true,
     external: [/^fujocoded:authproto/, /^astro:/],
   },
-  //   {
-  //     name: "components",
-  //     dts: true,
-  //     clean: true,
-  //     unbundle: true,
-  //     copy: ["src/components", { from: "src/components", to: "dist/components" }],
-  //   },
 ]);
