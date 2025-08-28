@@ -14,6 +14,8 @@ Bluesky and beyond.
 - [ ] Comment the whole Auth files
 - [ ] Improve config and make it make sense
 - [ ] Figure out how to turn AstroDB into an option
+- [ ] Add option to redirect logged in/logged out user to a chosen page
+- [ ] Figure out how to make types correctly signal Astro.locals.loggedInUser can be null
 
 // Tip!
 Want to see what gets saved by the storage? Use

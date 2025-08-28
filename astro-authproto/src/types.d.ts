@@ -4,7 +4,7 @@ declare global {
       "atproto-did": string | undefined;
     }
 
-    interface Locals extends Record<string, any> {
+    interface Locals {
       loggedInUser: {
         did: string;
         handle: string;

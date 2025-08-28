@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/authproto",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Astro integration to easily authenticateyour site visitors using ATproto. For Bluesky and beyond.",
   "main": "dist/index.js",
   "type": "module",
