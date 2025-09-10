@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/expressive-code-output",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Allow adding output for expressive code blocks.",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
