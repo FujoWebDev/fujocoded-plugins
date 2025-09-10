@@ -2,6 +2,7 @@ import { definePlugin, AttachedPluginData } from "@expressive-code/core";
 import { h } from "@expressive-code/core/hast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
+import { pluginFrames } from "@expressive-code/plugin-frames";
 
 interface CaptionData {
   caption?: string;

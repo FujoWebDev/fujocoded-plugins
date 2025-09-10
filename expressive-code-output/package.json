@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/expressive-code-output",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Allow adding output for expressive code blocks.",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
+    "validate": " npx publint",
+    "test": "vitest --no-watch"
   },
   "keywords": [
     "remark"
@@ -36,13 +37,15 @@
     "mdast-util-to-hast": "^13.2.0"
   },
   "devDependencies": {
+    "@expressive-code/core": "^0.41.3",
+    "@expressive-code/plugin-frames": "^0.41.3",
+    "hast-util-select": "^6.0.4",
+    "prettier": "^3.6.2",
     "tsup": "^8.1.0",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependencies": {
-    "@expressive-code/core": "^0.35.3"
   }
 }
