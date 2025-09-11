@@ -18,5 +18,6 @@ declare global {
     export const applicationDomain: string;
     export const defaultDevUser: string | null;
     export const storage: import("unstorage").Storage;
+    export const scopes: import("./lib/config.ts").OAuthScope[];
   }
 }

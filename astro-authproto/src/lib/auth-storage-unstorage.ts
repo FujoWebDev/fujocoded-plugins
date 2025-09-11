@@ -6,6 +6,7 @@ import {
 } from "@atproto/oauth-client-node";
 
 import { storage } from "fujocoded:authproto/config";
+
 /**
  * The StateStore saves the challenge token issued before an OAuth request to
  * the user's PDS is made. Once the OAuth authentication comes back with a

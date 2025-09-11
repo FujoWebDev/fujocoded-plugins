@@ -2,8 +2,8 @@ import { NodeOAuthClient } from "@atproto/oauth-client-node";
 import { JoseKey } from "@atproto/jwk-jose";
 import { StateStore, SessionStore } from "./auth-storage-unstorage.js";
 import { DidResolver } from "@atproto/identity";
+import { scopes } from "fujocoded:authproto/config";
 
-const ALLOWED_SCOPES = "atproto transition:generic";
 const REDIRECT_PATH = "/oauth/callback";
 
 const createClient = async (domain: string) => {
@@ -11,7 +11,7 @@ const createClient = async (domain: string) => {
   // is done through search params
   // See: https://atproto.com/specs/oauth#clients
   const LOCAL_SEARCH_PARAMS = new URLSearchParams({
-    scope: ALLOWED_SCOPES,
+    scope: scopes.join(" "),
     redirect_uri: new URL(REDIRECT_PATH, domain).toString(),
   });
   // @ts-expect-error
@@ -25,7 +25,7 @@ const createClient = async (domain: string) => {
         : new URL("/client-metadata.json", domain).toString(),
       client_uri: domain,
       redirect_uris: [new URL(REDIRECT_PATH, domain).toString()],
-      scope: ALLOWED_SCOPES,
+      scope: scopes.join(" "),
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       application_type: "web",

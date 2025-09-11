@@ -1,15 +1,18 @@
 import type { APIRoute } from "astro";
-import { applicationName, applicationDomain } from "fujocoded:authproto/config";
+import {
+  applicationName,
+  applicationDomain,
+  scopes,
+} from "fujocoded:authproto/config";
 
 const IS_DEVELOPMENT = import.meta.env.DEV;
 // The domain most appropriate for the environment we are in, i.e. localhost
 // if in dev, or else the application domain.
 const ENV_DOMAIN = IS_DEVELOPMENT ? "http://localhost:4321" : applicationDomain;
-const ALLOWED_SCOPES = "atproto transition:generic";
 const REDIRECT_PATH = "/oauth/callback";
 
 const LOCAL_SEARCH_PARAMS = new URLSearchParams({
-  scope: ALLOWED_SCOPES,
+  scope: scopes,
   redirect_uri: new URL(REDIRECT_PATH, ENV_DOMAIN).toString(),
 });
 
@@ -22,7 +25,7 @@ export const GET: APIRoute = async ({}) => {
         : new URL("/client-metadata.json", applicationDomain).toString(),
       client_uri: applicationDomain,
       redirect_uris: [new URL(REDIRECT_PATH, ENV_DOMAIN).toString()],
-      scope: ALLOWED_SCOPES,
+      scope: scopes,
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       application_type: "web",

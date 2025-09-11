@@ -16,6 +16,9 @@ Bluesky and beyond.
 - [ ] Figure out how to turn AstroDB into an option
 - [ ] Add option to redirect logged in/logged out user to a chosen page
 - [ ] Figure out how to make types correctly signal Astro.locals.loggedInUser can be null
+- [ ] Fix the state bits in the oauth login route
+- [ ] Figure out what's up with weird amount of implementations in lib/
+- [ ] Clean up client-metadata duplication
 
 // Tip!
 Want to see what gets saved by the storage? Use
