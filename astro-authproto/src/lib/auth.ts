@@ -1,10 +1,17 @@
 import { NodeOAuthClient } from "@atproto/oauth-client-node";
 import { JoseKey } from "@atproto/jwk-jose";
-import { StateStore, SessionStore } from "./auth-storage-unstorage.js";
+
 import { DidResolver } from "@atproto/identity";
-import { scopes } from "fujocoded:authproto/config";
+import { scopes, driverName } from "fujocoded:authproto/config";
 
 const REDIRECT_PATH = "/oauth/callback";
+
+let Stores;
+if (driverName == "astro:db") {
+  Stores = await import("./auth-storage-db.js");
+} else {
+  Stores = await import("./auth-storage-unstorage.js");
+}
 
 const createClient = async (domain: string) => {
   // In local clients configuration for allowed scopes and redirects
@@ -34,8 +41,8 @@ const createClient = async (domain: string) => {
       jwks_uri: new URL("/jwks.json", domain).toString(),
     },
     keyset: await Promise.all([JoseKey.generate()]),
-    stateStore: new StateStore(),
-    sessionStore: new SessionStore(),
+    stateStore: new Stores.StateStore(),
+    sessionStore: new Stores.SessionStore(),
   });
 };
 

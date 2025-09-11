@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import authProto from "@fujocoded/authproto";
+import db from "@astrojs/db";
 
 // https://astro.build/config
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
   },
   integrations: [
     authProto({
+      // driver: {
+      //   name: "astro:db",
+      // },
       applicationName: "Authproto test",
       applicationDomain: "fujocoded.com",
       defaultDevUser: "essentialrandom.bsky.social",
@@ -19,5 +23,6 @@ export default defineConfig({
         additionalScopes: ["transition:generic"],
       },
     }),
+    // db(),
   ],
 });

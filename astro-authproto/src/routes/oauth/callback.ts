@@ -1,9 +1,5 @@
 import type { APIRoute } from "astro";
-import {
-  // generateSessionToken,
-  // createSession,
-  oauthClient,
-} from "../../lib/auth.js";
+import { oauthClient } from "../../lib/auth.js";
 
 export const GET: APIRoute = async ({ params, request, redirect, session }) => {
   const requestUrl = new URL(request.url);

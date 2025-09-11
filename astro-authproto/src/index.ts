@@ -61,13 +61,10 @@ export default (
   name: "fujocoded:authproto",
   hooks: {
     "astro:config:setup": (setupParams) => {
-      // @ts-expect-error
       const { injectRoute, addMiddleware, createCodegenDir } = setupParams;
       const codegenDir = createCodegenDir();
 
-      // @ts-expect-error
       addOAuthRoutes(injectRoute);
-      // @ts-expect-error
       addAtProtoRoutes(injectRoute);
 
       // Make configuration values available throughout the application
@@ -92,7 +89,6 @@ export default (
       });
     },
     "astro:config:done": async ({ injectTypes, config, logger }) => {
-      // @ts-expect-error
       if (!config.session?.driver && !config.adapter) {
         logger.error(
           "The ATproto OAuth integration uses Astro's session storage, which requires a session driver or an adapter. You have neither set. For more information, see https://docs.astro.build/en/guides/sessions/"
@@ -120,11 +116,11 @@ export default (
       });
     },
     "astro:db:setup": ({ extendDb }) => {
-      // if (configOptions.driver?.name == "astro:db") {
-      //   extendDb({
-      //     configEntrypoint: path.join(import.meta.dirname, "./db/tables.ts"),
-      //   });
-      // }
+      if (configOptions.driver?.name == "astro:db") {
+        extendDb({
+          configEntrypoint: path.join(import.meta.dirname, "./db/tables.js"),
+        });
+      }
     },
   },
 });

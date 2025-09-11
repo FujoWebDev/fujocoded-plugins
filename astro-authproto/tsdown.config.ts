@@ -12,6 +12,16 @@ export default defineConfig([
     external: [/^fujocoded:authproto/, /^astro:/, /\.astro$/],
   },
   {
+    name: "tables",
+    entry: ["src/db/tables.ts"],
+    outputOptions: {
+      dir: `./dist/db/`,
+    },
+    clean: true,
+    unbundle: true,
+    external: [/^fujocoded:authproto/, /^astro:/, /\.astro$/],
+  },
+  {
     name: "integration",
     dts: true,
     clean: true,

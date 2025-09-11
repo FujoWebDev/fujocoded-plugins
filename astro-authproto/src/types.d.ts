@@ -19,5 +19,6 @@ declare global {
     export const defaultDevUser: string | null;
     export const storage: import("unstorage").Storage;
     export const scopes: import("./lib/config.ts").OAuthScope[];
+    export const driverName: import("./lib/config.ts").AllDriverOptions["name"];
   }
 }

@@ -7,7 +7,7 @@ type OptionsType<
   name: T;
   options: BuiltinDriverOptions[T];
 };
-type AllDriverOptions =
+export type AllDriverOptions =
   | {
       [K in keyof BuiltinDriverOptions]: OptionsType<K>;
     }[keyof BuiltinDriverOptions]
@@ -60,18 +60,32 @@ export const getConfig = ({ options }: { options: ConfigOptions }) => {
     scopes.push(...(options.scopes?.additionalScopes ?? []));
   }
 
+  let driversImport = "";
+  if (finalDriver.name !== "astro:db") {
+    driversImport = `
+    import driver from "unstorage/drivers/${finalDriver.name}";
+
+    export const storage = createStorage({
+      driver: driver(${JSON.stringify(finalDriver.options)}),
+    });
+    `;
+  } else {
+    driversImport = `
+    export const storage = null;
+    `;
+  }
+
   return `
     import { createStorage } from "unstorage";
-    import driver from "unstorage/drivers/${finalDriver.name}";
+
+    ${driversImport}
     
     export const applicationName = "${options.applicationName}";
     export const applicationDomain = "${options.applicationDomain}";
     export const defaultDevUser = ${JSON.stringify(
       options.defaultDevUser ?? null
     )};
-    export const storage = createStorage({
-      driver: driver(${JSON.stringify(finalDriver.options)}),
-    });
     export const scopes = ${JSON.stringify(scopes)};
+    export const driverName = "${finalDriver.name}";
     `;
 };
