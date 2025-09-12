@@ -3,7 +3,7 @@
  */
 
 const images = Array.from(
-  document.querySelectorAll<HTMLImageElement>("img[alt]")
+  document.querySelectorAll<HTMLImageElement>(`img[alt]:not(img[alt=""])`)
 );
 for (const image of images) {
   image.style.transform = "rotate(180deg)";

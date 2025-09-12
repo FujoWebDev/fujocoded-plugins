@@ -13,7 +13,8 @@ import Robbie from "../assets/robbie.small.png";
   </head>
   <body>
     <img src={Sportacus.src} alt='Sportacus from hit series "Lazytown"' />
-    <img src={Robbie.src} />
+    <!-- Do not trigger alt-text badge for empty alt -->
+    <img src={Robbie.src} alt="" />
     <script>
       import "@fujocoded/astro-alt-text-toolkit";
     </script>
