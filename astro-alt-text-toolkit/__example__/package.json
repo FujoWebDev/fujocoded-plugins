@@ -10,9 +10,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/db": "^0.17.2",
-    "@astrojs/node": "^9.4.0",
-    "@fujocoded/authproto": "file:..",
+    "@fujocoded/astro-alt-text-toolkit": "file:..",
     "astro": "^5.12.9"
   }
 }
