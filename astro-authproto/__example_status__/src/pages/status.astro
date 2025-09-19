@@ -1,0 +1,47 @@
+---
+import { actions } from "astro:actions";
+import { getAgent } from "../lib/atproto";
+
+const loggedInUser = Astro.locals.loggedInUser;
+
+const agent = await getAgent(Astro.locals);
+// we can grab any statuses that the logged in user made by listing records from a specific collection
+const statuses = await agent?.com.atproto.repo.listRecords({
+  repo: loggedInUser!.did,
+  collection: "xyz.statuscity.status",
+});
+
+if (!loggedInUser) {
+  return Astro.redirect("/login"); // you could redirect them if they're not logged in
+}
+---
+
+<form action={actions.addStatus} method="post">
+  <label for="status-input">How are you feeling?</label>
+  <input type="text" name="status" id="status-input" />
+  <button>Post</button>
+</form>
+
+{statuses && statuses.data.records.map(({ uri, value }) => (
+  <article>
+    <pre>{uri}</pre>
+    <p>{value.status}</p>
+    <time datetime={value.createdAt as string}>
+      {new Date(value.createdAt as string).toDateString()}
+    </time>
+  </article>
+))}
+
+<script>
+  import { actions } from "astro:actions";
+
+  const [form] = document.forms;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const { error } = await actions.addStatus(data);
+    if (!error) {
+      alert("Successfully posted! Please refresh to see the changes!");
+    }
+  });
+</script>
