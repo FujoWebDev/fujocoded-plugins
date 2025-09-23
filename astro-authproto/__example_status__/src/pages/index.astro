@@ -1,5 +1,6 @@
 ---
 import { Login } from "@fujocoded/authproto/components";
+import Status from "../components/Status.astro";
 const user = Astro.locals.loggedInUser;
 ---
 
@@ -14,7 +15,7 @@ const user = Astro.locals.loggedInUser;
   <body>
     {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
     <Login />
-
-    {user && (<a href="/status">Check out statuses!</a>)}
+    
+    {user && (<Status />)}
   </body>
 </html>
