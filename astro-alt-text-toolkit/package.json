@@ -10,12 +10,6 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
-    },
-    "./vite": {
-      "import": {
-        "types": "./dist/vite.d.ts",
-        "default": "./dist/vite.js"
-      }
     }
   },
   "files": [
@@ -37,10 +31,7 @@
   "keywords": [
     "astro",
     "withastro",
-    "astro-integration",
-    "atproto",
-    "bluesky",
-    "authentication"
+    "astro-integration"
   ],
   "author": "FujoCoded LLC",
   "license": "MIT",

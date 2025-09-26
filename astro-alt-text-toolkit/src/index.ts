@@ -1,5 +1,5 @@
 /**
- * Adds a alt text badge to all images on the site.
+ * Adds a alt text badge to all images on a page.
  */
 
 const addBadgeToImage = (image: HTMLElement) => {

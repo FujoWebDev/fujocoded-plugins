@@ -1,7 +1,9 @@
 ---
+export const prerender = false;
+
+import ImageWithAlt from "../components/ImageWithAlt.astro";
 import Sportacus from "../assets/sportacus.small.png";
 import Robbie from "../assets/robbie.small.png";
-import ImageWithAlt from "../components/ImageWithAlt.astro";
 ---
 
 <html lang="en">
@@ -13,7 +15,7 @@ import ImageWithAlt from "../components/ImageWithAlt.astro";
     <title>Astro</title>
   </head>
   <body>
-    <h1>Pre-Rendered Example</h1>
+    <h1>Server Rendered Example</h1>
     <ImageWithAlt src={Sportacus} alt="file://" />
     <!-- Do not trigger alt-text badge for empty alt -->
     <img src={Robbie.src} />
