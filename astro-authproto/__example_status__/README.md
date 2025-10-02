@@ -1,39 +1,30 @@
 # How to use `@fujocoded/authproto` in practice!
 
-To actually make data show up on BlueSky or atproto, you'll need to do this:
+## Before you start
 
-1. Install `@atproto/api`.
+Other than `@fujocoded/authproto`, you'll also need `@atproto/api` and `@atproto/common-web` to use the code in this example. You can install it with:
 
 ```bash
-npm install @atproto/api
+npm install @atproto/api @atproto/common-web
 ```
+
+## In this example
+
+[The previous example](../__example__) showed how to log in and log out a user using `@fujocoded/authproto`. This example will show you show to create and list records. This will involve:
+
+- Creating an ATproto agent, which will interact with ATproto on your behalf. After following the [before you start](#before-you-start) section, you can check out (or copy) [`src/lib/atproto.ts`](./src/lib/atproto.ts) to see how to create the agent.
+- Use the ATproto agent to [list records from a collection](./src/components/Status.astro).
+- Pairing the ATproto agent with Astro actions to [create new records in a collections](./src/actions/index.ts).
 
 > [!NOTE]
-> You'll need to set your OAuth scopes accordingly. `genericData` should be set to true under the `scopes` configuration option.
-
-2. You'll also need to create an agent, which will essentially interact with atproto for you. Most of the needed atproto libraries should already be included with the integration.
-
-See `src/lib/atproto.ts` for more info.
-
-3. Using [Astro's Actions API](https://docs.astro.build/en/guides/actions/), you'll build up code to make requests to atproto. Make an `actions` folder inside `src` if you haven't already. From here, we'll create a server.
-
-```typescript
-// src/actions/index.ts
-import { getAgent } from "../lib/atproto";
-import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:content";
-
-export const server = {
-  // start here!
-}
-```
+> To create, update, and delete records in your PDS, you'll need to set your OAuth scopes accordingly. `genericData` should be set to true under the `scopes` configuration option.
 
 For this example, we'll do a status update. You can write text and then display them on your PDS.
 
-See `src/actions/index.ts` for the code.
+![A simple form with a textbox that says 'happy! ^^'](./assets/form.png)
 
-4. To actually see if this works, let's make a form. You can see how this is done in `src/pages/status.astro`. (It also has an example of how to display all the statuses made by the logged in user. Great for a semi-private diary!)
+You can use [PDSls](https://pdsls.dev/) to test it out! Search by the handle you used to log in.
 
-Make sure that your form field uses `name` that matches the "schema" defined earlier in the action. In our example, it should be `<input type="text" name="status" />`.
+![A screenshot of the PDSls service where a record for 'xyz.statuscity.status' has been made](./assets/result.png)
 
-Then hit post to see if it shows up. You can use [PDSls](https://pdsls.dev/) to test it out! Search by the handle you used to log in.
+![A screenshot of the resulting statuses show up on the Astro demo website](./assets/display_result.png)
