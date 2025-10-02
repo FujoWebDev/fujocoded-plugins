@@ -19,7 +19,7 @@ npm install @atproto/api @atproto/common-web
 > [!NOTE]
 > To create, update, and delete records in your PDS, you'll need to set your OAuth scopes accordingly. `genericData` should be set to true under the `scopes` configuration option.
 
-For this example, we'll do a status update. You can write text and then display them on your PDS. See [`src/actions/index.ts`](./src/actions/index.ts) for the code.
+For this example, we'll do a status update. You can write text and then display them on your PDS.
 
 ![A simple form with a textbox that says 'happy! ^^'](./assets/form.png)
 
