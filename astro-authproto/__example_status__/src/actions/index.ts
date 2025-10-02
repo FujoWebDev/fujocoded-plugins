@@ -1,7 +1,7 @@
 import { TID } from "@atproto/common-web";
 import { getAgent } from "../lib/atproto";
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:content";
+import { z } from "astro:schema";
 
 export const server = {
   addStatus: defineAction({
