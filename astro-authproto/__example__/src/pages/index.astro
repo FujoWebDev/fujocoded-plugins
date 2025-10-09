@@ -1,6 +1,7 @@
 ---
 import { Login } from "@fujocoded/authproto/components";
 const user = Astro.locals.loggedInUser;
+const redirectReason = Astro.url.searchParams.get("reason");
 ---
 
 <html lang="en">
@@ -14,5 +15,7 @@ const user = Astro.locals.loggedInUser;
   <body>
     {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
     <Login />
+
+    {redirectReason == "unauthorized" && <div>Sorry, you can't play with us</div>}
   </body>
 </html>
