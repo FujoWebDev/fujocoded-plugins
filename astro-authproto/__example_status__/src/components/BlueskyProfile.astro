@@ -1,0 +1,44 @@
+---
+import { getPublicAgent } from "../lib/atproto";
+
+interface Props {
+    handle: string;
+}
+
+const handle = Astro.props.handle;
+const agent = await getPublicAgent();
+
+const response = await agent?.app.bsky.actor.getProfile({ actor: handle });
+const profile = response?.data;
+---
+
+<article>
+    <img src={profile?.avatar} />
+    <div class="name">
+        {profile?.displayName}
+    </div>
+    <div class="description">
+        {profile?.description}
+    </div>
+</article>
+<style>
+    article {
+        max-width: 800px;
+        display: grid;
+        grid-template-columns: min-content auto;
+        gap: 10px;
+        align-items: center;
+
+    }
+    .name {
+        font-weight: bold;
+    }
+    .description {
+        grid-column: span 2;
+    }
+    img {
+        width: 30px;
+        border-radius: 100%;
+        height: auto;
+    }
+</style>

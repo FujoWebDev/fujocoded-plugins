@@ -12,7 +12,7 @@ export default defineConfig({
     authProto({
       applicationName: "Authproto test",
       applicationDomain: "fujocoded.com",
-      defaultDevUser: "essentialrandom.bsky.social",
+      defaultDevUser: "bobatan.fujoweb.dev",
       scopes: {
         genericData: true, // this is needed to create, update, or delete records from a PDS
       },
