@@ -1,0 +1,41 @@
+---
+import { getLoggedInAgent } from "../lib/atproto";
+
+const loggedInUser = Astro.locals.loggedInUser;
+if (!loggedInUser) {
+  return null;
+}
+
+// To grab all the statuses that the user has posted, we first create
+// an Agent to do those request on the users' behalf. Then we ask it to list
+// the records in their "xyz.statuscity.status" data collection.
+const agent = await getLoggedInAgent(loggedInUser);
+const response = await agent?.com.atproto.repo.listRecords({
+  repo: loggedInUser.did, // Whose data do we want to fetch?
+  collection: "xyz.statuscity.status", // What type of data do we want?
+});
+
+// const response = await agent?.app.bsky.actor.getProfile({actor: FUJOCODED_DID});
+// TODO: decide whether to explain the cursor
+// TODO2: at the very list, we should add a message if there's
+// a cursor returned.
+// We take the list of statuses out of the response. If
+// there's no status, we use an empty array instead.
+const statuses = response?.data.records ?? [];
+---
+
+{statuses.length == 0 && <p>No statuses yet!</p>}
+
+{
+  statuses.map(({ uri, value }) => (
+    <article>
+      <!-- TODO: Put this in a way where it's clear what this is -->
+      <a href={`https://pdsls.dev/${uri}`}><pre>{uri}</pre></a>
+      <p>{value.status}</p>
+      <time datetime={value.createdAt as string}>
+        {new Date(value.createdAt as string).toDateString()}
+      </time>
+    </article>
+  ))
+}
+
