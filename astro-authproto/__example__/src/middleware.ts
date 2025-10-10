@@ -17,7 +17,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     const agent = new AtpBaseClient("https://public.api.bsky.app");
-    const relationships = await agent.app.bsky.graph.getRelationships({ actor: HAETAE_DID, others: [loggedInDid] });
+    const relationships = await agent.app.bsky.graph.getRelationships({ actor: FUJOCODED_DID, others: [loggedInDid] });
     const usersRelationship = relationships.data.relationships.at(0);
 
     // True if the current user follows you 
@@ -28,7 +28,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const mutuals = follower && following;
 
     if (!following) {
-        return context.redirect("/?reason=unauthorized");
+        return context.rewrite(new URL("/unauthorized", context.url));
     }
 
     return next();

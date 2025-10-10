@@ -25,6 +25,7 @@ Bluesky and beyond.
 - [ ] Fix the state bits in the oauth login route
 - [x] Figure out what's up with weird amount of implementations in lib/
 - [ ] Clean up client-metadata duplication
+- [ ] Rename genericData to writeData
 
 // Tip!
 Want to see what gets saved by the storage? Use
