@@ -1,5 +1,5 @@
 import { TID } from "@atproto/common-web";
-import { getLoggedInAgent } from "../lib/atproto";
+import { getLoggedInAgent, getPdsAgent } from "../lib/atproto";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -23,7 +23,7 @@ export const server = {
       // Since we need to write, the agent needs to the information
       // of the logged in user.
       // TODO: explain better
-      const agent = await getLoggedInAgent(loggedInUser); // this is needed to make requests to atproto
+      const agent = await getPdsAgent({ loggedInUser }); // this is needed to make requests to atproto
 
         if (!agent) {
           throw new ActionError({
