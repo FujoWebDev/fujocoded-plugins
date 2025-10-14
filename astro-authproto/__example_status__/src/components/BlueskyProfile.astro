@@ -1,12 +1,12 @@
 ---
-import { getPublicAgent } from "../lib/atproto";
+import { getBlueskyAgent } from "../lib/atproto";
 
 interface Props {
     handle: string;
 }
 
 const handle = Astro.props.handle;
-const agent = await getPublicAgent();
+const agent = await getBlueskyAgent();
 
 const response = await agent?.app.bsky.actor.getProfile({ actor: handle });
 const profile = response?.data;

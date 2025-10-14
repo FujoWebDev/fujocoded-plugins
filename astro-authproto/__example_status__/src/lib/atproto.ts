@@ -1,7 +1,29 @@
-import type { APIContext } from "astro";
 import { AtpBaseClient } from "@atproto/api";
-import { DidResolver } from "@atproto/identity"; // this is already included with @fujocoded/authproto!
+import { IdResolver } from "@atproto/identity"; // this is already included with @fujocoded/authproto!
 
+
+const IDENTITY_RESOLVER = new IdResolver({});
+export const getDid = async ({ didOrHandle }: { didOrHandle: string }) => {
+  if (didOrHandle.startsWith("did:")) {
+    return didOrHandle;
+  }
+  return await IDENTITY_RESOLVER.handle.resolve(didOrHandle);
+};
+
+const getPdsUrl = async ({ didOrHandle }: { didOrHandle: string }) => {
+  const did = await getDid({ didOrHandle });
+  if (!did) {
+    throw new Error(`Did not resolve to a valid DID: ${didOrHandle}`);
+  }
+  const atprotoData = await IDENTITY_RESOLVER.did.resolveAtprotoData(did);
+  return atprotoData.pds;
+};
+
+
+/**
+ * Sends requests through the PDS of the logged in user. This means they
+ * will have authentication status.
+ */
 export async function getLoggedInAgent(loggedInUser: NonNullable<App.Locals["loggedInUser"]>) {
   try {
     const agent = new AtpBaseClient(loggedInUser.fetchHandler);
@@ -11,24 +33,36 @@ export async function getLoggedInAgent(loggedInUser: NonNullable<App.Locals["log
   }
 }
 
-export async function getPublicAgent() {
+/**
+ * Sends requests directly to a user's PDS. Useful to retrieve records directly
+ * from the sources.
+ */
+export async function getPdsAgent(pdsOwner: { didOrHandle: string } | { loggedInUser: NonNullable<App.Locals["loggedInUser"]> }) {
+  if ("loggedInUser" in pdsOwner) {
+    return getLoggedInAgent(pdsOwner.loggedInUser)
+  }
   try {
-    const agent = new AtpBaseClient("https://public.api.bsky.app/");
+    const destination = await getPdsUrl({ didOrHandle: pdsOwner.didOrHandle });
+    if (!destination) {
+      return null;
+    }
+    const agent = new AtpBaseClient(destination);
     return agent;
   } catch (error) {
     return null;
   }
 }
 
-// TODO: explain this better
-// TODO: Do we really want this here? are we using it anywhere?
-// this is good if you want to resolve a did into a user-friendly handle
-export async function didToHandle(did: string) {
+/**
+ * This agent sends requests to the BlueSky appview. If a loggedInUser is present
+ * then it will send them through the users' PDS first to validate authentication
+ * status.
+ */
+export async function getBlueskyAgent(user?: { loggedInUser: NonNullable<App.Locals["loggedInUser"]> }) {
   try {
-    const didResolver = new DidResolver({});
-    const atProtoData = await didResolver.resolveAtprotoData(did);
-    return atProtoData.handle;
+    const agent = new AtpBaseClient(user ? user.loggedInUser.fetchHandler : "https://public.api.bsky.app/");
+    return agent;
   } catch (error) {
-    return "Invalid handle";
+    return null;
   }
 }
