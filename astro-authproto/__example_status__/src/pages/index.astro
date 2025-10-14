@@ -3,6 +3,7 @@ import { Login } from "@fujocoded/authproto/components";
 import ListStatuses from "../components/ListStatuses.astro";
 import PostStatus from "../components/PostStatus.astro";
 import BlueskyProfile from "../components/BlueskyProfile.astro";
+import UserAvatar from "../components/UserAvatar.astro";
 
 const loggedInUser = Astro.locals.loggedInUser;
 ---
@@ -17,6 +18,7 @@ const loggedInUser = Astro.locals.loggedInUser;
   </head>
   <body>
     <header>
+      {loggedInUser && <UserAvatar />}
       {
         !loggedInUser
           ? "Please log in:"
