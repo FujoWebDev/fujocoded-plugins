@@ -1,7 +1,7 @@
 {
-  "name": "@fujocoded/authproto",
-  "version": "0.1.1",
-  "description": "Astro integration to easily authenticateyour site visitors using ATproto. For Bluesky and beyond.",
+  "name": "@fujocoded/astro-alt-text-toolkit",
+  "version": "0.0.1",
+  "description": "",
   "main": "dist/index.js",
   "type": "module",
   "exports": {
@@ -9,12 +9,6 @@
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      }
-    },
-    "./components": {
-      "import": {
-        "types": "./dist/components.d.ts",
-        "default": "./dist/components.js"
       }
     }
   },
@@ -26,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch --ignore-watch __example__",
+    "dev": "tsdown --watch",
     "validate": "npx publint",
     "test": "vitest"
   },
@@ -37,10 +31,7 @@
   "keywords": [
     "astro",
     "withastro",
-    "astro-integration",
-    "atproto",
-    "bluesky",
-    "authentication"
+    "astro-integration"
   ],
   "author": "FujoCoded LLC",
   "license": "MIT",
@@ -48,13 +39,7 @@
     "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
-  "dependencies": {
-    "@astrojs/db": "^0.17.1",
-    "@atproto/identity": "^0.4.8",
-    "@atproto/oauth-client-node": "^0.3.8",
-    "astro-integration-kit": "^0.19.0",
-    "unstorage": "^1.16.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tsdown": "^0.14.1"
   },

@@ -1,6 +1,7 @@
 export function ExcalidrawComponent(props: { fileContent: string }) {
   return (
     <div
+      className="remark-excalidraw"
       // @ts-expect-error
       ref={async (el) => {
         if (typeof document == "undefined") {
