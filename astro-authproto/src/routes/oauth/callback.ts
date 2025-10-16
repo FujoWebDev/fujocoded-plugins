@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { oauthClient, getRedirectUrl } from "../../lib/auth.js";
+import { oauthClient } from "../../lib/auth.js";
+import { getRedirectUrl } from "../../lib/redirects.js";
 import { redirectAfterLogin } from "fujocoded:authproto/config";
 
 export const GET: APIRoute = async ({ params, request, redirect, session }) => {

@@ -11,9 +11,6 @@ import {
   applicationName,
   externalDomain,
 } from "fujocoded:authproto/config";
-import { LOGGED_IN_HANDLE_TEMPLATE } from "../index.js";
-import { REDIRECT_TO_REFERER_TEMPLATE } from "../index.js";
-import { LOGGED_IN_DID_TEMPLATE } from "../index.js";
 
 const REDIRECT_PATH = "/oauth/callback";
 
@@ -90,69 +87,4 @@ const IDENTITY_RESOLVER = new DidResolver({});
 export const didToHandle = async (did: string) => {
   const atprotoData = await IDENTITY_RESOLVER.resolveAtprotoData(did);
   return atprotoData.handle;
-};
-
-export const getRedirectUrl = async ({
-  redirectToBase,
-  did,
-  referer,
-}: {
-  redirectToBase: string;
-  did: string;
-  referer: string;
-}) => {
-  let redirectTo = redirectToBase;
-
-  if (referer && redirectTo.includes(REDIRECT_TO_REFERER_TEMPLATE)) {
-    // The redirectTo might already have a query string, so we need to split it and handle both parts
-    let [basePath, baseParams] = redirectTo.split("?");
-
-    console.dir({ basePath, baseParams }, { depth: null });
-    console.dir({ referer }, { depth: null });
-
-    let [refererBasePath, refererParams] = referer.split("?");
-
-    // As the first step, we figure out if the base path itself has the referer template
-    // In which case we need to special handle the referer search params so they
-    // are a base for the new redirectTo
-    if (basePath.includes(REDIRECT_TO_REFERER_TEMPLATE)) {
-      basePath = basePath.replaceAll(
-        REDIRECT_TO_REFERER_TEMPLATE,
-        refererBasePath
-      );
-    }
-    const finalSearchParams = new URLSearchParams(refererParams);
-
-    if (baseParams) {
-      const searchParams = new URLSearchParams(baseParams);
-      // Merge base params, replacing any referer template variables
-      for (const [key, value] of searchParams.entries()) {
-        if (value.includes(REDIRECT_TO_REFERER_TEMPLATE)) {
-          finalSearchParams.set(
-            key,
-            value.replaceAll(
-              REDIRECT_TO_REFERER_TEMPLATE,
-              encodeURIComponent(referer)
-            )
-          );
-        } else {
-          finalSearchParams.set(key, value);
-        }
-      }
-    }
-
-    redirectTo = `${basePath}${finalSearchParams.size > 0 ? `?${finalSearchParams.toString()}` : ""}`;
-  }
-
-  // Substitute template variables with logged-in user data
-  if (redirectTo.includes(LOGGED_IN_DID_TEMPLATE)) {
-    redirectTo = redirectTo.replaceAll(LOGGED_IN_DID_TEMPLATE, did);
-  }
-
-  if (redirectTo.includes(LOGGED_IN_HANDLE_TEMPLATE)) {
-    const handle = await didToHandle(did);
-    redirectTo = redirectTo.replaceAll(LOGGED_IN_HANDLE_TEMPLATE, handle);
-  }
-
-  return redirectTo;
 };
