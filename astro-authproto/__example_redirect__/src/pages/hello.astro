@@ -1,0 +1,58 @@
+---
+import { Login } from "@fujocoded/authproto/components";
+
+const user = Astro.locals.loggedInUser;
+const redirectReason = Astro.url.searchParams.get("reason");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <header>
+      {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
+      <Login />
+    </header>
+    <div>
+      <p>
+        You were redirected to this page because you {
+          user
+            ? "logged in"
+            : redirectReason == "logged-out"
+              ? "logged out"
+              : "(unknown reason)"
+        }. The search params contain the following DID:
+      </p>
+      <pre>{Astro.url.searchParams.get("did")}</pre>
+      <p>
+        This is <strong
+          >{
+            user?.did === Astro.url.searchParams.get("did")
+              ? "the same"
+              : "not the same"
+          }</strong
+        >
+        as your DID {!user && "(because you are logged out)"}.
+      </p>
+    </div>
+  </body>
+</html>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    height: 100dvh;
+    font-family: Arial, sans-serif;
+  }
+  div {
+    font-size: 1.5em;
+    max-width: 600px;
+  }
+</style>

@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch --ignore-watch __example__",
+    "dev": "tsdown --watch src/",
     "validate": "npx publint",
     "test": "vitest"
   },
@@ -50,7 +50,9 @@
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "@astrojs/db": "^0.17.1",
+    "@atproto/api": "^0.13.19",
     "@atproto/identity": "^0.4.8",
+    "@atproto/jwk-jose": "^0.1.4",
     "@atproto/oauth-client-node": "^0.3.8",
     "astro-integration-kit": "^0.19.0",
     "unstorage": "^1.16.1"
