@@ -1,0 +1,26 @@
+---
+import { getBlueskyAgent } from "../lib/atproto";
+
+if (!Astro.locals.loggedInUser) {
+    return null;
+}
+
+const agent = await getBlueskyAgent({
+    loggedInUser: Astro.locals.loggedInUser,
+});
+
+const response = await agent?.app.bsky.actor.getProfile({
+    actor: Astro.locals.loggedInUser.handle,
+});
+const profile = response?.data;
+---
+
+<img src={profile?.avatar} />
+
+<style>
+    img {
+        width: 30px;
+        border-radius: 100%;
+        height: auto;
+    }
+</style>
