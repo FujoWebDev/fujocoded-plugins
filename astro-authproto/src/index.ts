@@ -5,6 +5,9 @@ import "@astrojs/db";
 import { getConfig, type ConfigOptions } from "./lib/config.js";
 import { readFile } from "node:fs/promises";
 
+export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
+export const LOGGED_IN_HANDLE_TEMPLATE = "{loggedInUser.handle}";
+export const REDIRECT_TO_REFERER_TEMPLATE = "{referer}";
 /**
  * Adds all the routes necessary for OAuth and its callbacks to work:
  * - `/oauth/login`, called to start the login flow
@@ -75,6 +78,7 @@ export default (
             id: "fujocoded:authproto/config",
             content: getConfig({
               options: configOptions,
+              isDev: process.env.NODE_ENV === "development",
             }),
             context: "server",
           },
@@ -95,8 +99,13 @@ export default (
         );
       }
       if (!configOptions.driver) {
-        logger.error(
+        logger.warn(
           "The ATproto OAuth integration requires a configured session driver in production. This will be ok for dev mode."
+        );
+      }
+      if (!config.server.host && process.env.NODE_ENV === "development") {
+        logger.error(
+          "ATproto requires the local redirect URL to be 127.0.0.1 (not localhost) but your site is not running on a network address. Run `astro dev --host` to fix this."
         );
       }
       if (config.output === "static") {

@@ -19,12 +19,12 @@ Bluesky and beyond.
 - [ ] Comment the whole Auth files
 - [ ] Improve config and make it make sense
 - [x] Figure out how to turn AstroDB into an option
-- [ ] Add option to redirect logged in/logged out user to a chosen page
+- [x] Add option to redirect logged in/logged out user to a chosen page
 - [ ] Explain how to intercept logged out/logged in events so you can do things
 - [ ] Figure out how to make types correctly signal Astro.locals.loggedInUser can be null
-- [ ] Fix the state bits in the oauth login route
+- [x] Fix the state bits in the oauth login route
 - [x] Figure out what's up with weird amount of implementations in lib/
-- [ ] Clean up client-metadata duplication
+- [x] Clean up client-metadata duplication
 - [ ] Rename genericData to writeData
 
 // Tip!
