@@ -26,6 +26,7 @@ Bluesky and beyond.
 - [x] Figure out what's up with weird amount of implementations in lib/
 - [x] Clean up client-metadata duplication
 - [ ] Rename genericData to writeData
+- [ ] Add lists of current permissions
 
 // Tip!
 Want to see what gets saved by the storage? Use
