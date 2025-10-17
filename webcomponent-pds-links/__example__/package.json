@@ -10,6 +10,8 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@atproto/identity": "^0.4.9",
+    "@fujocoded/zod-transform-socials": "^0.0.12",
     "astro": "^5.12.9"
   },
   "devDependencies": {
