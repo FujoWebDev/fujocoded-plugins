@@ -10,10 +10,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/db": "^0.17.2",
-    "@astrojs/node": "^9.4.0",
-    "@atproto/api": "^0.17.2",
-    "@fujocoded/authproto": "file:..",
     "astro": "^5.12.9"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
