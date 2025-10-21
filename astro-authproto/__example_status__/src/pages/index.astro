@@ -26,8 +26,9 @@ const loggedInUser = Astro.locals.loggedInUser;
       }
       <Login />
     </header>
+    <h2>Post Your Status</h2>
+    {loggedInUser ? <PostStatus /> : "You must be logged in to post a status."}
     <ListStatuses />
-    {loggedInUser && <PostStatus />}
     <footer>
       A project by: <BlueskyProfile handle="fujocoded.bsky.social"/>
     </footer>

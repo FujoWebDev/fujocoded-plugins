@@ -1,5 +1,5 @@
 import { TID } from "@atproto/common-web";
-import { getLoggedInAgent, getPdsAgent } from "../lib/atproto";
+import { getPdsAgent } from "@fujocoded/authproto/helpers";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 

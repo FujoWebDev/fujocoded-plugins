@@ -1,5 +1,5 @@
 ---
-import { getLoggedInAgent, getPdsAgent, getDid } from "../lib/atproto";
+import { getPdsAgent, getDid } from "@fujocoded/authproto/helpers";
 
 const FUJOCODED_HANDLE = "fujocoded.bsky.social";
 const FUJOCODED_DID = await getDid({didOrHandle: FUJOCODED_HANDLE});
