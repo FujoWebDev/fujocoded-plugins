@@ -1,53 +1,67 @@
-@fujocoded/authproto
+# `@fujocoded/authproto`
 
 <!-- banner -->
 
-ATproto authentication for your Astro site. For free:tm:!
+ATproto authentication for your Astro site. Free and Easy™!
 
 <!-- badges -->
 
-# What does @fujocoded/authproto do?
+## What is `@fujocoded/authproto`?
 
-`@fujocoded/authproto` allows your visitors to log into your website through
-ATproto services (like BlueSky). Under the hood, `@fujocoded/authproto` uses
-`@atproto/oauth-client-node` to add OAuth authentication using Astro's session
-adapters to store your visitor's credentials.
+`@fujocoded/authproto` allows your visitors to log into your website using their
+account on any ATproto services (like Bluesky) or in technical terms their PDS!
+
+Under the hood, `@fujocoded/authproto` adds OAuth authentication to your site
+through
+[`@atproto/oauth-client-node`](https://www.npmjs.com/package/@atproto/oauth-client-node),
+then uses Astro's session adapters (based on
+[`@unjs/unstorage`](https://github.com/unjs/unstorage)) to store your visitor's
+credentials.
 
 <!-- screenshot of oauth x'd out -->
 <!-- screenshot of fujocoded thumbsup -->
 
-## What's included
+## What's included in `@fujocoded/authproto`?
 
 In this package, you'll find:
 
-- An Astro integration that adds the authentication routes you need
-- A way to know if a user is logged in and retrieve their DID and handle
-- A basic login/logout component to get you started quickly
+- `@fujocoded/authproto`, an Astro integration that:
+  - Adds the authentication routes you need
+  - Lets you easily access the DID and handle of a logged in user, if any
+- `@fujocoded/authproto/components`, which includes:
+  - A basic login/logout component to get started quickly
+- `@fujocoded/authproto/helpers`,
+  - `getPdsAgent` etc.?
+  - `friendsOnly` function (or similar)
 
-# What can you do with it?
+## What can you do with `@fujocoded/authproto`?
 
-- You can check to see if someone has an account on ATproto (such as an account
-  on BlueSky). With this, you can:
-  - Build private, friends-only spaces
+- **Let visitors log in to your site** with their ATproto account (such as a Bluesky
+  account). With this, you can:
+  - Build private, friends-only spaces and pages
   - Gate certain content from the public
-- You can read data from other ATproto services, like
-  [BlueSky](https://bsky.app/), [Streamplace](https://stream.place/),
-  [Teal.FM](https://teal.fm/), and more! Some examples:
-  - Embed BlueSky posts or [Leaflet publications](https://leaflet.pub/)
-  - List your stats from [RockSky](https://rocksky.app/)
-- You can create, update, and delete data from your account on ATproto.
+- **Read data from other ATproto services**, including [Bluesky](https://bsky.app/),
+  [Streamplace](https://stream.place/), [Teal.FM](https://teal.fm/), and more!
+  Among the many uses, you can:
+  - Show a list of your favorite [Bluesky](https://bsky.app/) posts, or
+    embed [Leaflet publications](https://leaflet.pub/)
+  - Tell everyone about the music you love by listing
+    your [Rocksky](https://rocksky.app/) stats
+- **Create, update, and delete data** on ATproto services, both existing ones or
+  _your own_!
+  - Post on [Bluesky](https://bsky.app/) from your own website
   - Build [guestbooks](https://github.com/FujoWebDev/lexicon-guestbook/) that
     others on ATproto can interact with
-  - Make your _own_ ATproto app
+  - Make your _own_ ATproto app that shares data with the rest of the network
 
 <!-- replace this with a fancier display -->
 
-## Examples
+## Built with Authproto
 
 - [Guestbook lexicons](https://github.com/FujoWebDev/lexicon-guestbook/)
 - [Fanfic archive](https://github.com/haetae-bit/fanfic-atproto)
 
-# How to start
+# Getting started
 
 ## Pre-requisites
 
@@ -55,7 +69,8 @@ In this package, you'll find:
 - NPM/pnpm/yarn
 - Terminal
 
-> [!IMPORTANT] `deno` requires a workaround due to a CJS/ESM import issue within
+> [!IMPORTANT]
+> `deno` requires a workaround due to a CJS/ESM import issue within
 > `@atproto/oauth-client-node`.
 
 // TODO: we can move this in a details tab
@@ -85,12 +100,12 @@ npx astro add @fujocoded/authproto
 
 4. Add the integration to your `astro.config.mjs` file, like this:
 
-// TODO: add a note that this requires a server and an adapter that supports
-// some type of storage...? I'm unsure how it works on e.g. netlify for the
-// various session handlers
+// TODO: add a note that this requires a server and an adapter that supports //
+some type of storage...? I'm unsure how it works on e.g. netlify for the //
+various session handlers
 
-// TODO: we might also want to make sure people do not set certain adapters
-// or even better just disallow the ones they shouldn't.
+// TODO: we might also want to make sure people do not set certain adapters //
+or even better just disallow the ones they shouldn't.
 
 ```typescript
 import { defineConfig } from "astro/config";
@@ -132,7 +147,7 @@ It'll look like a plain form:
 
 To make a page only visible to logged in users:
 
-```
+```ts
 // src/pages/secret.astro
 ---
 const loggedInUser = Astro.locals.loggedInUser;
