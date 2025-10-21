@@ -30,6 +30,14 @@ export default defineConfig([
     external: [/^fujocoded:authproto/, /^astro:/],
   },
   {
+    name: "helpers",
+    dts: true,
+    clean: true,
+    unbundle: true,
+    entry: ["src/helpers.ts", "src/types.d.ts"],
+    external: [/^fujocoded:authproto/, /^astro:/],
+  },
+  {
     name: "routes",
     entry: [...glob.sync(`./src/routes/**/*.ts`)],
     outputOptions: {
