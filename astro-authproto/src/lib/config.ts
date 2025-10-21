@@ -14,11 +14,27 @@ export type AllDriverOptions =
   | { name: "astro:db"; options?: never };
 
 export type OAuthScope =
+  /**
+   * The generic scope for ATproto authentication. All apps must have this scope.
+   */
   | "atproto"
+  /**
+   * Allows access to a user's email address and confirmation status.
+   */
   | "transition:email"
-  | "transition:generic"
+  /**
+   * Allows write/read access to a user's chat.bsky data.
+   */
   | "transition:chat.bsky"
+  /**
+   * Allows write access to a user's generic data.
+   */
+  | "transition:generic"
+  /**
+   * Additional scopes not covered by the others.
+   */
   | string;
+
 export interface ConfigOptions {
   applicationName: string;
   applicationDomain: string;
@@ -41,6 +57,12 @@ export interface ConfigOptions {
     afterLogin?: string;
     afterLogout?: string;
   };
+  /*
+  dev: {
+      defaultUser?: string;
+      devDriver?: AllDriverOptions | AstroDriverOption;
+  }
+  */
 }
 
 export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: boolean }) => {

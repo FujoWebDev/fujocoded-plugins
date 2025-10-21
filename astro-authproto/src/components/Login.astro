@@ -8,18 +8,20 @@ interface Props {
 
 const { redirect: redirectUrl } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
+
+const { class: cssClass, 'class:list': cssClassList } = Astro.props;
 ---
 
 {
   currentUser ? (
     // If there's a current user, show the log out button
-    <form action="/oauth/logout" method="post">
+    <form action="/oauth/logout" method="post"  class={cssClass} class:list={cssClassList}>
       {redirectUrl && <input type="hidden" name="redirect" value={redirectUrl} />}
       <button type="submit">Logout</button>
     </form>
   ) : (
     // If there's no current user, show the login button
-    <form action="/oauth/login" method="post">
+    <form action="/oauth/login" method="post" class={cssClass} class:list={cssClassList}>
       <input
         name="atproto-id"
         value={import.meta.env.DEV ? defaultDevUser : undefined}

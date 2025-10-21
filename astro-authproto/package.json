@@ -16,6 +16,12 @@
         "types": "./dist/components.d.ts",
         "default": "./dist/components.js"
       }
+    },
+    "./helpers": {
+      "import": {
+        "types": "./dist/helpers.d.ts",
+        "default": "./dist/helpers.js"
+      }
     }
   },
   "files": [
@@ -50,7 +56,7 @@
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "@astrojs/db": "^0.17.1",
-    "@atproto/api": "^0.13.19",
+    "@atproto/api": "^0.17.3",
     "@atproto/identity": "^0.4.8",
     "@atproto/jwk-jose": "^0.1.4",
     "@atproto/oauth-client-node": "^0.3.8",
