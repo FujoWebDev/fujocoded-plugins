@@ -2,7 +2,7 @@
 
 <!-- banner -->
 
-ATproto authentication for your Astro site. Free and Easy™!
+ATproto authentication for your [Astro](https://docs.astro.build/en/concepts/why-astro/) site. Free and Easy™!
 
 <!-- badges -->
 
@@ -31,8 +31,8 @@ In this package, you'll find:
 - `@fujocoded/authproto/components`, which includes:
   - A basic login/logout component to get started quickly
 - `@fujocoded/authproto/helpers`,
-  - `getPdsAgent` etc.?
-  - `friendsOnly` function (or similar)
+  - `getPdsAgent` authorizes a logged in user to post, update, or delete data from ATProto
+  - `friendsOnly` finds mutuals from your [Bluesky](https://bsky.app/) account
 
 ## What can you do with `@fujocoded/authproto`?
 
@@ -55,6 +55,7 @@ In this package, you'll find:
   - Make your _own_ ATproto app that shares data with the rest of the network
 
 <!-- replace this with a fancier display -->
+<!-- link to atproto explainer -->
 
 ## Built with Authproto
 
@@ -68,53 +69,48 @@ In this package, you'll find:
 - Node
 - NPM/pnpm/yarn
 - Terminal
+- [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up login/logout sessions
+- (Optional) [session driver](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver) to allow users to log in or log out
 
 > [!IMPORTANT]
 > `deno` requires a workaround due to a CJS/ESM import issue within
 > `@atproto/oauth-client-node`.
 
-// TODO: we can move this in a details tab
+> [!IMPORTANT]
+> Using either `localStorage` or `sessionStorage` will result in a ["Session storage could not be initialized." error](https://docs.astro.build/en/reference/errors/session-storage-init-error/) (and is considered insecure for handling sessions anyway). Consider other options, like a database.
 
 Requires some familiarity with Astro, but if you want to jump in head first:
 
-1. Install Astro by [following their official
-   tutorial](https://docs.astro.build/en/install-and-setup/#install-from-the-cli-wizard).
-   Once you do, [set your Astro site to server
-   mode](https://docs.astro.build/en/guides/on-demand-rendering/#server-mode).
-2. Install [any of the
-   adapters](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters).
+### Automatic Installation
 
-- You can start out with
-  [Node](https://docs.astro.build/en/guides/integrations-guide/node/), since
-  that's a widely supported runtime.
-
-3. Run the following command:
-
-```bash
-npm install @fujocoded/authproto
-```
+1. Run the following command:
 
 ```bash
 npx astro add @fujocoded/authproto
 ```
 
-4. Add the integration to your `astro.config.mjs` file, like this:
+This will automatically install `@fujocoded/authproto` and add the integration to your `astro.config.mjs` file.
 
-// TODO: add a note that this requires a server and an adapter that supports //
-some type of storage...? I'm unsure how it works on e.g. netlify for the //
-various session handlers
+> [!TIP] You can take a look at all the [possible configuration options below](#configuration-options).
 
-// TODO: we might also want to make sure people do not set certain adapters //
-or even better just disallow the ones they shouldn't.
+### Manual Installation
+
+1. Run the following command:
+
+```bash
+npm add @fujocoded/authproto
+```
+
+2. Add the integration to your `astro.config.mjs` file, like this:
 
 ```typescript
 import { defineConfig } from "astro/config";
-+ import node from "@astrojs/node";
+import node from "@astrojs/node";
 + import authproto from "@fujocoded/authproto";
 
 export default defineConfig({
-  output: "server",
-+ adapter: node({ mode: "standalone" }), // ... or whichever adapter you're using!
+  output: "server", // you can read up more how this works here: https://docs.astro.build/en/guides/on-demand-rendering/
+  adapter: node({ mode: "standalone" }), // ... or whichever adapter you're using!
 + integrations: [
 +   authproto({
 +     // config options here
@@ -123,12 +119,13 @@ export default defineConfig({
 });
 ```
 
-> [!TIP] You can take a look at all the [possible configuration options
-> below](#configuration-options).
+> [!TIP] You can take a look at all the [possible configuration options below](#configuration-options).
 
-5. Add the `<Login />` component to your site, like this:
+# Using `@fujocoded/authproto`
 
-```
+Add the `<Login />` component to your site, like this:
+
+```jsx
 // src/pages/index.astro
 ---
 import { Login } from "@fujocoded/authproto/components";
@@ -138,8 +135,7 @@ import { Login } from "@fujocoded/authproto/components";
 ```
 
 > [!TIP] You might run into a naming collision issue if you also have a page
-> named `login`. You can fix this by replacing `{ Login }` with `{ Login as
-LoginComponent }`.
+> named `login`. You can fix this by replacing `{ Login }` with `{ Login asLoginComponent }`.
 
 It'll look like a plain form:
 
@@ -147,7 +143,7 @@ It'll look like a plain form:
 
 To make a page only visible to logged in users:
 
-```ts
+```jsx
 // src/pages/secret.astro
 ---
 const loggedInUser = Astro.locals.loggedInUser;
@@ -168,10 +164,7 @@ if (!loggedInUser) {
 
 # Okay how do I _actually_ do stuff with this?
 
-Check out the example sites included:
-
-- [`__example__`](./__example__) shows you how to set up a login flow.
-- `__example_status__` has some examples of creating new records on a PDS.
+Check out the example sites included under the [examples folder](./__examples__/).
 
 # Configuration options
 
@@ -182,18 +175,12 @@ Check out the example sites included:
 - `defaultDevUser`, optional. The default handle that gets filled out in the
   `<Login />` component during development.
 - `driver`, optional. The driver used to store data about OAuth sessions. This
-  takes Astro's [session driver
-  options](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver).
+  takes Astro's [session driver options](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver).
   You can also set this with `name: "astro:db"` to utilize [Astro's DB
   integration](https://docs.astro.build/en/guides/integrations-guide/db/) for
   OAuth sessions. This will set up tables for sessions in your database.
   - NOTE: The default driver is `memory`. This is fine for development, but it's
     recommended that you switch to a more reliable solution for production.
-  - NOTE: Using either `localStorage` or `sessionStorage` will result in a
-    ["Session storage could not be initialized."
-    error](https://docs.astro.build/en/reference/errors/session-storage-init-error/)
-    (and is considered insecure for handling sessions anyway). Consider other
-    options, like a database.
 - `scopes`, optional. By default, only the `"atproto"` scope is added. This
   scope is included with any other scope that's enabled. See [ATproto's
   documentation for OAuth
