@@ -1,0 +1,53 @@
+---
+import { Login } from "@fujocoded/authproto/components";
+import ListStatuses from "../components/ListStatuses.astro";
+import PostStatus from "../components/PostStatus.astro";
+import BlueskyProfile from "../components/BlueskyProfile.astro";
+import UserAvatar from "../components/UserAvatar.astro";
+
+const loggedInUser = Astro.locals.loggedInUser;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <header>
+      {loggedInUser && <UserAvatar />}
+      {
+        !loggedInUser
+          ? "Please log in:"
+          : `Welcome ${loggedInUser.handle} (${loggedInUser.did})`
+      }
+      <Login />
+    </header>
+    <h2>Post Your Status</h2>
+    {loggedInUser ? <PostStatus /> : "You must be logged in to post a status."}
+    <ListStatuses />
+    <footer>
+      A project by: <BlueskyProfile handle="fujocoded.bsky.social"/>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  footer {
+    margin-top: 50px;
+    padding-top: 10px;
+    border-top: 1px dashed gray;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+</style>

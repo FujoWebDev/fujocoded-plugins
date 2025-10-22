@@ -1,0 +1,74 @@
+---
+import { Image } from "astro:assets";
+import { getImage } from "astro:assets";
+import path from "node:path";
+
+type ImageProps = Parameters<typeof Image>[0];
+type Props = ImageProps & {
+  alt?: ImageProps["alt"];
+};
+
+// TODO: this causes all the assets to be moved to the assets folder, see
+// if we can avoid it.
+const imageModules = import.meta.glob("/src/assets/*.{png,jpg,jpeg,webp}", {
+  eager: true,
+  import: "default",
+});
+const altTextModules = import.meta.glob("/src/assets/*.alt.txt", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+const getAltTextPathForImage = (imagePath: string) => {
+  const parsedPath = path.parse(imagePath);
+  return path.join(parsedPath.dir, parsedPath.name + ".alt.txt");
+};
+
+const getPathToAltTextMap = (
+  imageModules: {
+    [originalPath: string]: {
+      src: string; // Compiled path
+    };
+  },
+  altTextModules: {
+    [originalPath: string]: string;
+  }
+) => {
+  const pathToAltTextMap = new Map<string, string>();
+  for (const [originalPath, module] of Object.entries(imageModules)) {
+    const finalPath = module.src;
+    const altTextPath = getAltTextPathForImage(originalPath);
+    if (altTextModules[altTextPath]) {
+      pathToAltTextMap.set(finalPath, altTextModules[altTextPath]);
+    }
+  }
+  return pathToAltTextMap;
+};
+
+const getFinalSrc = async (image: typeof Astro.props.src) => {
+  const imageOptions = await getImage({
+    src: Astro.props.src,
+  });
+  // Loads the final src of this image no matter what the image passed in looks like
+  return typeof imageOptions.rawOptions.src == "string"
+    ? imageOptions.rawOptions.src
+    : imageOptions.rawOptions.src.src;
+};
+
+const finalPathToAltTextMap = getPathToAltTextMap(
+  imageModules as any,
+  altTextModules as any
+);
+
+const alt =
+  Astro.props.alt === "file://"
+    ? finalPathToAltTextMap.get(await getFinalSrc(Astro.props.src))
+    : Astro.props.alt;
+
+if (!alt) {
+  console.error("You need an alt text for your image");
+}
+---
+
+<Image {...Astro.props} alt={alt ?? "Shame on you"} />

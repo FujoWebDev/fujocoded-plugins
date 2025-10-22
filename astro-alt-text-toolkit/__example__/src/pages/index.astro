@@ -1,0 +1,25 @@
+---
+import Sportacus from "../assets/sportacus.small.png";
+import Robbie from "../assets/robbie.small.png";
+import ImageWithAlt from "../components/ImageWithAlt.astro";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <h1>Pre-Rendered Example</h1>
+    <ImageWithAlt src={Sportacus} alt="file://" />
+    <!-- Do not trigger alt-text badge for empty alt -->
+    <img src={Robbie.src} />
+    <script>
+      // This adds "click to see alt text" button to images
+      import "@fujocoded/astro-alt-text-toolkit";
+    </script>
+  </body>
+</html>

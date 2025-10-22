@@ -22,15 +22,14 @@ export const transformSocial = (social: SocialsSchema) => {
   const data = extractSocialData({ url });
 
   return {
-    ...data,
     icon:
       icon ??
       (platform === undefined
         ? data.icon
         : getSocialIcon(platform as INNER_SOCIAL_TYPES)),
-    url,
-    platform,
-    username,
+    url: url ?? data.url,
+    platform: platform ?? data.platform,
+    username: username ?? data.username,
   };
 };
 

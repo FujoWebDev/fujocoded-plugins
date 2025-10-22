@@ -14,15 +14,32 @@ export type AllDriverOptions =
   | { name: "astro:db"; options?: never };
 
 export type OAuthScope =
+  /**
+   * The generic scope for ATproto authentication. All apps must have this scope.
+   */
   | "atproto"
+  /**
+   * Allows access to a user's email address and confirmation status.
+   */
   | "transition:email"
-  | "transition:generic"
+  /**
+   * Allows write/read access to a user's chat.bsky data.
+   */
   | "transition:chat.bsky"
+  /**
+   * Allows write access to a user's generic data.
+   */
+  | "transition:generic"
+  /**
+   * Additional scopes not covered by the others.
+   */
   | string;
+
 export interface ConfigOptions {
   applicationName: string;
   applicationDomain: string;
   defaultDevUser?: string;
+  externalDomain?: string;
   driver?: AllDriverOptions | AstroDriverOption;
   // atproto => must have
   // transition:email => email address + confirmation status
@@ -36,13 +53,25 @@ export interface ConfigOptions {
         directMessages?: boolean;
         additionalScopes?: OAuthScope[];
       };
+  redirects?: {
+    afterLogin?: string;
+    afterLogout?: string;
+  };
+  /*
+  dev: {
+      defaultUser?: string;
+      devDriver?: AllDriverOptions | AstroDriverOption;
+  }
+  */
 }
 
-export const getConfig = ({ options }: { options: ConfigOptions }) => {
+export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: boolean }) => {
   const finalDriver = options.driver ?? {
     name: "memory",
     options: undefined,
   };
+
+  const externalDomain = options.externalDomain ?? (isDev ? "http://127.0.0.1:4321/" : undefined);
 
   const scopes: OAuthScope[] = ["atproto"];
   if (Array.isArray(options.scopes)) {
@@ -87,5 +116,12 @@ export const getConfig = ({ options }: { options: ConfigOptions }) => {
     )};
     export const scopes = ${JSON.stringify(scopes)};
     export const driverName = "${finalDriver.name}";
+    export const redirectAfterLogin = ${JSON.stringify(
+      options.redirects?.afterLogin ?? "/"
+    )};
+    export const redirectAfterLogout = ${JSON.stringify(
+      options.redirects?.afterLogout ?? "/"
+    )};
+    export const externalDomain = ${JSON.stringify(externalDomain)};
     `;
 };

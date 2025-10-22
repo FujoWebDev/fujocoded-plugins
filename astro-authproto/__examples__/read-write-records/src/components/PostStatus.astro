@@ -1,0 +1,30 @@
+---
+/**
+ * This is out PostStatus component. It lets....
+ *
+ *
+ * To learn more about Astro actions go here:
+ */
+import { actions } from "astro:actions";
+
+const response = Astro.getActionResult(actions.addStatus);
+---
+
+<form name="add-status" action={actions.addStatus} method="post">
+    <label for="status-input">How are you feeling?</label>
+    <input type="text" name="status" id="status-input" />
+    <button>Post</button>
+</form>
+
+{response?.error && <div>{response.error}</div>}
+
+{
+    response?.data && (
+        <div>
+            Your status was successfully created. See (and edit) it at{" "}
+            <a href={`https://pdsls.dev/${response.data.recordAtUri}`}>
+                pdsls.dev
+            </a>
+        </div>
+    )
+}
