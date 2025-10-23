@@ -2,8 +2,8 @@
 
 This will involve:
 
-- Creating an ATproto agent, which will interact with ATproto on your behalf. After following the [before you start](#before-you-start) section, you can check out (or copy) [`src/lib/atproto.ts`](./src/lib/atproto.ts) to see how to create the agent.
-- Use the ATproto agent to [list records from a collection](./src/components/Status.astro).
+<!-- - Creating an ATproto agent, which will interact with ATproto on your behalf. After following the [before you start](#before-you-start) section, you can check out (or copy) [`src/lib/atproto.ts`](./src/lib/atproto.ts) to see how to create the agent. -->
+- Use the ATproto agent to [list records from a collection](./src/components/ListStatuses.astro).
 - Pairing the ATproto agent with Astro actions to [create new records in a collections](./src/actions/index.ts).
 
 > [!NOTE]
@@ -19,14 +19,14 @@ npm install @atproto/api @atproto/common-web
 
 ## Getting started
 
-For this example, we'll do a status update. You can write text and then display them on your PDS. See [`src/actions/index.ts`](./src/actions/index.ts) for the code.
+For this example, we'll do a status update. You can write text and then display them on your PDS. See [`src/actions/index.ts`](./src/actions/index.ts) for the code. There's a form in [`src/components/PostStatus.astro`](./src/components/PostStatus.astro) that includes the example Astro Action.
 
 ![A simple form with a textbox that says 'happy! ^^'](./assets/form.png)
 
-There's a form in [`src/components/PostStatus.astro`](./src/components/PostStatus.astro) that includes the example Astro Action.
+You can see how statuses are listed in [`src/components/ListStatuses.astro`](./src/components/ListStatuses.astro).
 
 ![A screenshot of the resulting statuses show up on the Astro demo website](./assets/display_result.png)
 
-You can use [PDSls](https://pdsls.dev/) to test it out! Search by the handle you used to log in.
+You can use [PDSls](https://pdsls.dev/) to see it live on ATProto! Search by the handle you used to log in.
 
 ![A screenshot of the PDSls service where a record for 'xyz.statuscity.status' has been made](./assets/result.png)
