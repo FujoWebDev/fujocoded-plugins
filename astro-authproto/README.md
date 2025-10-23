@@ -69,12 +69,12 @@ In this package, you'll find:
 - Node
 - NPM/pnpm/yarn
 - Terminal
-- [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up login/logout sessions
+- [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up sessions
 - (Optional) [session driver](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver) to allow users to log in or log out
 
 > [!IMPORTANT]
 > `deno` requires a workaround due to a CJS/ESM import issue within
-> `@atproto/oauth-client-node`.
+> `@atproto/oauth-client-node`. For now, avoid using `deno` and use other package managers.
 
 > [!IMPORTANT]
 > Using either `localStorage` or `sessionStorage` will result in a ["Session storage could not be initialized." error](https://docs.astro.build/en/reference/errors/session-storage-init-error/) (and is considered insecure for handling sessions anyway). Consider other options, like a database.
