@@ -91,7 +91,9 @@ npx astro add @fujocoded/authproto
 
 This will automatically install `@fujocoded/authproto` and add the integration to your `astro.config.mjs` file.
 
-> [!TIP] You can take a look at all the [possible configuration options below](#configuration-options).
+> [!TIP]
+> 
+> You can take a look at all the [possible configuration options below](#configuration-options).
 
 ### Manual Installation
 
@@ -103,7 +105,7 @@ npm add @fujocoded/authproto
 
 2. Add the integration to your `astro.config.mjs` file, like this:
 
-```typescript
+```js
 import { defineConfig } from "astro/config";
 import node from "@astrojs/node";
 + import authproto from "@fujocoded/authproto";
@@ -119,7 +121,9 @@ export default defineConfig({
 });
 ```
 
-> [!TIP] You can take a look at all the [possible configuration options below](#configuration-options).
+> [!TIP]
+>
+> You can take a look at all the [possible configuration options below](#configuration-options).
 
 # Using `@fujocoded/authproto`
 
@@ -134,8 +138,9 @@ import { Login } from "@fujocoded/authproto/components";
 <Login />
 ```
 
-> [!TIP] You might run into a naming collision issue if you also have a page
-> named `login`. You can fix this by replacing `{ Login }` with `{ Login asLoginComponent }`.
+> [!TIP]
+> 
+> You might run into a naming collision issue if you also have a page named `login`. You can fix this by replacing `{ Login }` with `{ Login as LoginComponent }`.
 
 It'll look like a plain form:
 
