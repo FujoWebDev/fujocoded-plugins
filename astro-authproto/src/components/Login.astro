@@ -2,29 +2,30 @@
 import { defaultDevUser } from "fujocoded:authproto/config";
 
 interface Props {
+  class?: string;
   /** Optional redirect URL after successful login/logout */
   redirect?: string;
 }
 
-const { redirect: redirectUrl } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
-
-const { class: cssClass, 'class:list': cssClassList } = Astro.props;
+const { class: cssClass, redirect: redirectUrl, ...rest } = Astro.props;
 ---
 
 {
   currentUser ? (
     // If there's a current user, show the log out button
-    <form action="/oauth/logout" method="post"  class={cssClass} class:list={cssClassList}>
+    <form action="/oauth/logout" method="post" class={cssClass} {...rest}>
       {redirectUrl && <input type="hidden" name="redirect" value={redirectUrl} />}
       <button type="submit">Logout</button>
     </form>
   ) : (
     // If there's no current user, show the login button
-    <form action="/oauth/login" method="post" class={cssClass} class:list={cssClassList}>
+    <form action="/oauth/login" method="post" class={cssClass} {...rest}>
       <input
         name="atproto-id"
         value={import.meta.env.DEV ? defaultDevUser : undefined}
+        autocomplete="username" 
+        required 
       />
       {redirectUrl && <input type="hidden" name="redirect" value={redirectUrl} />}
       <button type="submit">Login</button>

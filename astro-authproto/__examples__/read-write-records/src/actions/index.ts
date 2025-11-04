@@ -20,10 +20,9 @@ export const server = {
         });
       }
 
-      // Since we need to write, the agent needs to the information
-      // of the logged in user.
-      // TODO: explain better
-      const agent = await getPdsAgent({ loggedInUser }); // this is needed to make requests to atproto
+      // getPdsAgent is an authorized agent that talks with ATProto
+      // using the PDS for the `loggedInUser` provided by @fujocoded/authproto
+      const agent = await getPdsAgent({ loggedInUser });
 
         if (!agent) {
           throw new ActionError({
