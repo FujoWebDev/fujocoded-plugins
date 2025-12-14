@@ -2,6 +2,8 @@
   "name": "fujocoded-plugins",
   "private": true,
   "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "release": "npm run build && changeset publish --provenance",
     "sherif": "npx sherif@latest"
   },
   "workspaces": [
