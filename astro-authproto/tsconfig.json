@@ -1,5 +1,4 @@
 {
-  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     /* Base Options: */
     "esModuleInterop": true,
@@ -8,7 +7,7 @@
     "lib": ["es2022", "DOM"],
     "allowJs": true,
     "resolveJsonModule": true,
-    "moduleDetection": "force",
+    "moduleDetection": "auto",
     "isolatedModules": true,
     /* Strictness */
     "strict": true,
@@ -19,9 +18,9 @@
     "sourceMap": true,
     "declaration": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "types": ["./src/types.d.ts"]
+    "noEmit": true
   },
   "include": ["./src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "files": ["./src/types.d.ts", "./src/config-module.d.ts"]
 }

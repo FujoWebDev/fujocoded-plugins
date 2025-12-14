@@ -22,6 +22,18 @@
         "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.js"
       }
+    },
+    "./stores/unstorage": {
+      "import": {
+        "types": "./dist/stores/unstorage.d.ts",
+        "default": "./dist/stores/unstorage.js"
+      }
+    },
+    "./stores/db": {
+      "import": {
+        "types": "./dist/stores/db.d.ts",
+        "default": "./dist/stores/db.js"
+      }
     }
   },
   "files": [
@@ -55,7 +67,6 @@
   },
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
-    "@astrojs/db": "^0.17.1",
     "@atproto/api": "^0.17.3",
     "@atproto/identity": "^0.4.8",
     "@atproto/jwk-jose": "^0.1.4",
@@ -64,9 +75,15 @@
     "unstorage": "^1.16.1"
   },
   "devDependencies": {
-    "tsdown": "^0.14.1"
+    "tsdown": "^0.17.2"
   },
   "peerDependencies": {
+    "@astrojs/db": "^0.17.1",
     "astro": "^5.13.0"
+  },
+  "peerDependenciesMeta": {
+    "@astrojs/db": {
+      "optional": true
+    }
   }
 }

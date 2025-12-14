@@ -1,5 +1,3 @@
-/// <reference types="astro/client" />
-
 declare global {
   namespace App {
     interface SessionData {
@@ -14,15 +12,6 @@ declare global {
       } | null;
     }
   }
-}
-
-declare module "fujocoded:authproto/config" {
-  export const applicationName: string;
-  export const applicationDomain: string;
-  export const defaultDevUser: string | null;
-  export const storage: import("unstorage").Storage;
-  export const scopes: import("./lib/config.ts").OAuthScope[];
-  export const driverName: import("./lib/config.ts").AllDriverOptions["name"];
 }
 
 export {};

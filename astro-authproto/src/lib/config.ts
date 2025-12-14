@@ -1,16 +1,14 @@
-import type { BuiltinDriverOptions } from "unstorage";
+import type { BuiltinDriverOptions, BuiltinDriverName } from "unstorage";
 
 type AstroDriverOption = { name: "astro:db"; options?: never };
-type OptionsType<
-  T extends keyof BuiltinDriverOptions = keyof BuiltinDriverOptions,
-> = {
-  name: T;
-  options: BuiltinDriverOptions[T];
-};
+type OptionsType<T extends BuiltinDriverName = BuiltinDriverName> =
+  T extends keyof BuiltinDriverOptions
+    ? { name: T; options: BuiltinDriverOptions[T] }
+    : { name: T; options?: never };
 export type AllDriverOptions =
   | {
-      [K in keyof BuiltinDriverOptions]: OptionsType<K>;
-    }[keyof BuiltinDriverOptions]
+      [K in BuiltinDriverName]: OptionsType<K>;
+    }[BuiltinDriverName]
   | { name: "astro:db"; options?: never };
 
 export type OAuthScope =
@@ -64,6 +62,13 @@ export interface ConfigOptions {
   }
   */
 }
+
+export const getStoresImport = (driverName?: string) => {
+  if (driverName === "astro:db") {
+    return `export { StateStore, SessionStore } from "@fujocoded/authproto/stores/db";`;
+  }
+  return `export { StateStore, SessionStore } from "@fujocoded/authproto/stores/unstorage";`;
+};
 
 export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: boolean }) => {
   const finalDriver = options.driver ?? {
