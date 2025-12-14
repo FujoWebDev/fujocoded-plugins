@@ -1,8 +1,7 @@
 import type { AstroIntegration, InjectedRoute } from "astro";
 import path from "node:path";
 import { addVirtualImports } from "astro-integration-kit";
-import "@astrojs/db";
-import { getConfig, type ConfigOptions } from "./lib/config.js";
+import { getConfig, getStoresImport, type ConfigOptions } from "./lib/config.js";
 import { readFile } from "node:fs/promises";
 
 export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
@@ -34,8 +33,8 @@ const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
 
 /**
  * Add two routes ATProto OAuth clients must have:
- * - `/client-metadata.json`, information about the client's identity
- *   and requested access
+ * - `/client-metadata.json`, information about the client's identity and
+ *   requested access
  * - `/jwks.json`, information about the cryptographic keys used in the
  *   authorization request
  */
@@ -82,6 +81,11 @@ export default (
             }),
             context: "server",
           },
+          {
+            id: "fujocoded:authproto/stores",
+            content: getStoresImport(configOptions.driver?.name),
+            context: "server",
+          },
         ],
       });
 
@@ -99,9 +103,15 @@ export default (
         );
       }
       if (!configOptions.driver) {
-        logger.warn(
-          "The ATproto OAuth integration requires a configured session driver in production. This will be ok for dev mode."
-        );
+        if (process.env.NODE_ENV === "development") {
+          logger.warn(
+            "The ATproto OAuth integration requires a configured session driver in production. This will be ok for dev mode."
+          );
+        } else {
+          throw new Error(
+            "The ATproto OAuth integration requires a configured session driver in production."
+          );
+        }
       }
       if (!config.server.host && process.env.NODE_ENV === "development") {
         logger.error(
@@ -109,7 +119,8 @@ export default (
         );
       }
       if (config.output === "static") {
-        // TODO: check if a static site with some routes marked as dynamic works.
+        // TODO: check if a static site with some routes marked as dynamic
+        // works.
         logger.warn(
           `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`
         );
