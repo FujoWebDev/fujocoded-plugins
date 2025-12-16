@@ -1,9 +1,13 @@
 import type { APIRoute } from "astro";
-import { oauthClient } from "../../lib/auth.js";
+import { extractAuthError, oauthClient } from "../../lib/auth.js";
 import { scopes } from "fujocoded:authproto/config";
 import { randomBytes } from "node:crypto";
+import {
+  AUTHPROTO_ERROR_CODE,
+  AUTHPROTO_ERROR_DESCRIPTION,
+} from "../../../src/routes/middleware.ts";
 
-export const POST: APIRoute = async ({ redirect, request }) => {
+export const POST: APIRoute = async ({ redirect, request, session }) => {
   const body = await request.formData();
   const atprotoId = body.get("atproto-id")?.toString();
   const customRedirect = body.get("redirect")?.toString();
@@ -19,17 +23,24 @@ export const POST: APIRoute = async ({ redirect, request }) => {
     ...(referer && !customRedirect && { referer }),
   };
 
-  const url = await oauthClient.authorize(atprotoId!, {
-    scope: scopes.join(" "),
-    // This random value protects against CSRF (Cross-Site Request
-    // Forgery) attacks. We send it along our authorization request, and the OAuth
-    // provider will send it back with the authentication response. By verifying
-    // it matches what we sent, we can be sure the callback is in response to
-    // OUR authorization request, not someone else's.
-    // We also encode the desired redirect URL if provided.
-    state: Buffer.from(JSON.stringify(stateData)).toString("base64url"),
-  });
+  try {
+    const url = await oauthClient.authorize(atprotoId!, {
+      scope: scopes.join(" "),
+      // This random value protects against CSRF (Cross-Site Request
+      // Forgery) attacks. We send it along our authorization request, and the OAuth
+      // provider will send it back with the authentication response. By verifying
+      // it matches what we sent, we can be sure the callback is in response to
+      // OUR authorization request, not someone else's.
+      // We also encode the desired redirect URL if provided.
+      state: Buffer.from(JSON.stringify(stateData)).toString("base64url"),
+    });
 
-  console.log(`Redirecting to PDS for Authorization`);
-  return redirect(url.toString());
+    return redirect(url.toString());
+  } catch (e) {
+    const authError = extractAuthError(e);
+    session?.set(AUTHPROTO_ERROR_CODE, authError.code);
+    session?.set(AUTHPROTO_ERROR_DESCRIPTION, authError.description);
+
+    return redirect(stateData.referer || "/");
+  }
 };
