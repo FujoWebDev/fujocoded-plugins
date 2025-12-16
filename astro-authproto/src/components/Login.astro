@@ -8,9 +8,11 @@ interface Props {
 
 const { redirect: redirectUrl } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
+const currentError = Astro.locals.authproto?.errorDescription ?? Astro.locals.authproto?.errorCode;
 
 // @ts-expect-error
 const { class: cssClass, 'class:list': cssClassList } = Astro.props;
+
 ---
 
 {
@@ -32,3 +34,4 @@ const { class: cssClass, 'class:list': cssClassList } = Astro.props;
     </form>
   )
 }
+{currentError && <div style="color:red;">{currentError}</div>}
