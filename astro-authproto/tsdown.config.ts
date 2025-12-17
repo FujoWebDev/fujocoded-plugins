@@ -17,30 +17,14 @@ export default defineConfig([
   {
     name: "components",
     entry: ["src/components.ts"],
-    copy: [{ from: "src/components", to: "dist/components" }],
+    copy: [{ from: "src/components/", to: "dist/" }],
     external: astroFileExternal,
     ...COMMON_CONFIG,
-  },
-  {
-    name: "tables",
-    entry: ["src/db/tables.ts"],
-    outputOptions: {
-      dir: `./dist/db/`,
-    },
-    external: astroFileExternal,
-    ...COMMON_CONFIG,
-    dts: false,
   },
   {
     name: "integration",
-    entry: ["src/index.ts", "src/types.d.ts"],
-    external: baseExternal,
-    ...COMMON_CONFIG,
-  },
-  {
-    name: "helpers",
-    entry: ["src/helpers.ts", "src/types.d.ts"],
-    external: baseExternal,
+    entry: ["src/index.ts", "src/helpers.ts", "src/types.d.ts", "src/db/tables.ts"],
+    external: astroFileExternal,
     ...COMMON_CONFIG,
   },
   {
@@ -53,17 +37,8 @@ export default defineConfig([
     ...COMMON_CONFIG,
   },
   {
-    name: "stores-unstorage",
-    entry: ["src/stores/unstorage.ts"],
-    outputOptions: {
-      dir: `./dist/stores/`,
-    },
-    external: baseExternal,
-    ...COMMON_CONFIG,
-  },
-  {
-    name: "stores-db",
-    entry: ["src/stores/db.ts"],
+    name: "stores",
+    entry: ["src/stores/unstorage.ts", "src/stores/db.ts"],
     outputOptions: {
       dir: `./dist/stores/`,
     },
