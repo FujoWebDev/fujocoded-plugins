@@ -1,4 +1,6 @@
-# @fujocoded/astro-alt-text-toolkit
+# `@fujocoded/astro-alt-text-toolkit`
 
-A WIP bundle of ALT text utilities to make the ALT text of your
-Astro site (and beyond) easier to manage
+> [!WARNING]
+> This plugin is a work in progress.
+
+A bundle of utilities that make the alt text of your Astro site (and beyond) easier to manage.

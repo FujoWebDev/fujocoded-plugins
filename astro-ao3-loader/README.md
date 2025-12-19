@@ -1,16 +1,40 @@
-# Astro AO3 loader
+# `@fujocoded/astro-ao3-loader`
+
+<div align="center">
+
+Load data from Archive of Our Own to your Astro site.
+
+<!-- Add the <a> so IMGs will stay on the same line -->
+<a href="#">
+    <img alt="NPM license" src="https://img.shields.io/npm/l/%40fujocoded%2Fastro-ao3-loader" />
+</a>
+<a href="https://gitpod.io/from-referrer/">
+    <img src="https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod" alt="Gitpod Ready-to-Code"/>
+</a>
+<a href="https://fancoders.com/">
+    <img src="https://img.shields.io/badge/fandom-coders-ff69b4" alt="Fandom Coders badge"/>
+</a>
+<a href="https://npmjs.com/package/@fujocoded/astro-ao3-loader">
+
+![npm version](https://badge.fury.io/js/%40fujocoded%2Fastro-ao3-loader.svg)
+
+</a>
+</div>
+
+## What is `@fujocoded/astro-ao3-loader`?
 
 > [!WARNING]
-> This is an experimental library with only basic functionality. If you
-> want to help us expand it, contact us via GitHub, Fandom Coders, or at
-> contacts@fujocoded.com.
+> This is an experimental library with only basic functionality. If you want to help us expand it, you can reach out via GitHub, Fandom Coders, or contacts@fujocoded.com.
 >
-> If you've never joined an open source project before, this is an excellent
-> first place to contribute!
+> If you've never joined an open source project before, this is an excellent first place to contribute!
 
-A AO3 data loader for Astro using the experimental content layer and
-[AO3.js](https://github.com/fujowebdev/ao3.js) to load data from AO3 to your
-Astro website.
+This plugin uses the experimental content layer and [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from [Archive of Our Own](https://archiveofourown.org/) to your [Astro](https://astro.build/) website.
+
+## What can `@fujocoded/astro-ao3-loader` do?
+
+| **Method** | **Description** | **Parameters** | **Return Type** |
+| ---------- | --------------- | -------------- | --------------- |
+| `getNextFicGroupFetcher` | Retrieves a group of works from AO3. | `{ workIds: string[], logger: LoaderContext["logger"] }` - A list of work IDs |                 |
 
 You can see an example of its usage [in our sample
 repository](https://github.com/FujoWebDev/ao3-content-layer-example).
