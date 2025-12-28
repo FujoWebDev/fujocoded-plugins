@@ -28,13 +28,14 @@ Load data from Archive of Our Own to your Astro site.
 >
 > If you've never joined an open source project before, this is an excellent first place to contribute!
 
-This plugin uses the experimental content layer and [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from [Archive of Our Own](https://archiveofourown.org/) to your [Astro](https://astro.build/) website.
+This plugin uses the [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/) and [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from [Archive of Our Own](https://archiveofourown.org/) to your [Astro](https://astro.build/) website.
 
 ## What can `@fujocoded/astro-ao3-loader` do?
 
 | **Method** | **Description** | **Parameters** | **Return Type** |
 | ---------- | --------------- | -------------- | --------------- |
-| `getNextFicGroupFetcher` | Retrieves a group of works from AO3. | `{ workIds: string[], logger: LoaderContext["logger"] }` - A list of work IDs |                 |
+| `getFetcher` | Retrieves a | `{ logger: LoaderContext["logger"] }` - An [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ response }` - The HTTP status response from the server. |
+| `getNextFicGroupFetcher` | Retrieves a group of works from AO3 using the specified `workIds`. | `{ workIds: string[], logger: LoaderContext["logger"] }` - A list of work IDs and an [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ nextGroup }` - The next group of fics to be loaded. |
 
 You can see an example of its usage [in our sample
 repository](https://github.com/FujoWebDev/ao3-content-layer-example).
