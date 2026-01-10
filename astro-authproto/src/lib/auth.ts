@@ -86,3 +86,18 @@ export const didToHandle = async (did: string) => {
   const atprotoData = await IDENTITY_RESOLVER.resolveAtprotoData(did);
   return atprotoData.handle;
 };
+
+export const extractAuthError = (
+  e: unknown
+): { code: string | "UNKNOWN"; description: string | undefined } => {
+  if (e instanceof Error) {
+    return {
+      code: e.name ?? "UNKNOWN",
+      description: e.message,
+    };
+  }
+  return {
+    code: "UNKNOWN",
+    description: undefined,
+  };
+};
