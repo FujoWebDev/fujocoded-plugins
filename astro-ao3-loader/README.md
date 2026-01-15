@@ -39,7 +39,7 @@ This plugin uses the [Content Loader API](https://docs.astro.build/en/reference/
 
 ## How to use `@fujocoded/astro-ao3-loader`
 
-> [!SUCCESS]
+> [!TIP]
 > Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
 
 ### Prerequisites
