@@ -37,20 +37,14 @@ This plugin uses the [Content Loader API](https://docs.astro.build/en/reference/
 | `getFetcher` | Retrieves a | `{ logger: LoaderContext["logger"] }` - An [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ response }` - The HTTP status response from the server. |
 | `getNextFicGroupFetcher` | Retrieves a group of works from AO3 using the specified `workIds`. | `{ workIds: string[], logger: LoaderContext["logger"] }` - A list of work IDs and an [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ nextGroup }` - The next group of fics to be loaded. |
 
-You can see an example of its usage [in our sample
-repository](https://github.com/FujoWebDev/ao3-content-layer-example).
+## How to use `@fujocoded/astro-ao3-loader`
 
-## Installation
+> [!SUCCESS]
+> Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
 
-```sh
-npm install @fujocoded/astro-ao3-loader
-```
+### Prerequisites
 
-## Usage
-
-This package requires Astro 4.14.0 or later. You must enable the experimental
-content layer in Astro unless you are using version 5.0.0-beta or later. You can
-do this by adding the following to your `astro.config.mjs`:
+This package requires [Astro](https://astro.build/) 4.14.0 or later and Astro's built-in [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference). If you're using a version of Astro earlier than 5.0.0-beta, you can enable the API by adding the following code to `astro.config.mjs`:
 
 ```javascript
 export default defineConfig({
@@ -61,35 +55,50 @@ export default defineConfig({
 });
 ```
 
-Currently, this package contains only a single loader called `worksLoader`,
-which loads the details of a series of works whose id is listed in the
-`src/content/ao3/works.yaml` file.
+You'll also need to add the latest version of [AO3.js](https://github.com/fujowebdev/ao3.js) to your project.
 
-First add the configuration in `src/content/config.ts`:
+```bash
+# Install plugin using NPM.
+npm install @fujocoded/ao3.js
 
-```typescript
-// src/content/config.ts
-import { defineCollection } from "astro:content";
-import { feedLoader } from "@fujocoded/astro-ao3-loader";
-
-export const collections = {
-  fanfictions: defineCollection({ loader: worksLoader }),
-};
+# Install plugin using yarn.
+yarn add @fujocoded/ao3.js
 ```
 
-Then create your `src/content/ao3/works.yaml` file:
+### Installation
 
-```yaml
-- 38226814
-- 49238326
-- 59988091
-- 41160522
-- 11728554
-- 12928950
-- 58869805
+```bash
+npm install @fujocoded/astro-ao3-loader
 ```
 
-You can then use this like any other collection in Astro:
+### Configuration
+
+This package contains a loader called `worksLoader` that loads the details of a series of works whose IDs are listed in `src/content/ao3/works.yaml`.
+
+1. Configure the plugin in `src/content/config.ts`.
+
+    ```ts
+    import { defineCollection } from "astro:content";
+    import { feedLoader } from "@fujocoded/astro-ao3-loader";
+
+    export const collections = {
+      fanfictions: defineCollection({ loader: worksLoader }),
+    };
+    ```
+
+2. Create `src/content/ao3/works.yaml` and add a list of work IDs to the file.
+
+    ```yaml
+    - 38226814
+    - 49238326
+    - 59988091
+    - 41160522
+    - 11728554
+    - 12928950
+    - 58869805
+    ```
+
+Once configured, you can use the `astro-ao3-loader` like any other Astro collection.
 
 ```astro
 ---
