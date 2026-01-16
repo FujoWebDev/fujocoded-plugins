@@ -34,7 +34,8 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "astro": "^5.16.9"
+    "astro": "^5.16.9",
+    "ts-to-zod": "^5.1.0"
   },
   "publishConfig": {
     "access": "public"

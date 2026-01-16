@@ -2,10 +2,12 @@
 import { getCollection } from "astro:content";
 
 const fanfictions = await getCollection("fanfictions");
+const series = await getCollection("series");
 
 // Uncomment the next line to see what's inside the `fanfictions`
 // variable and what data you can access
 // console.dir(fanfictions, { depth: null });
+console.dir(series, {depth: null})
 ---
 
 <html lang="en">
