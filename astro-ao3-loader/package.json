@@ -3,17 +3,12 @@
   "type": "module",
   "version": "0.0.3",
   "description": "Allows loading a series of AO3 works for the Astro Content Layer",
-  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
       }
     }
   },
@@ -24,8 +19,9 @@
     "package.json"
   ],
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
+    "build": "tsdown",
+    "dev": "tsdown --watch src/",
+    "validate": "npx publint"
   },
   "keywords": [
     "withastro",
