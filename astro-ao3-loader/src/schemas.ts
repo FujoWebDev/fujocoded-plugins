@@ -18,6 +18,12 @@ const UnlockedWorkSummarySchema = z.object({
       anonymous: z.boolean(),
     })
     .array(),
+  tags: z.object({
+    warnings: z.string().array(),
+    characters: z.string().array(),
+    relationships: z.string().array(),
+    additional: z.string().array(),
+  })
 });
 
 const LockedWorkSummarySchema = z.object({

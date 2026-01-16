@@ -25,7 +25,8 @@ const fanfictions = await getCollection("fanfictions");
             <li>Locked</li>
           ) : (
             <li>
-              {fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})
+              <div>{fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})</div>
+              <div class="relationships">Relationships: {fic.data.tags.relationships.join(", ")}</div>
             </li>
           )
         )
@@ -33,3 +34,15 @@ const fanfictions = await getCollection("fanfictions");
     </ul>
   </body>
 </html>
+
+<style>
+  .relationships {
+    color: lightslategray;
+    font-size: small;
+  }
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+</style>

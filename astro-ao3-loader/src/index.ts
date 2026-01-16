@@ -1,4 +1,4 @@
-import { getWork, setFetcher } from "@bobaboard/ao3.js";
+import { getWork, setFetcher } from "@fujocoded/ao3.js";
 import { readFileSync } from "node:fs";
 import { WorkSummarySchema } from "./schemas.ts";
 import { parse } from "yaml";

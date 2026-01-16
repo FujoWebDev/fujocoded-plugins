@@ -30,7 +30,7 @@
   "author": "FujoCoded LLC",
   "license": "MIT",
   "dependencies": {
-    "@bobaboard/ao3.js": "^0.17.0",
+    "@fujocoded/ao3.js": "^0.22.1",
     "@types/node": "^22.8.2",
     "astro": "^4.16.7",
     "yaml": "^2.8.2",
