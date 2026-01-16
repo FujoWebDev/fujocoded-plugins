@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+
+const fanfictions = await getCollection("fanfictions");
+
+// Uncomment the next line to see what's inside the `fanfictions`
+// variable and what data you can access
+// console.dir(fanfictions, { depth: null });
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+	<h1>Hello fujin</h1>
+    <ul>
+      {
+        fanfictions.map((fic) =>
+          fic.data.locked ? (
+            <li>Locked</li>
+          ) : (
+            <li>
+              {fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})
+            </li>
+          )
+        )
+      }
+    </ul>
+  </body>
+</html>
