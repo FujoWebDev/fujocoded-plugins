@@ -7,6 +7,6 @@ export default defineConfig([
     clean: true,
     unbundle: true,
     entry: ["src/index.ts"],
-    external: [/^astro:?/],
+    external: [/^astro:?/, /^zod(\/.*)?$/],
   },
 ]);

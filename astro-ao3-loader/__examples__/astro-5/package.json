@@ -10,6 +10,6 @@
   },
   "dependencies": {
     "astro": "^5.16.9",
-    "@fujocoded/astro-ao3-loader": "../.."
+    "@fujocoded/astro-ao3-loader": "file:../.."
   }
 }
