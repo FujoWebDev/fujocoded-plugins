@@ -18,14 +18,14 @@ const getPrefix = (type: "works" | "series") => {
 };
 
 
-async function loadItems<T extends { id: string | number }>(
+const loadItems = async <T extends { id: string | number }>(
   { store, logger }: LoaderContext,
   config: {
     type: "works" | "series";
     yamlPath: string;
     fetchFn: (id: string) => Promise<NonNullable<T>>;
   }
-) {
+) => {
   setFetcher(getFetcher(logger));
 
   const file = readFileSync(config.yamlPath, { encoding: "utf-8" });
@@ -38,6 +38,7 @@ async function loadItems<T extends { id: string | number }>(
     itemsType: config.type
   });
 
+  tracker.start();
   try {
     await Promise.all(
       ids.map(async (id) => {

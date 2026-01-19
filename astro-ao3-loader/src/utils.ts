@@ -6,6 +6,7 @@ const CONCURRENCY = 5;
 const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 const REQUEST_TIMEOUT_MS = 120_000; // 2 minutes total (includes all retries)
 const PROGRESS_INTERVAL_MS = 15 * 1000; // 15 seconds
+const RESPONSE_CACHE = new Map<string, Response>();
 
 const getRetryReason = (error: Error): string => {
   if (error.name === "TimeoutError") {
@@ -42,10 +43,8 @@ const getRetryReason = (error: Error): string => {
  * Compatible with ao3.js's `setFetcher()`.
  */
 const createFetcher = (logger: LoaderContext["logger"]) => {
-  const cache = new Map<string, Response>();
   const queue = new PQueue({ concurrency: CONCURRENCY });
 
-  // Debug-level queue status logging
   queue.on("next", () => {
     logger.debug(`Queue: ${queue.pending} running, ${queue.size} waiting`);
   });
@@ -60,6 +59,30 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
       retryOnTimeout: true,
     },
     hooks: {
+      beforeRequest: [
+        (request, _options, state: { retryCount: number }) => {
+          // Return cached response if available
+          // This is necessary because even though we skip the queue for cached
+          // requests, we may still have a pending request for the same URL.
+          const cached = RESPONSE_CACHE.get(request.url);
+          if (cached) {
+            logger.debug(`Cache hit: ${request.url}`);
+            return cached.clone();
+          }
+
+          if (state.retryCount === 0) {
+            logger.debug(`Fetching: ${request.url}`);
+          }
+        },
+      ],
+      afterResponse: [
+        (_request, _options, response) => {
+          if (response.ok) {
+            RESPONSE_CACHE.set(response.url, response.clone());
+            setTimeout(() => RESPONSE_CACHE.delete(response.url), CACHE_TTL_MS);
+          }
+        },
+      ],
       beforeRetry: [
         async ({ request, error, retryCount }) => {
           logger.warn(`${getRetryReason(error)}, retrying (${retryCount}/5): ${request.url}`);
@@ -72,30 +95,11 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
     input: RequestInfo | URL,
     init?: RequestInit
   ): Promise<Response> => {
-    const url = typeof input === "string" ? input : input.toString();
-
-    // Return cached response if available
-    const cached = cache.get(url);
-    if (cached) {
-      logger.debug(`Cache hit: ${url}`);
-      return cached.clone();
+    // We skip the queue if the response is already cached
+    if (RESPONSE_CACHE.has(input.toString())) {
+      return RESPONSE_CACHE.get(input.toString())!;
     }
-
-    // Queue the request for concurrency control
-    const result = await queue.add(async () => {
-      logger.debug(`Fetching: ${url}`);
-      const response = await client(url, init);
-
-      if (response.ok) {
-        cache.set(url, response.clone());
-        setTimeout(() => cache.delete(url), CACHE_TTL_MS);
-      }
-
-      return response;
-    });
-
-    // p-queue can return undefined if the task is aborted, but we don't use that feature
-    return result as Response;
+    return await queue.add(async () => await client(input, init));
   };
 };
 
