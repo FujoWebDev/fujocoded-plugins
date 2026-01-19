@@ -5,9 +5,9 @@ const fanfictions = await getCollection("fanfictions");
 const series = await getCollection("series");
 
 // Uncomment the next line to see what's inside the `fanfictions`
-// variable and what data you can access
+// or `series`variables and what data you can access
 // console.dir(fanfictions, { depth: null });
-console.dir(series, {depth: null})
+// console.dir(series, {depth: null})
 ---
 
 <html lang="en">
@@ -19,7 +19,7 @@ console.dir(series, {depth: null})
     <title>Astro</title>
   </head>
   <body>
-	<h1>Hello fujin</h1>
+    <h1>Hello fujin</h1>
     <ul>
       {
         fanfictions.map((fic) =>
@@ -27,10 +27,15 @@ console.dir(series, {depth: null})
             <li>Locked</li>
           ) : (
             <li>
-              <div>{fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})</div>
-              <div class="relationships">Relationships: {fic.data.tags.relationships.join(", ")}</div>
+              <div>
+                {fic.data.title} by {fic.data.authors[0].pseud} (
+                {fic.data.rating})
+              </div>
+              <div class="relationships">
+                Relationships: {fic.data.tags.relationships.join(", ")}
+              </div>
             </li>
-          )
+          ),
         )
       }
     </ul>
@@ -45,6 +50,6 @@ console.dir(series, {depth: null})
   ul {
     display: flex;
     flex-direction: column;
-    gap: .3rem;
+    gap: 0.3rem;
   }
 </style>
