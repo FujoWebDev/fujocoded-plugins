@@ -32,10 +32,9 @@ This plugin uses the [Content Loader API](https://docs.astro.build/en/reference/
 
 ## What can `@fujocoded/astro-ao3-loader` do?
 
-| **Method** | **Description** | **Parameters** | **Return Type** |
-| ---------- | --------------- | -------------- | --------------- |
-| `getFetcher` | Retrieves a | `{ logger: LoaderContext["logger"] }` - An [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ response }` - The HTTP status response from the server. |
-| `getNextFicGroupFetcher` | Retrieves a group of works from AO3 using the specified `workIds`. | `{ workIds: string[], logger: LoaderContext["logger"] }` - A list of work IDs and an [Astro content loader](https://docs.astro.build/en/reference/content-loader-reference/#loadercontext). | `{ nextGroup }` - The next group of fics to be loaded. |
+| **Method**    | **Description**                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| `worksLoader` | Fetches and loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). |
 
 ## How to use `@fujocoded/astro-ao3-loader`
 
@@ -55,16 +54,6 @@ export default defineConfig({
 });
 ```
 
-You'll also need to add the latest version of [AO3.js](https://github.com/fujowebdev/ao3.js) to your project.
-
-```bash
-# Install plugin using NPM.
-npm install @fujocoded/ao3.js
-
-# Install plugin using yarn.
-yarn add @fujocoded/ao3.js
-```
-
 ### Installation
 
 ```bash
@@ -79,7 +68,7 @@ This package contains a loader called `worksLoader` that loads the details of a 
 
     ```ts
     import { defineCollection } from "astro:content";
-    import { feedLoader } from "@fujocoded/astro-ao3-loader";
+    import { worksLoader } from "@fujocoded/astro-ao3-loader";
 
     export const collections = {
       fanfictions: defineCollection({ loader: worksLoader }),

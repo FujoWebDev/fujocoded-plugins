@@ -1,5 +1,8 @@
 import type { LoaderContext } from "astro/loaders";
 
+/* 
+  Retrieves a group of works from Archive of Our Own (AO3) using the specified `workIds`.
+*/
 const GROUP_SIZE = 5;
 export const getNextFicGroupFetcher = (
   workIds: string[],
@@ -25,6 +28,9 @@ export const getNextFicGroupFetcher = (
   };
 };
 
+/*
+  Retrieves data from a website. Returns an HTTP status response.
+*/
 const CACHE = new Map();
 export const getFetcher =
   (logger: LoaderContext["logger"]) =>
