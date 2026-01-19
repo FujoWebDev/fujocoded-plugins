@@ -5,6 +5,7 @@ import PQueue from "p-queue";
 const CONCURRENCY = 5;
 const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 const REQUEST_TIMEOUT_MS = 120_000; // 2 minutes total (includes all retries)
+const MAX_RETRIES = 5;
 const PROGRESS_INTERVAL_MS = 15 * 1000; // 15 seconds
 const RESPONSE_CACHE = new Map<string, Response>();
 
@@ -52,7 +53,7 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
   const client = ky.create({
     timeout: REQUEST_TIMEOUT_MS,
     retry: {
-      limit: 5,
+      limit: MAX_RETRIES,
       statusCodes: [429, 502, 503, 504],
       afterStatusCodes: [429], // Respects Retry-After header
       backoffLimit: 10_000, // Max delay between retries
@@ -85,7 +86,7 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
       ],
       beforeRetry: [
         async ({ request, error, retryCount }) => {
-          logger.warn(`${getRetryReason(error)}, retrying (${retryCount}/5): ${request.url}`);
+          logger.warn(`${getRetryReason(error)}, retrying (${retryCount}/${MAX_RETRIES}): ${request.url}`);
         },
       ],
     },
