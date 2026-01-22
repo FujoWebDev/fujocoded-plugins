@@ -1,0 +1,16 @@
+{
+  "name": "login-logout",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.2",
+    "@fujocoded/authproto": "file:..",
+    "astro": "^5.16.14"
+  }
+}
