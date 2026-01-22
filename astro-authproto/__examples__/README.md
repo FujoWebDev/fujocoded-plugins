@@ -5,7 +5,8 @@ how to use `@fujocoded/authproto` to achieve all your dreams.
 
 ## Our Examples
 
-1. TODO: the simplest example => Just shows you how to log in/out
+1. the simplest example: login-logout => 
+	 - Just shows you how to log in/out
 2. TODO: the almost-simplest example => 
    - Logged out: Show FujoCoded's Bluesky profile
    - Logged in: Show the logged-in user Bluesky profile
