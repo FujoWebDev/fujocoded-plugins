@@ -1,0 +1,40 @@
+---
+import { Login } from "@fujocoded/authproto/components";
+import { AtpBaseClient } from "@atproto/api";
+
+const FUJOCODED_HANDLE = "fujocoded.bsky.social";
+const FUJOCODED_DID = "did:plc:737bslnnf7vyaktosjlrshmd";
+
+const user = Astro.locals.loggedInUser;
+const display_user = !user ? {did: FUJOCODED_DID, handle: FUJOCODED_HANDLE} : user;
+
+const agent = new AtpBaseClient("https://public.api.bsky.app");
+const display_profile = 
+	await agent.app.bsky.actor.getProfile({ actor: display_user.did} );
+
+console.log(display_profile)
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Bluesky Profile</title>
+	</head>
+	<body>
+		{!user ? "Log in below." : `Hello, ${user.handle} (${user.did})`}
+		<Login />
+
+		DisplayName: {display_profile.data.displayName}
+		<br>
+		Description: {display_profile.data.description}
+		<br>
+		Avatar: {display_profile.data.avatar}
+		<br>
+		CreatedAt: {display_profile.data.createdAt}
+
+	</body>
+</html>

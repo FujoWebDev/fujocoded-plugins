@@ -11,7 +11,7 @@ export default defineConfig({
   }),
   integrations: [
     authProto({
-			applicationName: "Login Logout",
+			applicationName: "Read Bluesky Profile",
 			applicationDomain: "localhost:4321",
 			driver: {
 				name: "fs",
@@ -22,4 +22,3 @@ export default defineConfig({
     }),
 	],
 });
-
