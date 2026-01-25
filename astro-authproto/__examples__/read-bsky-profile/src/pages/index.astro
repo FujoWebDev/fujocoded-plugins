@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import { Login } from "@fujocoded/authproto/components";
 import { AtpBaseClient } from "@atproto/api";
+import '../styles/bsky_table.css';
 
 const FUJOCODED_HANDLE = "fujocoded.bsky.social";
 const FUJOCODED_DID = "did:plc:737bslnnf7vyaktosjlrshmd";
@@ -12,7 +14,7 @@ const agent = new AtpBaseClient("https://public.api.bsky.app");
 const display_profile = 
 	await agent.app.bsky.actor.getProfile({ actor: display_user.did} );
 
-console.log(display_profile)
+//console.log(display_profile)
 ---
 
 <html lang="en">
@@ -28,13 +30,25 @@ console.log(display_profile)
 		{!user ? "Log in below." : `Hello, ${user.handle} (${user.did})`}
 		<Login />
 
-		DisplayName: {display_profile.data.displayName}
 		<br>
-		Description: {display_profile.data.description}
-		<br>
-		Avatar: {display_profile.data.avatar}
-		<br>
-		CreatedAt: {display_profile.data.createdAt}
+		<table> 
+			<tr>
+				<td>Display Name</td>
+				<td>{display_profile.data.displayName}</td>
+			</tr>
+			<tr>
+				<td>Description</td>
+				<td>{display_profile.data.description}</td>
+			</tr>
+			<tr>
+				<td>Avatar</td>
+				<td><Image src={display_profile.data.avatar} width=50 height=50 alt="{display_profile.data.displayName}'s avatar."/></td>
+			</tr>
+			<tr>
+				<td>Created At</td>
+				<td>{display_profile.data.createdAt}</td>
+			</tr>
+		</table>
 
 	</body>
 </html>

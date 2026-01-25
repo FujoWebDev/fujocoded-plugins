@@ -1,0 +1,16 @@
+table {
+	max-width: 50%;
+	border-spacing: 5px 10px;
+}
+tr {
+}
+td:first-child {
+	font-weight: bold;
+	white-space: nowrap;
+	vertical-align: text-top;
+}
+table td + td {
+	border-left: 1px solid #ddd;
+	padding-left: 5px;
+	white-space: pre-line;
+}
