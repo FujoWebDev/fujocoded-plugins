@@ -7,7 +7,7 @@ how to use `@fujocoded/authproto` to achieve all your dreams.
 
 1. the simplest example: login-logout => 
 	 - Just shows you how to log in/out
-2. TODO: the almost-simplest example => 
+2. the almost-simplest example: read-bsky-profile => 
    - Logged out: Show FujoCoded's Bluesky profile
    - Logged in: Show the logged-in user Bluesky profile
    - Stretch: get someone to sponsor a paid ad for another service
