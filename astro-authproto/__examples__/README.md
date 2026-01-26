@@ -11,8 +11,11 @@ how to use `@fujocoded/authproto` to achieve all your dreams.
    - Logged out: Show FujoCoded's Bluesky profile
    - Logged in: Show the logged-in user Bluesky profile
    - Stretch: get someone to sponsor a paid ad for another service
-3. Stepping it up: Reading and Writing Records from/to a PDS
+3. Stepping it up: read-write-records =>
+	 - reads and writes records from a PDS
    - Add bits scopes here
+4. Extra: auth-only-pages =>
+	 - restrict pages to e.g. mutuals
 
 ### Extras
 
