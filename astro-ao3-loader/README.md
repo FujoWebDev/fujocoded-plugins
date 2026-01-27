@@ -5,54 +5,50 @@
 Load data from Archive of Our Own to your Astro site.
 
 <!-- Add the <a> so IMGs will stay on the same line -->
-<a href="#">
+<a href="https://choosealicense.com/licenses/mit/">
     <img alt="NPM license" src="https://img.shields.io/npm/l/%40fujocoded%2Fastro-ao3-loader" />
-</a>
-<a href="https://gitpod.io/from-referrer/">
-    <img src="https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod" alt="Gitpod Ready-to-Code"/>
 </a>
 <a href="https://fancoders.com/">
     <img src="https://img.shields.io/badge/fandom-coders-ff69b4" alt="Fandom Coders badge"/>
 </a>
 <a href="https://npmjs.com/package/@fujocoded/astro-ao3-loader">
-
-![npm version](https://badge.fury.io/js/%40fujocoded%2Fastro-ao3-loader.svg)
-
+    <img src="https://badge.fury.io/js/%40fujocoded%2Fastro-ao3-loader.svg" alt="Np PM version badge"/>
+</a>
+<a href="https://codespaces.new/FujoWebDev/fujocoded-plugins">
+    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" style="height: 20px"/>
 </a>
 </div>
 
 ## What is `@fujocoded/astro-ao3-loader`?
 
 > [!WARNING]
-> This is an experimental library with only basic functionality. If you want to help us expand it, you can reach out via GitHub, Fandom Coders, or contacts@fujocoded.com.
+> This is an experimental library with only basic functionality. If you want to help us expand it, you can reach out via GitHub, Fandom Coders, our socials, or contacts@fujocoded.com.
 >
 > If you've never joined an open source project before, this is an excellent first place to contribute!
 
-This plugin uses the [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/) and [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from [Archive of Our Own](https://archiveofourown.org/) to your [Astro](https://astro.build/) website.
+This library makes it easy to use the [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/) and [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from [Archive of Our Own](https://archiveofourown.org/) to your [Astro](https://astro.build/) website.
 
 ## What can `@fujocoded/astro-ao3-loader` do?
 
+`@fujocoded/astro-ao3-loader` lets you easily grab data about content hosted on [Archive of Our Own](https://archiveofourown.org/) to use in your Astro website—however you wish to ✨
+
+It includes the following loaders:
+
 | **Method**    | **Description**                                                                                          |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
-| `worksLoader` | Fetches and loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). |
+| `worksLoader` | Loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). |
+| `seriesLoader` | Loads data from series hosted on [Archive of Our Own](https://archiveofourown.org/). |
 
 ## How to use `@fujocoded/astro-ao3-loader`
 
 > [!TIP]
-> Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
+> Want to see it in action? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
 
 ### Prerequisites
 
-This package requires [Astro](https://astro.build/) 4.14.0 or later and Astro's built-in [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference). If you're using a version of Astro earlier than 5.0.0-beta, you can enable the API by adding the following code to `astro.config.mjs`:
-
-```javascript
-export default defineConfig({
-  // ...
-  experimental: {
-    contentLayer: true,
-  },
-});
-```
+This package requires [Astro](https://astro.build/) 5.0.0 or later and Astro's
+built-in [Content Loader
+API](https://docs.astro.build/en/reference/content-loader-reference). Astro 4 is not supported at this moment, but if you're interested, [open an issue](https://github.com/FujoWebDev/fujocoded-plugins/issues/new?labels=ao3-content-loader) to let us know.
 
 ### Installation
 
@@ -62,9 +58,14 @@ npm install @fujocoded/astro-ao3-loader
 
 ### Configuration
 
-This package contains a loader called `worksLoader` that loads the details of a series of works whose IDs are listed in `src/content/ao3/works.yaml`.
+This package contains loaders that let you download different types of content
+from AO3. The configuration is the same for each loader.
 
-1. Configure the plugin in `src/content/config.ts`.
+In this example, we'll use a loader called `worksLoader` that lets you get the details of a list of works whose IDs are listed in the `src/content/ao3/works.yaml` file.
+
+To set it up, follow these steps:
+
+1. Set up a content collection in `src/content/config.ts` that uses your chosen loader.
 
     ```ts
     import { defineCollection } from "astro:content";
@@ -75,7 +76,7 @@ This package contains a loader called `worksLoader` that loads the details of a 
     };
     ```
 
-2. Create `src/content/ao3/works.yaml` and add a list of work IDs to the file.
+2. Create a file at `src/content/ao3/works.yaml` and add a list of work IDs to the file.
 
     ```yaml
     - 38226814
@@ -86,6 +87,12 @@ This package contains a loader called `worksLoader` that loads the details of a 
     - 12928950
     - 58869805
     ```
+
+> [!TIP] 
+> This file is in a language called YAML. If you're running into issues,
+> check your syntax by using one of the many YAML validators out there.
+
+...and that's all!
 
 Once configured, you can use the `astro-ao3-loader` like any other Astro collection.
 
@@ -110,3 +117,5 @@ const fanfictions = await getCollection("fanfictions");
   }
 </ul>
 ```
+
+For a more complete example, you can take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
