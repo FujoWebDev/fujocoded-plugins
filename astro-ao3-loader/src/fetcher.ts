@@ -6,7 +6,6 @@ const CONCURRENCY = 5;
 const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 const REQUEST_TIMEOUT_MS = 120_000; // 2 minutes total (includes all retries)
 const MAX_RETRIES = 5;
-const PROGRESS_INTERVAL_MS = 15 * 1000; // 15 seconds
 const RESPONSE_CACHE = new Map<string, Response>();
 
 const getRetryReason = (error: Error): string => {
@@ -86,7 +85,9 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
       ],
       beforeRetry: [
         async ({ request, error, retryCount }) => {
-          logger.warn(`${getRetryReason(error)}, retrying (${retryCount}/${MAX_RETRIES}): ${request.url}`);
+          logger.warn(
+            `${getRetryReason(error)}, retrying (${retryCount}/${MAX_RETRIES}): ${request.url}`,
+          );
         },
       ],
     },
@@ -94,7 +95,7 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
 
   return async (
     input: RequestInfo | URL,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<Response> => {
     // We skip the queue if the response is already cached
     if (RESPONSE_CACHE.has(input.toString())) {
@@ -104,62 +105,10 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
   };
 };
 
-
 let AO3_FETCHER: typeof fetch | null = null;
 export const getFetcher = (logger: LoaderContext["logger"]) => {
   if (!AO3_FETCHER) {
     AO3_FETCHER = createFetcher(logger);
   }
   return AO3_FETCHER;
-};
-
-export const getProgressTracker = ({
-  logger,
-  prefix,
-  total,
-  itemsType
-}: {
-  logger: LoaderContext["logger"],
-  prefix: string,
-  total: number,
-  itemsType: string
-}) => {
-  let successCount = 0;
-  // TODO: add details of failed items
-  let failCount = 0;
-  let timeout: NodeJS.Timeout | undefined;
-
-  const log = () => {
-    const completed = successCount + failCount;
-    logger.info(
-      `${prefix} ${completed}/${total} ${itemsType} loaded ${failCount > 0 ? `(${failCount} failed)` : ""
-      }`
-    );
-
-    clearTimeout(timeout);
-    if (completed < total) {
-      timeout = setTimeout(log, PROGRESS_INTERVAL_MS);
-    }
-  };
-
-  return {
-    start: () => {
-      logger.info(`${prefix} Loading ${total} ${itemsType}...`);
-      timeout = setTimeout(log, PROGRESS_INTERVAL_MS);
-    },
-    incrementSuccess: () => {
-      successCount++;
-      log();
-    },
-    incrementFail: () => {
-      failCount++;
-      log();
-    },
-    finish: () => {
-      clearTimeout(timeout);
-      logger.info(
-        `${prefix} Loaded ${successCount} of ${total} ${itemsType} (${failCount} failed)`
-      );
-    },
-  };
 };
