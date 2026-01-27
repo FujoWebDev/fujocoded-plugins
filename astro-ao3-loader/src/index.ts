@@ -4,27 +4,21 @@ import { workSummarySchema, seriesSchema } from "@fujocoded/ao3.js/zod-schemas";
 import { parse } from "yaml";
 import type { Loader, LoaderContext } from "astro/loaders";
 import { z } from "zod";
-import { getFetcher, getProgressTracker } from "./utils.ts";
-
-const PREFIX_ANSI_COLORS = {
-  works: "\x1b[36m", // Cyan
-  series: "\x1b[35m", // Magenta
-  reset: "\x1b[0m",
-};
-
-const getPrefix = (type: "works" | "series") => {
-  const color = PREFIX_ANSI_COLORS[type];
-  return `${color}[${type}]${PREFIX_ANSI_COLORS.reset}`;
-};
+import { getFetcher } from "./fetcher.ts";
+import { getProgressTracker} from "./logger.ts";
 
 
+/**
+ * Loads the items of the given "type" from the given file ("yamlPath").
+ * It uses the "itemFetcher" function to fetch it from the archive.
+ */
 const loadItems = async <T extends { id: string | number }>(
   { store, logger }: LoaderContext,
   config: {
     type: "works" | "series";
     yamlPath: string;
-    fetchFn: (id: string) => Promise<NonNullable<T>>;
-  }
+    itemFetcher: (id: string) => Promise<NonNullable<T>>;
+  },
 ) => {
   setFetcher(getFetcher(logger));
 
@@ -33,31 +27,32 @@ const loadItems = async <T extends { id: string | number }>(
 
   const tracker = getProgressTracker({
     logger,
-    prefix: getPrefix(config.type),
     total: ids.length,
-    itemsType: config.type
+    itemsType: config.type,
   });
 
+  // Start tracking our progress for this itemsType
   tracker.start();
   try {
     await Promise.all(
       ids.map(async (id) => {
         try {
-          const item = await config.fetchFn(id);
+          // Fetch the item with the given id from the archive
+          const item = await config.itemFetcher(id);
+          // If that works, add it to the store, and mark success
           store.set({ id: item.id.toString(), data: { ...item } });
           tracker.incrementSuccess();
         } catch (error) {
-          tracker.incrementFail();
-          logger.error(
-            `${getPrefix(config.type)} Failed to fetch ${config.type.slice(0, -1)} ${id}: ${error}`
-          );
+          // If there's an error, increment the fail count
+          tracker.incrementFail(id, error);
         }
-      })
+      }),
     );
   } finally {
+    // Once everything is done, close off our tracking of progress
     tracker.finish();
   }
-}
+};
 
 export const worksLoader: Loader = {
   name: "ao3-loader",
@@ -65,7 +60,7 @@ export const worksLoader: Loader = {
     loadItems(context, {
       type: "works",
       yamlPath: "./src/content/ao3/works.yaml",
-      fetchFn: (workId) => getWork({ workId }),
+      itemFetcher: (workId) => getWork({ workId }),
     }),
   schema: workSummarySchema,
 };
@@ -76,7 +71,7 @@ export const seriesLoader: Loader = {
     loadItems(context, {
       type: "series",
       yamlPath: "./src/content/ao3/series.yaml",
-      fetchFn: (seriesId) => getSeries({ seriesId }),
+      itemFetcher: (seriesId) => getSeries({ seriesId }),
     }),
   schema: seriesSchema,
 };
