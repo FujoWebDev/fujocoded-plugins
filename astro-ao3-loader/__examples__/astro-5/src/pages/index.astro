@@ -28,8 +28,16 @@ const series = await getCollection("series");
           ) : (
             <li>
               <div>
-                {fic.data.title} by {fic.data.authors[0].pseud} (
-                {fic.data.rating})
+                <a href={`https://archiveofourown.org/works/${fic.data.id}/`}>
+                  {fic.data.title}
+                </a>{" "}
+                by{" "}
+                <a
+                  href={`https://archiveofourown.org/users/${fic.data.authors[0].username}/pseuds/${fic.data.authors[0].pseud}`}
+                >
+                  {fic.data.authors[0].pseud}
+                </a>{" "}
+                ({fic.data.rating})
               </div>
               <div class="relationships">
                 Relationships: {fic.data.tags.relationships.join(", ")}
