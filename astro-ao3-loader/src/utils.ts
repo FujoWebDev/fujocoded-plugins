@@ -54,7 +54,7 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
     timeout: REQUEST_TIMEOUT_MS,
     retry: {
       limit: MAX_RETRIES,
-      statusCodes: [429, 502, 503, 504],
+      statusCodes: [429, 502, 503, 504, 525],
       afterStatusCodes: [429], // Respects Retry-After header
       backoffLimit: 10_000, // Max delay between retries
       retryOnTimeout: true,

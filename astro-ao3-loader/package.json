@@ -30,7 +30,7 @@
   "author": "FujoCoded LLC",
   "license": "MIT",
   "dependencies": {
-    "@fujocoded/ao3.js": "^0.22.1",
+    "@fujocoded/ao3.js": "^0.23.1",
     "ky": "^1.14.2",
     "p-queue": "^9.1.0",
     "tsdown": "^0.20.0-beta.3",
