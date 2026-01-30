@@ -1,15 +1,25 @@
 import { defineConfig, type UserConfig } from "tsdown";
 import { glob } from "glob";
 
+const COMMON_CONFIG = {
+  clean: true,
+  unbundle: true,
+  fixedExtension: false,
+  dts: {
+    sideEffects: true
+  }
+} satisfies Partial<UserConfig>;
+
+const baseExternal = [/^fujocoded:authproto/, /^astro:/];
+const astroFileExternal = [...baseExternal, /\.astro$/];
+
 export default defineConfig([
   {
     name: "components",
     entry: ["src/components.ts"],
-    dts: true,
-    clean: true,
-    unbundle: true,
     copy: [{ from: "src/components", to: "dist/components" }],
-    external: [/^fujocoded:authproto/, /^astro:/, /\.astro$/],
+    external: astroFileExternal,
+    ...COMMON_CONFIG,
   },
   {
     name: "tables",
@@ -17,25 +27,21 @@ export default defineConfig([
     outputOptions: {
       dir: `./dist/db/`,
     },
-    clean: true,
-    unbundle: true,
-    external: [/^fujocoded:authproto/, /^astro:/, /\.astro$/],
+    external: astroFileExternal,
+    ...COMMON_CONFIG,
+    dts: false,
   },
   {
     name: "integration",
-    dts: true,
-    clean: true,
-    unbundle: true,
     entry: ["src/index.ts", "src/types.d.ts"],
-    external: [/^fujocoded:authproto/, /^astro:/],
+    external: baseExternal,
+    ...COMMON_CONFIG,
   },
   {
     name: "helpers",
-    dts: true,
-    clean: true,
-    unbundle: true,
     entry: ["src/helpers.ts", "src/types.d.ts"],
-    external: [/^fujocoded:authproto/, /^astro:/],
+    external: baseExternal,
+    ...COMMON_CONFIG,
   },
   {
     name: "routes",
@@ -43,9 +49,25 @@ export default defineConfig([
     outputOptions: {
       dir: `./dist/routes/`,
     },
-    dts: true,
-    clean: true,
-    unbundle: true,
-    external: [/^fujocoded:authproto/, /^astro:/],
+    external: baseExternal,
+    ...COMMON_CONFIG,
+  },
+  {
+    name: "stores-unstorage",
+    entry: ["src/stores/unstorage.ts"],
+    outputOptions: {
+      dir: `./dist/stores/`,
+    },
+    external: baseExternal,
+    ...COMMON_CONFIG,
+  },
+  {
+    name: "stores-db",
+    entry: ["src/stores/db.ts"],
+    outputOptions: {
+      dir: `./dist/stores/`,
+    },
+    external: [...baseExternal, "astro:db"],
+    ...COMMON_CONFIG,
   },
 ]);

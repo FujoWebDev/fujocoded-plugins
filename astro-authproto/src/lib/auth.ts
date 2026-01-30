@@ -7,19 +7,17 @@ import { JoseKey } from "@atproto/jwk-jose";
 import { DidResolver } from "@atproto/identity";
 import {
   scopes,
-  driverName,
   applicationName,
   externalDomain,
 } from "fujocoded:authproto/config";
 
-const REDIRECT_PATH = "/oauth/callback";
+// We import the stores from the virtual module "fujocoded:authproto/stores"
+// so we don't force projects using this integration to bundle all our dependencies,
+// even for stores they don't use. Doing otherwise would cause errors if the consumer
+// is (for example) NOT using "astro:db", but our code requires it for the bundle.
+import * as Stores from "fujocoded:authproto/stores";
 
-let Stores;
-if (driverName == "astro:db") {
-  Stores = await import("./auth-storage-db.js");
-} else {
-  Stores = await import("./auth-storage-unstorage.js");
-}
+const REDIRECT_PATH = "/oauth/callback";
 
 /**
  * Creates OAuth client metadata for the given domain.

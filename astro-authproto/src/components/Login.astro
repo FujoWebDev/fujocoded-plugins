@@ -9,6 +9,7 @@ interface Props {
 const { redirect: redirectUrl } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
 
+// @ts-expect-error
 const { class: cssClass, 'class:list': cssClassList } = Astro.props;
 ---
 

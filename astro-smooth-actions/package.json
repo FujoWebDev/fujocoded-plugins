@@ -5,6 +5,7 @@
   "description": "An Astro integration for smooth action handling",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "private": true,
   "exports": {
     ".": {
       "import": {

@@ -2,10 +2,16 @@
   "name": "fujocoded-plugins",
   "private": true,
   "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "release": "npm run build && changeset publish --provenance",
     "sherif": "npx sherif@latest"
   },
   "workspaces": [
-    "./*"
+    "*/",
+    "!.*/"
   ],
-  "packageManager": "^npm@10.2.4"
+  "packageManager": "^npm@10.2.4",
+  "dependencies": {
+    "@changesets/cli": "^2.29.8"
+  }
 }
