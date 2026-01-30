@@ -2,21 +2,21 @@
 
 <div align="center">
 
-Load data from Archive of Our Own to your Astro site.
+  Load data from Archive of Our Own to your Astro site.
 
-<!-- Add the <a> so IMGs will stay on the same line -->
-<a href="https://choosealicense.com/licenses/mit/">
+  <!-- Add the <a> so IMGs will stay on the same line -->
+  <a href="https://choosealicense.com/licenses/mit/">
     <img alt="NPM license" src="https://img.shields.io/npm/l/%40fujocoded%2Fastro-ao3-loader" />
-</a>
-<a href="https://fancoders.com/">
+  </a>
+  <a href="https://fancoders.com/">
     <img src="https://img.shields.io/badge/fandom-coders-ff69b4" alt="Fandom Coders badge"/>
-</a>
-<a href="https://npmjs.com/package/@fujocoded/astro-ao3-loader">
+  </a>
+  <a href="https://npmjs.com/package/@fujocoded/astro-ao3-loader">
     <img src="https://badge.fury.io/js/%40fujocoded%2Fastro-ao3-loader.svg" alt="Np PM version badge"/>
-</a>
-<a href="https://codespaces.new/FujoWebDev/fujocoded-plugins">
+  </a>
+  <a href="https://codespaces.new/FujoWebDev/fujocoded-plugins">
     <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" style="height: 20px"/>
-</a>
+  </a>
 </div>
 
 ## What is `@fujocoded/astro-ao3-loader`?
@@ -30,9 +30,7 @@ This library makes it easy to use the [Content Loader API](https://docs.astro.bu
 
 ## What can `@fujocoded/astro-ao3-loader` do?
 
-`@fujocoded/astro-ao3-loader` lets you easily grab data about content hosted on [Archive of Our Own](https://archiveofourown.org/) to use in your Astro website—however you wish to ✨
-
-It includes the following loaders:
+You can use the following loaders to fetch data from [Archive of Our Own](https://archiveofourown.org/).
 
 | **Method**     | **Description**                                                                              |
 | -------------- | -------------------------------------------------------------------------------------------- |
@@ -42,13 +40,11 @@ It includes the following loaders:
 ## How to use `@fujocoded/astro-ao3-loader`
 
 > [!TIP]
-> Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
+> Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example) or the [examples folder](/astro-ao3-loader/__examples__/).
 
 ### Prerequisites
 
-This package requires [Astro](https://astro.build/) 5.0.0 or later and Astro's
-built-in [Content Loader
-API](https://docs.astro.build/en/reference/content-loader-reference). Astro 4 is not supported at this moment, but if you're interested, [open an issue](https://github.com/FujoWebDev/fujocoded-plugins/issues/new?labels=ao3-content-loader) to let us know.
+This library requires [Astro](https://astro.build/) 5.0.0 or later, and Astro's built-in [Content Loader API](https://docs.astro.build/en/reference/content-loader-reference/). Astro 4 isn't currently supported, but if you'd like to use the library on an older version, [open an issue](https://github.com/FujoWebDev/fujocoded-plugins/issues/new?labels=ao3-content-loader) to let us know!
 
 ### Installation
 
@@ -58,12 +54,7 @@ npm install @fujocoded/astro-ao3-loader
 
 ### Configuration
 
-This package contains loaders that let you download different types of content
-from AO3. The configuration is the same for each loader.
-
-In this example, we'll use a loader called `worksLoader` that lets you get the details of a list of works whose IDs are listed in the `src/content/ao3/works.yaml` file.
-
-To set it up, follow these steps:
+The configuration steps are the same for each loader. In this example, we'll use the `worksLoader` to get information from a list of works specified in `src/content/ao3/works.yaml`.
 
 1. Set up a content collection in `src/content/config.ts` that uses your chosen loader.
 
@@ -76,7 +67,7 @@ To set it up, follow these steps:
     };
     ```
 
-2. Create a file at `src/content/ao3/works.yaml` and add a list of work IDs to the file.
+2. Create `src/content/ao3/works.yaml` and add a list of work IDs to the file.
 
     ```yaml
     - 38226814
@@ -88,11 +79,8 @@ To set it up, follow these steps:
     - 58869805
     ```
 
-> [!TIP] 
-> This file is in a language called YAML. If you're running into issues,
-> check your syntax by using one of the many YAML validators out there.
-
-...and that's all!
+  > [!TIP]
+  > This file uses the YAML programming language to identify work IDs. If you're running into issues, check your syntax using one of the many YAML validators out there.
 
 Once configured, you can use the `astro-ao3-loader` like any other Astro collection.
 
@@ -117,5 +105,3 @@ const fanfictions = await getCollection("fanfictions");
   }
 </ul>
 ```
-
-For a more complete example, you can take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
