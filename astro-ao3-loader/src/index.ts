@@ -7,11 +7,10 @@ import { z } from "zod";
 import { getFetcher } from "./fetcher.ts";
 import { getProgressTracker} from "./logger.ts";
 
-
 /**
- * Loads the items of the given "type" from the given file ("yamlPath").
- * It uses the "itemFetcher" function to fetch it from the archive.
- */
+ * Loads items of the given "type" from the specified file ("yamlPath"). This uses the "itemFetcher"
+ * function to fetch items from Archive of Our Own.
+**/
 const loadItems = async <T extends { id: string | number }>(
   { store, logger }: LoaderContext,
   config: {
@@ -31,25 +30,25 @@ const loadItems = async <T extends { id: string | number }>(
     itemsType: config.type,
   });
 
-  // Start tracking our progress for this itemsType
+  // Start tracking progress for this "itemsType".
   tracker.start();
   try {
     await Promise.all(
       ids.map(async (id) => {
         try {
-          // Fetch the item with the given id from the archive
+          // Fetch the item with the specified ID from the archive.
           const item = await config.itemFetcher(id);
-          // If that works, add it to the store, and mark success
+          // If that works, add it to the store and mark success.
           store.set({ id: item.id.toString(), data: { ...item } });
           tracker.incrementSuccess();
         } catch (error) {
-          // If there's an error, increment the fail count
+          // If there's an error, increment the fail count.
           tracker.incrementFail(id, error);
         }
       }),
     );
   } finally {
-    // Once everything is done, close off our tracking of progress
+    // Once everything is done, close off progress tracking.
     tracker.finish();
   }
 };
