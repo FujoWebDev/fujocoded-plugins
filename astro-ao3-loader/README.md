@@ -30,9 +30,11 @@ This library makes it easy to use the [Content Loader API](https://docs.astro.bu
 
 ## What can `@fujocoded/astro-ao3-loader` do?
 
-You can use the following loaders to fetch data from [Archive of Our Own](https://archiveofourown.org/).
+You can use this library to easily grab data about content hosted on [Archive of Our Own](https://archiveofourown.org/) to use in your [Astro](https://astro.build/) site—however you wish to. ✨
 
-| **Method**     | **Description**                                                                              |
+The library includes the following loaders:
+
+| **Loader**     | **Description**                                                                              |
 | -------------- | -------------------------------------------------------------------------------------------- |
 | `worksLoader`  | Loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). |
 | `seriesLoader` | Loads data from series hosted on [Archive of Our Own](https://archiveofourown.org/).         |
@@ -40,8 +42,7 @@ You can use the following loaders to fetch data from [Archive of Our Own](https:
 ## How to use `@fujocoded/astro-ao3-loader`
 
 > [!TIP]
-> Want to see it in action? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example).
-> Want to see some examples? Take a look at [our sample repository](https://github.com/FujoWebDev/ao3-content-layer-example) or the [examples folder](/astro-ao3-loader/__examples__/).
+> Want to see some examples? Take a look around the [examples folder](/astro-ao3-loader/__examples__/). 👀
 
 ### Prerequisites
 
@@ -55,7 +56,7 @@ npm install @fujocoded/astro-ao3-loader
 
 ### Configuration
 
-The configuration steps are the same for each loader. In this example, we'll use the `worksLoader` to get information from a list of works specified in `src/content/ao3/works.yaml`.
+The configuration steps are the same for each [loader](#what-can-fujocodedastro-ao3-loader-do). In this example, we'll use the `worksLoader` to get information from a list of works specified in `src/content/ao3/works.yaml`.
 
 1. Set up a content collection in `src/content/config.ts` that uses your chosen loader.
 
@@ -106,3 +107,5 @@ const fanfictions = await getCollection("fanfictions");
   }
 </ul>
 ```
+
+For a more complete example, you can take a look at [our example directory](/astro-ao3-loader/__examples__/astro-5/src/pages/index.astro).
