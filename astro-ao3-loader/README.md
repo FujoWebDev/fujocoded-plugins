@@ -34,10 +34,10 @@ You can use this library to easily grab data about content hosted on [Archive of
 
 The library includes the following loaders:
 
-| **Loader**     | **Description**                                                                              |
-| -------------- | -------------------------------------------------------------------------------------------- |
-| `worksLoader`  | Loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). |
-| `seriesLoader` | Loads data from series hosted on [Archive of Our Own](https://archiveofourown.org/).         |
+| **Loader**     | **Description**                                                                              | **Data file**                 |
+| -------------- | -------------------------------------------------------------------------------------------- | ----------------------------- |
+| `worksLoader`  | Loads data from a set of works hosted on [Archive of Our Own](https://archiveofourown.org/). | `src/content/ao3/works.yaml`  |
+| `seriesLoader` | Loads data from series hosted on [Archive of Our Own](https://archiveofourown.org/).         | `src/content/ao3/series.yaml` |
 
 ## How to use `@fujocoded/astro-ao3-loader`
 
