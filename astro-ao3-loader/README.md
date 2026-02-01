@@ -58,7 +58,7 @@ npm install @fujocoded/astro-ao3-loader
 
 The configuration steps are the same for each [loader](#what-can-fujocodedastro-ao3-loader-do). In this example, we'll use the `worksLoader` to get information from a list of works specified in `src/content/ao3/works.yaml`.
 
-1. Set up a content collection in `src/content/config.ts` that uses your chosen loader.
+1. Set up [a content collection](https://docs.astro.build/en/guides/content-collections/#defining-collections) in `src/content/config.ts` that uses your chosen loader.
 
    ```ts
    import { defineCollection } from "astro:content";
@@ -84,7 +84,8 @@ The configuration steps are the same for each [loader](#what-can-fujocodedastro-
 > [!TIP]
 > This file uses the YAML data format to list work IDs. If you're running into issues, check your syntax using one of the many YAML validators out there.
 
-Once configured, you can use the `astro-ao3-loader` like any other Astro collection.
+Once configured, you can use the collection created with `astro-ao3-loader` like you
+would any other [Astro content collection](https://docs.astro.build/en/guides/content-collections/#using-content-in-astro-templates).
 
 ```astro
 ---
@@ -108,4 +109,4 @@ const fanfictions = await getCollection("fanfictions");
 </ul>
 ```
 
-For a more complete example, you can take a look at [our example directory](/astro-ao3-loader/__examples__/astro-5/src/pages/index.astro).
+For a more complete example, you can take a look at [our example page](/astro-ao3-loader/__examples__/works-list/src/pages/index.astro).
