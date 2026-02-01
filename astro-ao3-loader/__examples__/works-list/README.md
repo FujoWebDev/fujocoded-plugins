@@ -1,5 +1,13 @@
 # `@fujocoded/astro-ao3-loader` Example
 
+<center>
+    <img 
+    alt="A list of works from AO3 as shown in this example. Features title, author, ratings and relationships" 
+    src="./works-list.png" 
+    style="max-width: 500px; margin: 15px;"
+    />
+</center>
+
 This example shows the `@fujocoded/astro-ao3-loader` library in action. Inside, you'll see (among others) the following folders and files:
 
 ```text
