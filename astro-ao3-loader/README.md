@@ -97,14 +97,16 @@ const fanfictions = await getCollection("fanfictions");
 <h1>Hello fujin</h1>
 <ul>
   {
-    fanfictions.map((fic) =>
-      fic.data.locked ? (
-        <li>Locked</li>
-      ) : (
-        <li>{fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})
+    fanfictions.map((fic) => {
+      if (fic.data.locked) {
+        return <li>Locked</li>;
+      }
+      return (
+        <li>
+          {fic.data.title} by {fic.data.authors[0].pseud} ({fic.data.rating})
         </li>
-      )
-    )
+      );
+    })
   }
 </ul>
 ```
