@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+
+/**
+ * We use getCollection with the name of our collection to
+ * load the data we want to use in our page.
+ *
+ * See: https://docs.astro.build/en/guides/content-collections/#using-content-in-astro-templates
+ */
+const fanfictions = await getCollection("fanfictions");
+const series = await getCollection("series");
+
+// Uncomment the next line to see what's inside the `fanfictions`
+// or `series`variables and what data you can access. The data will
+// appear in your terminal when you refresh the page.
+// console.dir(fanfictions, { depth: null });
+// console.dir(series, {depth: null})
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>@fujocoded/astro-ao3-loader example</title>
+  </head>
+  <body>
+    <h1>Hello, fujin!</h1>
+    <ul>
+      {
+        fanfictions.map((fic) => {
+          // Before using the data for the fanfiction, you should check it's not locked
+          if (fic.data.locked) {
+            return <li>Locked</li>;
+          }
+          // Now you can safely access everything we know about it!
+          return (
+            <li>
+              <div>
+                <a href={`https://archiveofourown.org/works/${fic.data.id}/`}>
+                  {fic.data.title}
+                </a>{" "}
+                by
+                <a
+                  href={`https://archiveofourown.org/users/${fic.data.authors[0].username}/pseuds/${fic.data.authors[0].pseud}`}
+                >
+                  {
+                    // TODO: improve this code by showing all authors, not just the first one
+                    fic.data.authors[0].pseud
+                  }
+                </a>{" "}
+                ({fic.data.rating})
+              </div>
+              {
+                // Only show relationships if the relationship tags aren't empty
+                fic.data.tags.relationships.length > 0 && (
+                  <div class="relationships">
+                    Relationships: {fic.data.tags.relationships.join(", ")}
+                  </div>
+                )
+              }
+            </li>
+          );
+        })
+      }
+    </ul>
+  </body>
+</html>
+
+<style>
+  .relationships {
+    color: lightslategray;
+    font-size: small;
+  }
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>
