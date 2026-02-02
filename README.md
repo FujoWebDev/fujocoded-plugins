@@ -7,8 +7,8 @@
 A repository of plugins for true webdev fujin.
 
 <!-- Add the <a> so IMGs will stay on the same line -->
-<a href="https://fancoders.com/">
-    <img src="https://img.shields.io/badge/fandom-coders-ff69b4" alt="Fandom Coders badge"/>
+<a href="https://fujocoded.com/">
+    <img src="https://img.shields.io/badge/fujo-coded-555555?labelColor=9c89fa&style=flat-square" alt="FujoCoded badge"/>
 </a>
 </div>
 
