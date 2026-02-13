@@ -14,9 +14,37 @@ const redirectReason = Astro.url.searchParams.get("reason");
     <title>Astro</title>
   </head>
   <body>
-    {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
-    <Login />
+    <p>
+      This example restricts certain pages based on the Bluesky relationship
+      between the logged-in user and a specific bluesky account (e.g. followers,
+      mutuals).
 
-    {redirectReason == "unauthorized" && <div>Sorry, you can't play with us</div>}
+      <h2>Try it out</h2>
+
+      {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
+      <Login />
+      <p>
+        <a href="/secret">/secret</a> is a protected page. When you visit it,
+        <code>src/middleware.ts</code> checks whether you follow <a
+          href="https://bsky.app/profile/essentialrandom.bsky.social"
+          >Ms Boba on Bluesky</a
+        >:
+      </p>
+      <ul>
+        <li>If you're logged out, it will redirect you here with an error.</li>
+        <li>
+          If you follow (or are) her, you'll see <code>secret.astro</code>
+        </li>
+        <li>If not, you'll see <code>unauthorized.astro</code> instead</li>
+      </ul>
+
+      {
+        redirectReason == "unauthorized" && (
+          <div style="color: red">
+            Sorry, you can't play with us! Try logging in.
+          </div>
+        )
+      }
+    </p>
   </body>
 </html>

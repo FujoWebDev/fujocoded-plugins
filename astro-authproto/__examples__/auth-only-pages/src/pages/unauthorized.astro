@@ -12,8 +12,18 @@ const loggedInUser = Astro.locals.loggedInUser;
   </head>
   <body>
     <h1>STRANGER, BEGONE!</h1>
-    Only friends are allowed on <code>{Astro.originPathname}</code>. <br/>
-    {loggedInUser && <>You {loggedInUser.handle}, are NOT a friend.</>}
-    {!loggedInUser && <>I have no idea who you are.</>}
+    Only friends are allowed on <code>{Astro.originPathname}</code>. <br />
+    {
+      loggedInUser && (
+        <>
+          You, {loggedInUser.handle}, do NOT{" "}
+          <a href="https://bsky.app/profile/essentialrandom.bsky.social">
+            follow Ms Boba on Bluesky
+          </a>
+          ...yet!
+        </>
+      )
+    }
+    {!loggedInUser && <>I have no idea who you are...try logging in!</>}
   </body>
 </html>

@@ -12,11 +12,10 @@ export default defineConfig({
     authProto({
       applicationName: "Authproto test",
       applicationDomain: "fujocoded.com",
-      defaultDevUser: "essentialrandom.bsky.social",
+      defaultDevUser: "bobatan.fujocoded.com",
       scopes: {
-        email: true,
-        directMessages: true,
-        additionalScopes: ["transition:generic"],
+        // Don't need scopes cause we only need
+        // access to the logged in identity
       },
     }),
   ],
