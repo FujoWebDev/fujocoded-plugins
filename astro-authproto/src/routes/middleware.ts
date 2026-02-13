@@ -2,23 +2,23 @@ import { didToHandle, oauthClient } from "../lib/auth.js";
 import { type MiddlewareHandler } from "astro";
 
 export const AUTHPROTO_ERROR_CODE = "authproto-error-code";
-export const AUTHPROTO_ERROR_DESCRIPTION = "authproto-error-description"
+export const AUTHPROTO_ERROR_DESCRIPTION = "authproto-error-description";
 
 export const onRequest: MiddlewareHandler = async (
   { locals, session },
-  next
+  next,
 ) => {
   const userDid = await session?.get("atproto-did");
   const errorCode = await session?.get(AUTHPROTO_ERROR_CODE);
   const errorDescription = await session?.get(AUTHPROTO_ERROR_DESCRIPTION);
   if (errorCode || errorDescription) {
-        locals.authproto = {
-          // TODO: add input handler
-          errorCode,
-          errorDescription
-        };
-        await session?.delete(AUTHPROTO_ERROR_CODE);
-        await session?.delete(AUTHPROTO_ERROR_DESCRIPTION);
+    locals.authproto = {
+      // TODO: add input handler
+      errorCode,
+      errorDescription,
+    };
+    await session?.delete(AUTHPROTO_ERROR_CODE);
+    await session?.delete(AUTHPROTO_ERROR_DESCRIPTION);
   }
 
   if (!session || !userDid) {

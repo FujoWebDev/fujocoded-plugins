@@ -16,10 +16,14 @@ export const GET: APIRoute = async ({
   locals,
 }) => {
   const requestUrl = new URL(request.url);
+  console.dir(requestUrl);
 
   let oauthSession: OAuthSession | null;
-  let error = requestUrl.searchParams.get("error") ?? "UNKNOWN";
-  let errorDescription = requestUrl.searchParams.get("error_description") ?? undefined;
+  let error = requestUrl.searchParams.get("error");
+  // This falls back to undefined so it will be compatible with the session
+  // storage signature if not present.
+  let errorDescription =
+    requestUrl.searchParams.get("error_description") ?? undefined;
   try {
     const clientCallback = await oauthClient.callback(requestUrl.searchParams);
     oauthSession = clientCallback.session;
@@ -34,7 +38,7 @@ export const GET: APIRoute = async ({
   }
 
   if (error || errorDescription) {
-    session?.set(AUTHPROTO_ERROR_CODE, error);
+    session?.set(AUTHPROTO_ERROR_CODE, error ?? "UNKNOWN");
     session?.set(AUTHPROTO_ERROR_DESCRIPTION, errorDescription);
   }
 
@@ -47,7 +51,7 @@ export const GET: APIRoute = async ({
   if (stateParam) {
     try {
       const stateData = JSON.parse(
-        Buffer.from(stateParam, "base64url").toString()
+        Buffer.from(stateParam, "base64url").toString(),
       );
       customRedirect = stateData.redirect;
       referer = stateData.referer;

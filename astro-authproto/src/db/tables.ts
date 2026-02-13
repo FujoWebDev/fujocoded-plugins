@@ -1,7 +1,6 @@
-import { asDrizzleTable } from "@astrojs/db/utils";
 import { defineDb, column, defineTable } from "astro:db";
 
-const AtProtoChallengesTable = defineTable({
+export const AtProtoChallengesTable = defineTable({
   columns: {
     key: column.text(),
     state: column.text(),
@@ -14,7 +13,7 @@ const AtProtoChallengesTable = defineTable({
   ],
 });
 
-const AtProtoSessionsTable = defineTable({
+export const AtProtoSessionsTable = defineTable({
   columns: {
     did: column.text(),
     session: column.text(),
@@ -26,15 +25,6 @@ const AtProtoSessionsTable = defineTable({
     },
   ],
 });
-
-export const AtProtoChallenges = asDrizzleTable(
-  "AtProtoChallenges",
-  AtProtoChallengesTable
-);
-export const AtProtoSessions = asDrizzleTable(
-  "AtProtoSessions",
-  AtProtoSessionsTable
-);
 
 // Export the Database Configuration for StudioCMS
 export default defineDb({

@@ -75,14 +75,19 @@
     "unstorage": "^1.16.1"
   },
   "devDependencies": {
+    "drizzle-orm": "^0.42.0",
     "tsdown": "^0.17.2"
   },
   "peerDependencies": {
     "@astrojs/db": "^0.17.1",
-    "astro": "^5.13.0"
+    "astro": "^5.13.0",
+    "drizzle-orm": "^0.42.0"
   },
   "peerDependenciesMeta": {
     "@astrojs/db": {
+      "optional": true
+    },
+    "drizzle-orm": {
       "optional": true
     }
   }
