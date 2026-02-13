@@ -2,20 +2,20 @@
 import { Login } from "@fujocoded/authproto/components";
 
 const user = Astro.locals.loggedInUser;
+console.dir(Astro.locals.authproto, { depth: null });
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Simple Login/Logout</title>
-	</head>
-	<body>
-		{!user ? "Log in below." : `Hello, ${user.handle} (${user.did})`}
-		<Login />
-
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Simple Login/Logout</title>
+  </head>
+  <body>
+    {!user ? "Log in below." : `Hello, ${user.handle} (${user.did})`}
+    <Login />
+  </body>
 </html>

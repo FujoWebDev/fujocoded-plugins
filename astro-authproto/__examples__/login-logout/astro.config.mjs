@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 import authProto from "@fujocoded/authproto";
 import node from "@astrojs/node";
 
@@ -11,15 +11,14 @@ export default defineConfig({
   }),
   integrations: [
     authProto({
-			applicationName: "Login Logout",
-			applicationDomain: "localhost:4321",
-			driver: {
-				name: "fs",
-				options: {
-					base: "./tmp"
-				},
-			},
+      applicationName: "Login Logout",
+      applicationDomain: "localhost:4321",
+      driver: {
+        name: "fs",
+        options: {
+          base: "./tmp",
+        },
+      },
     }),
-	],
+  ],
 });
-
