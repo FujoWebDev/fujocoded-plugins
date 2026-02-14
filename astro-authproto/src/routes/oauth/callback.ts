@@ -16,7 +16,6 @@ export const GET: APIRoute = async ({
   locals,
 }) => {
   const requestUrl = new URL(request.url);
-  console.dir(requestUrl);
 
   let oauthSession: OAuthSession | null;
   let error = requestUrl.searchParams.get("error");
