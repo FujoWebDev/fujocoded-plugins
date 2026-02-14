@@ -4,8 +4,21 @@ import {
   type NodeSavedSessionStore,
   type NodeSavedState,
 } from "@atproto/oauth-client-node";
+import { asDrizzleTable } from "@astrojs/db/utils";
 import { db, eq } from "astro:db";
-import { AtProtoChallenges, AtProtoSessions } from "../db/tables.js";
+import {
+  AtProtoChallengesTable,
+  AtProtoSessionsTable,
+} from "../db/tables.js";
+
+const AtProtoChallenges = asDrizzleTable(
+  "AtProtoChallenges",
+  AtProtoChallengesTable
+);
+const AtProtoSessions = asDrizzleTable(
+  "AtProtoSessions",
+  AtProtoSessionsTable
+);
 
 /**
  * The StateStore saves the challenge token issued before an OAuth request to

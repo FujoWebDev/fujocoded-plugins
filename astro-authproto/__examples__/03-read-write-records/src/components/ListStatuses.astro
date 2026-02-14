@@ -1,0 +1,90 @@
+---
+import { getPdsAgent, getDid } from "@fujocoded/authproto/helpers";
+import '../styles/status_table.css'
+
+const FUJOCODED_HANDLE = "fujocoded.bsky.social";
+const FUJOCODED_DID = await getDid({didOrHandle: FUJOCODED_HANDLE});
+if (!FUJOCODED_DID) {
+  throw new Error("Something has gone horribly wrong with this demo.");
+}
+
+const loggedInUser = Astro.locals.loggedInUser;
+
+// To grab all the statuses that the user has posted, we first create
+// an Agent to do those request on the users' behalf. Then we ask it to list
+// the records in their "xyz.statuscity.status" data collection.
+const agent = await getPdsAgent(loggedInUser ? {loggedInUser} : {didOrHandle: FUJOCODED_HANDLE});
+const response = await agent?.com.atproto.repo.listRecords({
+  repo: loggedInUser ? loggedInUser.did : FUJOCODED_DID, // Whose data do we want to fetch?
+  collection: "xyz.statuscity.status", // What type of data do we want?
+});
+
+// We take the list of statuses out of the response. If
+// there's no status, we use an empty array instead.
+const statuses = response?.data.records ?? [];
+//console.log(statuses)
+---
+
+<h2>{loggedInUser ? "Your" : `${FUJOCODED_HANDLE}'s`} Statusphere Status(es)</h2>
+{statuses.length == 0 && <p>No statuses yet!</p>}
+
+{
+  statuses.map(({ uri, cid, value }) => (
+    <article>
+      <!-- TODO: Put this in a way where it's clear what this is -->
+			<table>
+				<tr>
+					<td>Record</td>
+					<td><a href={`https://pdsls.dev/${uri}`}><pre>{uri}</pre></a></td>
+				</tr>
+				<tr>
+					<td>Status</td>
+					<td><p>{value.status}</p></td>
+				</tr>
+				<tr>
+					<td>Date</td>
+					<td>
+						<time datetime={value.createdAt as string}>
+							{new Date(value.createdAt as string).toDateString()}
+						</time>
+					</td>
+				</tr>
+				{loggedInUser && 
+					<tr>
+						<td colspan="2">
+							<button class="delete" id={uri.split('/').pop()}>Delete Status</button>
+							{}
+						</td>
+					</tr>
+				}
+			</table>
+    </article>
+  ))
+}
+
+<script>
+	import { actions } from "astro:actions";
+
+	// Get all buttons with class 'delete'
+	const buttons = document.querySelectorAll('button.delete');
+
+	//Handle clicks on each button
+	buttons.forEach((button) => {
+		button.addEventListener('click', async function (e) {
+			//console.log("Deleting record with cid " + this.id + ".")
+			const { data, error } = await actions.deleteStatus({ status_id: this.id });
+			//if (!error) console.log(data);
+			if (data.response != null) {
+				this.disabled=true;
+
+				const parent_row = this.parentNode;
+				const span = document.createElement("span");
+				span.className = "delete_response";
+				const span_response = document.createTextNode("Deleted record with key " + data.response.rev + ".");
+				span.appendChild(span_response);
+				parent_row.appendChild(span);
+				parent_row.closest("table").className = 'deleted';
+			}
+		});
+	});
+</script>

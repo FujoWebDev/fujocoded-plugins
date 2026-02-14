@@ -2,21 +2,20 @@
 import { Login } from "@fujocoded/authproto/components";
 
 const user = Astro.locals.loggedInUser;
-const redirectReason = Astro.url.searchParams.get("reason");
+console.dir(Astro.locals.authproto, { depth: null });
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro</title>
+    <title>Simple Login/Logout</title>
   </head>
   <body>
-    {!user ? "Please log in:" : `Welcome ${user.handle} (${user.did})`}
+    {!user ? "Log in below." : `Hello, ${user.handle} (${user.did})`}
     <Login />
-
-    {redirectReason == "unauthorized" && <div>Sorry, you can't play with us</div>}
   </body>
 </html>

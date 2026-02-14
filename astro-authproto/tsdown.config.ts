@@ -2,12 +2,11 @@ import { defineConfig, type UserConfig } from "tsdown";
 import { glob } from "glob";
 
 const COMMON_CONFIG = {
-  clean: true,
   unbundle: true,
   fixedExtension: false,
   dts: {
-    sideEffects: true
-  }
+    sideEffects: true,
+  },
 } satisfies Partial<UserConfig>;
 
 const baseExternal = [/^fujocoded:authproto/, /^astro:/];
@@ -17,13 +16,19 @@ export default defineConfig([
   {
     name: "components",
     entry: ["src/components.ts"],
-    copy: [{ from: "src/components/", to: "dist/" }],
+    copy: [{ from: "src/components/", to: "dist/components/" }],
     external: astroFileExternal,
+    clean: true,
     ...COMMON_CONFIG,
   },
   {
     name: "integration",
-    entry: ["src/index.ts", "src/helpers.ts", "src/types.d.ts", "src/db/tables.ts"],
+    entry: [
+      "src/index.ts",
+      "src/helpers.ts",
+      "src/types.d.ts",
+      "src/db/tables.ts",
+    ],
     external: astroFileExternal,
     ...COMMON_CONFIG,
   },
