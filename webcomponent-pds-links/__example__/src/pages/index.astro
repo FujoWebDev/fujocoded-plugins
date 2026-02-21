@@ -1,0 +1,59 @@
+---
+
+---
+
+<h1>My Social Accounts</h1>
+<div>See them on <a
+  href="https://pdsls.dev/at://did:plc:r2vpg2iszskbkegoldmqa322/com.fujocoded.rolodex.card/ms-boba"
+  >pdsls.dev</a
+></div>
+
+<h2>Simple:</h2>
+<atfujo-links handle="essentialrandom.bsky.social"></atfujo-links> 
+
+<h2>Template:</h2>
+<atfujo-links handle="essentialrandom.bsky.social">
+  <template>
+    <ul>
+      <li>
+        Find me on: <a />
+        <button>I shall</button>
+      </li>
+    </ul>
+  </template>
+</atfujo-links>
+
+<script>
+  import "../components/PdsLinks";
+</script>
+
+<style is:global>
+  atfujo-links {
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      li {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        &[data-icon]:before {
+          height: 20px;
+          aspect-ratio: 1;
+          background-image: var(--icon-url);
+          background-size: contain;
+          content: "";
+        }
+      }
+    }
+
+    [data-platform="tumblr"] {
+      color: pink;
+    }
+    [data-platform="bsky"] {
+      color: lightseagreen;
+    }
+  }
+</style>
