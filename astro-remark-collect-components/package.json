@@ -32,6 +32,10 @@
   ],
   "author": "FujoCoded LLC",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
   "dependencies": {
     "unist-util-visit": "^5.0.0"
   },

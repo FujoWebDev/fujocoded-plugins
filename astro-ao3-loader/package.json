@@ -29,6 +29,10 @@
   ],
   "author": "FujoCoded LLC",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
   "dependencies": {
     "@fujocoded/ao3.js": "^0.23.1",
     "ky": "^1.14.2",

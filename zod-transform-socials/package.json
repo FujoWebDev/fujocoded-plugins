@@ -32,6 +32,13 @@
   ],
   "author": "FujoCoded LLC",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "tsup": "^8.1.0",
     "typescript": "^5.5.2"
