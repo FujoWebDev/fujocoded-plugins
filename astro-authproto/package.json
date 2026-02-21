@@ -76,6 +76,7 @@
   },
   "devDependencies": {
     "drizzle-orm": "^0.42.0",
+    "glob": "^13.0.6",
     "tsdown": "^0.17.2"
   },
   "peerDependencies": {
