@@ -23,8 +23,17 @@ export const POST: APIRoute = async ({ redirect, request, session }) => {
     ...(referer && !customRedirect && { referer }),
   };
 
+  if (!atprotoId) {
+    session?.set(AUTHPROTO_ERROR_CODE, "MISSING_FIELD");
+    session?.set(
+      AUTHPROTO_ERROR_DESCRIPTION,
+      'Missing required "atproto-id" field in login form data',
+    );
+    return redirect(stateData.referer || "/");
+  }
+
   try {
-    const url = await oauthClient.authorize(atprotoId!, {
+    const url = await oauthClient.authorize(atprotoId, {
       scope: scopes.join(" "),
       // This random value protects against CSRF (Cross-Site Request
       // Forgery) attacks. We send it along our authorization request, and the OAuth
