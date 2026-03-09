@@ -1,5 +1,16 @@
 # @fujocoded/authproto
 
+## 0.2.0
+
+### Minor Changes
+
+- 2e1dc6e: Use oauth-client-metadata in place of client-metadata for permission check
+
+### Patch Changes
+
+- 5afb389: Directly return error about missing username field
+- 03e7133: Allow using AUTHPROTO_EXTERNAL_DOMAIN to override oauth redirect
+
 ## 0.1.4
 
 ### Patch Changes
