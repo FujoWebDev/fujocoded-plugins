@@ -8,7 +8,7 @@ import { DidResolver } from "@atproto/identity";
 import {
   scopes,
   applicationName,
-  externalDomain,
+  clientMetadataDomain,
 } from "fujocoded:authproto/config";
 
 // We import the stores from the virtual module "fujocoded:authproto/stores"
@@ -77,9 +77,7 @@ const createClient = async (domain: string) => {
   });
 };
 
-const DOMAIN =
-  process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? externalDomain ?? "http://127.0.0.1:4321/";
-export const oauthClient = await createClient(DOMAIN);
+export const oauthClient = await createClient(clientMetadataDomain);
 
 const IDENTITY_RESOLVER = new DidResolver({});
 export const didToHandle = async (did: string) => {

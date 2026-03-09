@@ -128,5 +128,6 @@ export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: b
       options.redirects?.afterLogout ?? "/"
     )};
     export const externalDomain = ${JSON.stringify(externalDomain)};
+    export const clientMetadataDomain = process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? ${JSON.stringify(externalDomain)} ?? "${options.applicationDomain}";
     `;
 };

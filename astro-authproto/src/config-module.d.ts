@@ -25,6 +25,7 @@ declare module "fujocoded:authproto/config" {
   export const driverName: string;
   export const redirectAfterLogin: string;
   export const redirectAfterLogout: string;
+  export const clientMetadataDomain: string;
 }
 
 declare module "fujocoded:authproto/stores" {
