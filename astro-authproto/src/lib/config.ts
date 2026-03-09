@@ -76,7 +76,7 @@ export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: b
     options: undefined,
   };
 
-  const externalDomain = options.externalDomain ?? (isDev ? "http://127.0.0.1:4321/" : undefined);
+  const externalDomain = options.externalDomain ?? (isDev ? "http://127.0.0.1:4321/" : options.applicationDomain);
 
   const scopes: OAuthScope[] = ["atproto"];
   if (Array.isArray(options.scopes)) {

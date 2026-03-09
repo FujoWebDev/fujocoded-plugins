@@ -78,7 +78,7 @@ const createClient = async (domain: string) => {
 };
 
 const DOMAIN =
-  externalDomain ?? process.env.EXTERNAL_DOMAIN ?? "http://127.0.0.1:4321/";
+  process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? externalDomain ?? "http://127.0.0.1:4321/";
 export const oauthClient = await createClient(DOMAIN);
 
 const IDENTITY_RESOLVER = new DidResolver({});
