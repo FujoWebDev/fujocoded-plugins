@@ -55,7 +55,7 @@ export const createClientMetadata = (
     client_name: applicationName,
     client_id: IS_LOCALHOST
       ? CLIENT_ID.href
-      : new URL("/client-metadata.json", CLIENT_ID).toString(),
+      : new URL("/oauth-client-metadata.json", CLIENT_ID).toString(),
     client_uri: ENDPOINT_URL.href,
     redirect_uris: [new URL(REDIRECT_PATH, ENDPOINT_URL).href],
     scope: scopes.join(" "),

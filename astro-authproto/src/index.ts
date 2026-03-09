@@ -40,10 +40,10 @@ const addOAuthRoutes = (injectRoute: (_: InjectedRoute) => void) => {
  */
 const addAtProtoRoutes = (injectRoute: (_: InjectedRoute) => void) => {
   injectRoute({
-    pattern: "/client-metadata.json",
+    pattern: "/oauth-client-metadata.json",
     entrypoint: path.join(
       import.meta.dirname,
-      "./routes/client-metadata.json.js"
+      "./routes/oauth-client-metadata.json.js"
     ),
     prerender: false,
   });
