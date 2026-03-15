@@ -33,6 +33,15 @@ export type OAuthScope =
    */
   | string;
 
+export type ScopesOption =
+  | OAuthScope[]
+  | {
+      email?: boolean;
+      genericData?: boolean;
+      directMessages?: boolean;
+      additionalScopes?: OAuthScope[];
+    };
+
 export interface ConfigOptions {
   applicationName: string;
   applicationDomain: string;
@@ -43,14 +52,11 @@ export interface ConfigOptions {
   // transition:email => email address + confirmation status
   // transition:generic => write/read all data except DMs
   // transition:chat.bsky => chat.bsky Lexicons
-  scopes?:
-    | OAuthScope[]
-    | {
-        email?: boolean;
-        genericData?: boolean;
-        directMessages?: boolean;
-        additionalScopes?: OAuthScope[];
-      };
+  scopes?: ScopesOption;
+  /** Scopes requested when no per-request scopes are specified. Defaults to all configured scopes. */
+  defaultScopes?: ScopesOption;
+  /** Path to a module exporting a resolveScopes hook: (atprotoId: string, scopes: string[]) => string[] | Promise<string[]> */
+  resolveScopesEntrypoint?: string;
   redirects?: {
     afterLogin?: string;
     afterLogout?: string;
@@ -63,11 +69,37 @@ export interface ConfigOptions {
   */
 }
 
+export const getHooksImport = (resolveScopesEntrypoint?: string) => {
+  if (resolveScopesEntrypoint) {
+    return `export { default as resolveScopes } from ${JSON.stringify(resolveScopesEntrypoint)};`;
+  }
+  return `export const resolveScopes = null;`;
+};
+
 export const getStoresImport = (driverName?: string) => {
   if (driverName === "astro:db") {
     return `export { StateStore, SessionStore } from "@fujocoded/authproto/stores/db";`;
   }
   return `export { StateStore, SessionStore } from "@fujocoded/authproto/stores/unstorage";`;
+};
+
+const resolveScopes = (scopesOption?: ScopesOption): OAuthScope[] => {
+  const resolved: OAuthScope[] = ["atproto"];
+  if (Array.isArray(scopesOption)) {
+    resolved.push(...scopesOption);
+  } else {
+    if (scopesOption?.email) {
+      resolved.push("transition:email");
+    }
+    if (scopesOption?.genericData) {
+      resolved.push("transition:generic");
+    }
+    if (scopesOption?.directMessages) {
+      resolved.push("transition:chat.bsky");
+    }
+    resolved.push(...(scopesOption?.additionalScopes ?? []));
+  }
+  return resolved;
 };
 
 export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: boolean }) => {
@@ -78,21 +110,10 @@ export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: b
 
   const externalDomain = options.externalDomain ?? (isDev ? "http://127.0.0.1:4321/" : options.applicationDomain);
 
-  const scopes: OAuthScope[] = ["atproto"];
-  if (Array.isArray(options.scopes)) {
-    scopes.push(...options.scopes);
-  } else {
-    if (options.scopes?.email) {
-      scopes.push("transition:email");
-    }
-    if (options.scopes?.genericData) {
-      scopes.push("transition:generic");
-    }
-    if (options.scopes?.directMessages) {
-      scopes.push("transition:chat.bsky");
-    }
-    scopes.push(...(options.scopes?.additionalScopes ?? []));
-  }
+  const scopes = resolveScopes(options.scopes);
+  const defaultScopes = options.defaultScopes
+    ? resolveScopes(options.defaultScopes)
+    : scopes;
 
   let driversImport = "";
   if (finalDriver.name !== "astro:db") {
@@ -120,6 +141,7 @@ export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: b
       options.defaultDevUser ?? null
     )};
     export const scopes = ${JSON.stringify(scopes)};
+    export const defaultScopes = ${JSON.stringify(defaultScopes)};
     export const driverName = "${finalDriver.name}";
     export const redirectAfterLogin = ${JSON.stringify(
       options.redirects?.afterLogin ?? "/"

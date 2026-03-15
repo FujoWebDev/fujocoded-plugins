@@ -1,0 +1,82 @@
+---
+import { Login } from "@fujocoded/authproto/components";
+import {
+  defaultDevUser,
+  scopes as allScopes,
+} from "fujocoded:authproto/config";
+
+const user = Astro.locals.loggedInUser;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Custom Scopes</title>
+  </head>
+  <body>
+    {
+      user ? (
+        <>
+          <p>
+            Welcome {user.handle} ({user.did})
+          </p>
+          <p>You have the following scopes:</p>
+          <ul>
+            {user.scopes.map((s) => (
+              <li>{s}</li>
+            ))}
+          </ul>
+          <Login />
+
+          <h2>Not Enough™? Choose new ones!</h2>
+          <form action="/oauth/login" method="post">
+            <input type="hidden" name="atproto-id" value={user.did} />
+            {allScopes.map((scope) => (
+              <label>
+                <input
+                  type="checkbox"
+                  name="scope"
+                  value={scope}
+                  checked={user.scopes.includes(scope)}
+                />{" "}
+                {scope}
+              </label>
+            ))}
+            <button type="submit">Grant me scopes!</button>
+          </form>
+        </>
+      ) : (
+        <>
+          <p>Choose your log in adventure:</p>
+
+          <h2>1. Default Scopes </h2>
+          <Login />
+
+          <h2>2. Minimal scopes (identity only)</h2>
+          <Login scopes={[]} />
+
+          <h2>3. Default scopes + DMs</h2>
+          <Login additionalScopes={["transition:chat.bsky"]} />
+
+          <h2>4. Choose your own!</h2>
+          <form action="/oauth/login" method="post">
+            <input
+              name="atproto-id"
+              placeholder="handle.bsky.social"
+              value={import.meta.env.DEV ? defaultDevUser : undefined}
+            />
+            {allScopes.map((scope) => (
+              <label>
+                <input type="checkbox" name="scope" value={scope} /> {scope}
+              </label>
+            ))}
+            <button type="submit">Login with selected</button>
+          </form>
+        </>
+      )
+    }
+  </body>
+</html>

@@ -14,6 +14,7 @@ export const POST: APIRoute = async ({ redirect, session, request }) => {
   await loggedInClient.signOut();
 
   session.delete("atproto-did");
+  session.delete("atproto-scopes");
 
   // Check if a custom redirect was passed in the form data
   const body = await request.formData();
