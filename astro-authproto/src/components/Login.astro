@@ -1,15 +1,32 @@
 ---
-import { defaultDevUser } from "fujocoded:authproto/config";
+import { defaultDevUser, defaultScopes } from "fujocoded:authproto/config";
+import type { OAuthScope } from "../lib/config.js";
 
 interface Props {
   /** Optional redirect URL after successful login/logout */
   redirect?: string;
+  /** Explicit scopes to request (ignores defaults, starts from empty). */
+  scopes?: OAuthScope[];
+  /** Additional scopes on top of defaultScopes. */
+  additionalScopes?: OAuthScope[];
 }
 
-const { redirect: redirectUrl } = Astro.props;
+const { redirect: redirectUrl, scopes, additionalScopes } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
 const currentError =
   Astro.locals.authproto?.errorDescription ?? Astro.locals.authproto?.errorCode;
+
+// Create the final set of scopes. If neither props are present, this will be
+// empty, there will be no scopes hidden input, and the server will return the
+// default scopes.
+const resolvedScopes: OAuthScope[] = [];
+if (scopes !== undefined) {
+  // The scopes passed explicitly + atproto (must have)
+  resolvedScopes.push("atproto", ...scopes);
+} else if (additionalScopes !== undefined) {
+  // The default scopes + the additional ones
+  resolvedScopes.push(...defaultScopes, ...additionalScopes);
+}
 
 // @ts-expect-error
 const { class: cssClass, "class:list": cssClassList } = Astro.props;
@@ -44,6 +61,9 @@ const { class: cssClass, "class:list": cssClassList } = Astro.props;
       {redirectUrl && (
         <input type="hidden" name="redirect" value={redirectUrl} />
       )}
+      {resolvedScopes?.map((s) => (
+        <input type="hidden" name="scope" value={s} />
+      ))}
       <button type="submit">Login</button>
     </form>
   )

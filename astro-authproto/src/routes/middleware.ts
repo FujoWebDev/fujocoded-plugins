@@ -3,6 +3,7 @@ import { type MiddlewareHandler } from "astro";
 
 export const AUTHPROTO_ERROR_CODE = "authproto-error-code";
 export const AUTHPROTO_ERROR_DESCRIPTION = "authproto-error-description";
+export const AUTHPROTO_SCOPES = "atproto-scopes";
 
 export const onRequest: MiddlewareHandler = async (
   { locals, session },
@@ -34,6 +35,7 @@ export const onRequest: MiddlewareHandler = async (
       locals.loggedInUser = {
         did: loggedInClient.did,
         handle: await didToHandle(loggedInClient.did),
+        scopes: (await session?.get(AUTHPROTO_SCOPES)) ?? [],
         fetchHandler: loggedInClient.fetchHandler.bind(loggedInClient),
       };
     }
