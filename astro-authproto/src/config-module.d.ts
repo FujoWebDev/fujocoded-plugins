@@ -22,6 +22,7 @@ declare module "fujocoded:authproto/config" {
   export const externalDomain: string | undefined;
   export const storage: import("unstorage").Storage | null;
   export const scopes: string[];
+  export const defaultScopes: string[];
   export const driverName: string;
   export const redirectAfterLogin: string;
   export const redirectAfterLogout: string;
@@ -33,6 +34,12 @@ declare module "fujocoded:authproto/stores" {
     StateStore,
     SessionStore,
   } from "@fujocoded/authproto/stores/unstorage";
+}
+
+declare module "fujocoded:authproto/hooks" {
+  export const resolveScopes:
+    | ((atprotoId: string, scopes: string[]) => string[] | Promise<string[]>)
+    | null;
 }
 
 // astro:db types - @astrojs/db is an optional peer dependency

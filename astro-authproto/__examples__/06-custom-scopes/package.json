@@ -1,0 +1,19 @@
+{
+  "name": "example",
+  "type": "module",
+  "version": "0.0.1",
+  "private": "true",
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/db": "^0.17.2",
+    "@astrojs/node": "^9.4.0",
+    "@atproto/api": "^0.17.2",
+    "@fujocoded/authproto": "file:..",
+    "astro": "^5.12.9"
+  }
+}

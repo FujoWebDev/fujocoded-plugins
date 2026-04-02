@@ -72,8 +72,7 @@ In this package, you'll find:
 - [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up sessions
 - (Optional) [session driver](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver) to allow users to log in or log out
 
-> [!IMPORTANT]
-> `deno` requires a workaround due to a CJS/ESM import issue within
+> [!IMPORTANT] > `deno` requires a workaround due to a CJS/ESM import issue within
 > `@atproto/oauth-client-node`. For now, avoid using `deno` and use other package managers.
 
 > [!IMPORTANT]
@@ -92,7 +91,7 @@ npx astro add @fujocoded/authproto
 This will automatically install `@fujocoded/authproto` and add the integration to your `astro.config.mjs` file.
 
 > [!TIP]
-> 
+>
 > You can take a look at all the [possible configuration options below](#configuration-options).
 
 ### Manual Installation
@@ -138,8 +137,12 @@ import { Login } from "@fujocoded/authproto/components";
 <Login />
 ```
 
+You can also control what permissions your app asks for on different requests
+using the `scopes` and `additionalScopes` props! Check out the
+[custom scopes example](./__examples__/06-custom-scopes/) for all the details.
+
 > [!TIP]
-> 
+>
 > You might run into a naming collision issue if you also have a page named `login`. You can fix this by replacing `{ Login }` with `{ Login as LoginComponent }`.
 
 It'll look like a plain form:
@@ -199,6 +202,12 @@ Check out the example sites included under the [examples folder](./__examples__/
   - `additionalScopes`: array, optional. This is used in case you need to expand
     permissions to include other services. This should be an array of strings,
     like this: `["scope1", "scope2"]`
+- `defaultScopes`, optional. What your app asks for when no per-request scopes
+  are specified. Defaults to all configured `scopes`. Handy if you want to allow
+  a big set of scopes but only request a subset by default!
+- `resolveScopesEntrypoint`, optional. Path to a module that exports a
+  `resolveScopes(atprotoId, scopes)` function — use this if you need to tweak
+  scopes on the server side before the OAuth request goes out.
 
 # Support Us
 

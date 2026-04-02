@@ -5,6 +5,7 @@ import { redirectAfterLogin } from "fujocoded:authproto/config";
 import {
   AUTHPROTO_ERROR_DESCRIPTION,
   AUTHPROTO_ERROR_CODE,
+  AUTHPROTO_SCOPES,
 } from "../middleware.ts";
 import { type OAuthSession } from "@atproto/oauth-client-node";
 
@@ -18,6 +19,7 @@ export const GET: APIRoute = async ({
   const requestUrl = new URL(request.url);
 
   let oauthSession: OAuthSession | null;
+  let appState: string | null = null;
   let error = requestUrl.searchParams.get("error");
   // This falls back to undefined so it will be compatible with the session
   // storage signature if not present.
@@ -26,6 +28,7 @@ export const GET: APIRoute = async ({
   try {
     const clientCallback = await oauthClient.callback(requestUrl.searchParams);
     oauthSession = clientCallback.session;
+    appState = clientCallback.state;
     session?.set("atproto-did", oauthSession.did);
   } catch (e) {
     // If there is an error during session restoration then it takes precedence
@@ -41,22 +44,22 @@ export const GET: APIRoute = async ({
     session?.set(AUTHPROTO_ERROR_DESCRIPTION, errorDescription);
   }
 
-  // Check if a custom redirect or referer was passed in the state
-  // Note: CSRF validation is already handled by oauthClient.callback() above,
-  // so it's safe to fall back to default redirect if state parsing fails here
+  // The OAuth client returns our app state (passed during authorize) via
+  // clientCallback.state. The URL's "state" param is the library's internal nonce.
   let customRedirect: string | undefined;
   let referer: string | undefined;
-  const stateParam = requestUrl.searchParams.get("state");
-  if (stateParam) {
+  if (appState) {
     try {
       const stateData = JSON.parse(
-        Buffer.from(stateParam, "base64url").toString(),
+        Buffer.from(appState, "base64url").toString(),
       );
       customRedirect = stateData.redirect;
       referer = stateData.referer;
+      if (Array.isArray(stateData.scopes)) {
+        session?.set(AUTHPROTO_SCOPES, stateData.scopes);
+      }
     } catch {
-      // If custom redirect parsing fails, use default redirect
-      // (CSRF protection is still validated by the OAuth client)
+      // If state parsing fails, fall back to default redirect
     }
   }
 

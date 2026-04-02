@@ -1,7 +1,7 @@
 import type { AstroIntegration, InjectedRoute } from "astro";
 import path from "node:path";
 import { addVirtualImports } from "astro-integration-kit";
-import { getConfig, getStoresImport, type ConfigOptions } from "./lib/config.js";
+import { getConfig, getStoresImport, getHooksImport, type ConfigOptions } from "./lib/config.js";
 import { readFile } from "node:fs/promises";
 
 export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
@@ -84,6 +84,11 @@ export default (
           {
             id: "fujocoded:authproto/stores",
             content: getStoresImport(configOptions.driver?.name),
+            context: "server",
+          },
+          {
+            id: "fujocoded:authproto/hooks",
+            content: getHooksImport(configOptions.resolveScopesEntrypoint),
             context: "server",
           },
         ],
