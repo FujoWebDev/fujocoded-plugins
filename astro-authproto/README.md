@@ -26,13 +26,18 @@ credentials.
 In this package, you'll find:
 
 - `@fujocoded/authproto`, an Astro integration that:
-  - Adds the authentication routes you need
-  - Lets you easily access the DID and handle of a logged in user, if any
+  - Adds the Astro routes you need to authenticate with ATproto
+  - Gives you easy access the DID and handle of a logged in user, if any
 - `@fujocoded/authproto/components`, which includes:
-  - A basic login/logout component to get started quickly
-- `@fujocoded/authproto/helpers`,
-  - `getPdsAgent` authorizes a logged in user to post, update, or delete data from ATProto
-  - `friendsOnly` finds mutuals from your [Bluesky](https://bsky.app/) account
+  - A basic login/logout component to help you get started quickly
+- `@fujocoded/authproto/helpers`, which lets you access:
+  - `getLoggedInAgent` returns an authenticated agent for the logged in user,
+    routing requests through their PDS.
+  - `getPdsAgent` returns an agent pointed at any user's PDS. Pass a handle/DID to
+    read records, or a logged in user to create, update, or delete them. When
+    given a logged in user, it behaves exactly like `getLoggedInAgent`.
+  - `getBlueskyAgent` returns an agent for the Bluesky appview (public by
+    default, or authenticated if a logged in user is passed).
 
 ## What can you do with `@fujocoded/authproto`?
 
