@@ -72,8 +72,7 @@ In this package, you'll find:
 - [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up sessions
 - (Optional) [session driver](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver) to allow users to log in or log out
 
-> [!IMPORTANT]
-> `deno` requires a workaround due to a CJS/ESM import issue within
+> [!IMPORTANT] > `deno` requires a workaround due to a CJS/ESM import issue within
 > `@atproto/oauth-client-node`. For now, avoid using `deno` and use other package managers.
 
 > [!IMPORTANT]
@@ -92,8 +91,8 @@ npx astro add @fujocoded/authproto
 This will automatically install `@fujocoded/authproto` and add the integration to your `astro.config.mjs` file.
 
 > [!TIP]
-> 
-> You can take a look at all the [possible configuration options below](#configuration-options).
+>
+> You can take a look at [all the settings you can tweak below](#configuring-authproto).
 
 ### Manual Installation
 
@@ -123,9 +122,11 @@ export default defineConfig({
 
 > [!TIP]
 >
-> You can take a look at all the [possible configuration options below](#configuration-options).
+> You can take a look at [all the settings you can tweak below](#configuring-authproto).
 
 # Using `@fujocoded/authproto`
+
+## Add your login form
 
 Add the `<Login />` component to your site, like this:
 
@@ -138,13 +139,13 @@ import { Login } from "@fujocoded/authproto/components";
 <Login />
 ```
 
-> [!TIP]
-> 
-> You might run into a naming collision issue if you also have a page named `login`. You can fix this by replacing `{ Login }` with `{ Login as LoginComponent }`.
-
 It'll look like a plain form:
 
 <!-- screenshot -->
+
+See [Customizing the login form](#customizing-the-login-form) for ways to change how it looks and where it sends people after they log in.
+
+## Make a page only visible to logged in users
 
 To make a page only visible to logged in users:
 
@@ -167,18 +168,31 @@ if (!loggedInUser) {
 
 ... And you've got authentication working on your Astro site!
 
+> [!TIP]
+>
+> If you also have a page file named `login.astro`, you'll see the TypeScript error `Import declaration conflicts with local declaration of 'Login'` on the import line. Fix it by renaming the import:
+>
+> ```js
+> import { Login as LoginComponent } from "@fujocoded/authproto/components";
+> ```
+
 # Okay how do I _actually_ do stuff with this?
 
 Check out the example sites included under the [examples folder](./__examples__/).
 
-# Configuration options
+# Configuring authproto
+
+These settings go inside the `authproto({ ... })` call in your
+`astro.config.mjs`.
 
 - `applicationName`, required. The name of your application. For example, you
   can set this to `"My personal guestbook"`!
 - `applicationDomain`, required. It should be a domain that your site is on, or
   you can just put in `"localhost:4321"` for now.
-- `defaultDevUser`, optional. The default handle that gets filled out in the
-  `<Login />` component during development.
+- `defaultDevUser`, optional. A handle that gets pre-filled into the
+  [login form](#customizing-the-login-form) while you're developing your site
+  locally (never in production). Saves you from re-typing your handle every
+  time you restart the dev server.
 - `driver`, optional. The driver used to store data about OAuth sessions. This
   takes Astro's [session driver options](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver).
   You can also set this with `name: "astro:db"` to utilize [Astro's DB
@@ -199,6 +213,34 @@ Check out the example sites included under the [examples folder](./__examples__/
   - `additionalScopes`: array, optional. This is used in case you need to expand
     permissions to include other services. This should be an array of strings,
     like this: `["scope1", "scope2"]`
+
+# Customizing the login form
+
+You can change how `<Login />` looks and behaves by passing it these options:
+
+- `redirect`, optional. Where to send the user after they successfully log in
+  or log out.
+- `placeholder`, optional. The hint text shown inside the input when it's
+  empty. Defaults to `"handle.bsky.social"`.
+- Any standard HTML `<form>` attribute: `class`, `class:list`, `id`,
+  `aria-*`, `data-*`, `style`, and so on. These get applied directly to the
+  form, so you can style it, label it for screen readers, or use any field other libraries may require.
+  - NOTE: `action` and `method` are set by the component — they're what makes
+    login and logout work, so they can't be changed.
+
+> [!TIP]
+>
+> During development, you can pre-fill the input with a default handle by
+> setting [`defaultDevUser`](#configuring-authproto) in your `astro.config.mjs`.
+
+```jsx
+<Login
+  class="my-login-form"
+  aria-label="Sign in with your Atmosphere account"
+  redirect="/dashboard"
+  placeholder="you.bsky.social"
+/>
+```
 
 # Support Us
 

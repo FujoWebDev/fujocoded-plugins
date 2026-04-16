@@ -13,6 +13,7 @@ declare global {
         handle: string;
         fetchHandler: import("@atproto/oauth-client-node").OAuthSession["fetchHandler"];
       } | null;
+      loggedInClient: import("@atproto/oauth-client-node").OAuthSession | null;
       authproto: {
         attemptedHandle?: string;
         errorDescription?: string;

@@ -23,6 +23,7 @@ export const onRequest: MiddlewareHandler = async (
 
   if (!session || !userDid) {
     locals.loggedInUser = null;
+    locals.loggedInClient = null;
     return next();
   }
 
@@ -36,10 +37,12 @@ export const onRequest: MiddlewareHandler = async (
         handle: await didToHandle(loggedInClient.did),
         fetchHandler: loggedInClient.fetchHandler.bind(loggedInClient),
       };
+      locals.loggedInClient = loggedInClient;
     }
   } catch (e) {
     await session.delete("atproto-did");
     locals.loggedInUser = null;
+    locals.loggedInClient = null;
   }
 
   return next();

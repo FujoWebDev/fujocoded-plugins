@@ -1,29 +1,27 @@
 ---
+import type { HTMLAttributes } from "astro/types";
 import { defaultDevUser } from "fujocoded:authproto/config";
 
-interface Props {
+interface Props extends Omit<HTMLAttributes<"form">, "action" | "method"> {
   /** Optional redirect URL after successful login/logout */
   redirect?: string;
+  placeholder?: string;
 }
 
-const { redirect: redirectUrl } = Astro.props;
+const {
+  redirect: redirectUrl,
+  placeholder = "handle.bsky.social",
+  ...formAttrs
+} = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
 const currentError =
   Astro.locals.authproto?.errorDescription ?? Astro.locals.authproto?.errorCode;
-
-// @ts-expect-error
-const { class: cssClass, "class:list": cssClassList } = Astro.props;
 ---
 
 {
   currentUser ? (
     // If there's a current user, show the log out button
-    <form
-      action="/oauth/logout"
-      method="post"
-      class={cssClass}
-      class:list={cssClassList}
-    >
+    <form {...formAttrs} action="/oauth/logout" method="post">
       {redirectUrl && (
         <input type="hidden" name="redirect" value={redirectUrl} />
       )}
@@ -31,14 +29,16 @@ const { class: cssClass, "class:list": cssClassList } = Astro.props;
     </form>
   ) : (
     // If there's no current user, show the login button
-    <form
-      action="/oauth/login"
-      method="post"
-      class={cssClass}
-      class:list={cssClassList}
-    >
+    <form {...formAttrs} action="/oauth/login" method="post">
       <input
+        type="text"
         name="atproto-id"
+        placeholder={placeholder}
+        inputmode="email"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="username"
+        spellcheck="false"
         value={import.meta.env.DEV ? defaultDevUser : undefined}
       />
       {redirectUrl && (
