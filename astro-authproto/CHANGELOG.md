@@ -1,5 +1,19 @@
 # @fujocoded/authproto
 
+## 0.3.0
+
+### Minor Changes
+
+- 4edfdd1: Support Astro 6.
+- b728333: Add loggedInClient to Astro.locals and expose the full OAuthSession for the new lex package.
+
+### Patch Changes
+
+- 4edfdd1: Export client metadata domain from config so registered and runtime clients stay consistent.
+- b728333: Add input attributes to Login component for better mobile UX (placeholder, inputmode, autocorrect, autocapitalize, autocomplete, spellcheck).
+  Allow user to pass down form props to form.
+  Partially based on https://tangled.org/strings/did:plc:4gt3dbmp4pydjiemob4konzm/3mihke6jals22
+
 ## 0.2.0
 
 ### Minor Changes
