@@ -54,3 +54,39 @@ interface Props {
   contacts: SocialLinksData;
 }
 ```
+
+## Adding custom domains
+
+For platforms without a fixed domain, like `mastodon`, the built-in matchers
+can only know a fixed set of domains (e.g. `mastodon.social`,
+`mastodon.world`). If you use a different instance and you're tired of
+spelling out `platform: mastodon` every time, you can use `createSocialsTransformer`
+and pass platform domains via `domains`:
+
+```ts
+import { createSocialsTransformer } from "@fujocoded/zod-transform-socials";
+
+const { SocialLinks, transformSocial } = createSocialsTransformer({
+  domains: {
+    mastodon: ["blorbo.social", "tech.lgbt", "indiepocalypse.social"],
+  },
+});
+
+export const teamCollection = defineCollection({
+  type: "data",
+  schema: (tools) =>
+    z.object({
+      // ...
+      contacts: SocialLinks,
+    }),
+});
+```
+
+Only platforms with a registered URL shape can be configured this way
+(currently: `mastodon`). If you need a platform that isn't covered, please
+open a PR to add its URL-shape builder to `DOMAIN_PATTERNS` in the library —
+that way every consumer benefits and patterns stay correct.
+
+The bare `SocialLinks` / `transformSocial` exports still work and use the
+default configuration — only switch to `createSocialsTransformer` when you
+need to add domains.

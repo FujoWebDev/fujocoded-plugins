@@ -1,6 +1,15 @@
 import z from "zod";
-import { extractSocialData, getSocialIcon } from "./socials.ts";
-import type { SOCIAL_TYPES as INNER_SOCIAL_TYPES } from "./social-links.ts";
+import {
+  createExtractSocialData,
+  extractSocialData,
+  getSocialIcon,
+} from "./socials.ts";
+import {
+  createSocialLinks,
+  type CreateSocialLinksConfig,
+  type DomainShortcuts,
+  type SOCIAL_TYPES as INNER_SOCIAL_TYPES,
+} from "./social-links.ts";
 
 export const SocialsSchema = z.union([
   z.string().url(),
@@ -14,26 +23,47 @@ export const SocialsSchema = z.union([
 
 export type SocialsSchema = z.infer<typeof SocialsSchema>;
 
-export const transformSocial = (social: SocialsSchema) => {
-  if (typeof social == "string") {
-    return extractSocialData({ url: social });
-  }
-  const { icon, url, platform, username } = social;
-  const data = extractSocialData({ url });
+export type SOCIAL_TYPES = INNER_SOCIAL_TYPES;
+export type { DomainShortcuts };
 
-  return {
-    icon:
-      icon ??
-      (platform === undefined
-        ? data.icon
-        : getSocialIcon(platform as INNER_SOCIAL_TYPES)),
-    url: url ?? data.url,
-    platform: platform ?? data.platform,
-    username: username ?? data.username,
+export type CreateSocialsConfig = CreateSocialLinksConfig;
+
+const buildTransformSocial =
+  (extractor: ReturnType<typeof createExtractSocialData>) =>
+  (social: SocialsSchema) => {
+    if (typeof social == "string") {
+      return extractor({ url: social });
+    }
+    const { icon, url, platform, username } = social;
+    const data = extractor({ url });
+
+    return {
+      icon:
+        icon ??
+        (platform === undefined
+          ? data.icon
+          : getSocialIcon(platform as INNER_SOCIAL_TYPES)),
+      url: url ?? data.url,
+      platform: platform ?? data.platform,
+      username: username ?? data.username,
+    };
   };
+
+export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
+  const socialLinks = createSocialLinks(config);
+  const extractor = createExtractSocialData(socialLinks);
+  const transformSocial = buildTransformSocial(extractor);
+
+  const SocialLinks = z
+    .array(SocialsSchema)
+    .default([])
+    .transform((socialUrls) => socialUrls.map(transformSocial));
+
+  return { SocialsSchema, transformSocial, SocialLinks, socialLinks };
 };
 
-export type SOCIAL_TYPES = INNER_SOCIAL_TYPES;
+// Export a default transformer
+export const transformSocial = buildTransformSocial(extractSocialData);
 
 export const SocialLinks = z
   .array(SocialsSchema)

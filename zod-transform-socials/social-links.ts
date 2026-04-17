@@ -1,141 +1,184 @@
-import { type ProfileMatch, SocialLinks } from "social-links";
+import { type ProfileMatch, SocialLinks as SocialLinksLib } from "social-links";
 
-export const socialLinks = new SocialLinks();
+export type { ProfileMatch };
 
-const tumblrMatches: ProfileMatch[] = [
-  {
-    match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
-    // TODO: more may be necessary for things like extracting usernames
+/**
+ * Per-platform shortcut builders: turn a bare domain like `"blorbo.social"`
+ * into a `ProfileMatch` that knows the platform's URL shape.
+ */
+const DOMAIN_PATTERNS = {
+  mastodon: (domain: string) => ({
+    match: `https?://${escapeForRegex(domain)}/@([a-z0-9-_]+)/?`,
     group: 1,
-  },
-  // Must be last because it's a more general match, or www will be as a username
-  {
-    match: "https?://([a-z0-9-]+).tumblr.com/?.*",
-    // TODO: more may be necessary for things like extracting usernames
-    group: 1,
-  },
-];
-socialLinks.addProfile("tumblr", tumblrMatches);
-const kofiMatches: ProfileMatch[] = [
-  {
-    match: "https?://ko-fi.com/([a-z0-9-_]+)",
-    group: 1,
-  },
-];
-socialLinks.addProfile("ko-fi", kofiMatches);
+  }),
+} as const satisfies Record<string, (domain: string) => ProfileMatch>;
 
-const inprntMatches: ProfileMatch[] = [
-  {
-    match: "https?://(?:www.)?inprnt.com/gallery/([a-z0-9-]+)/?",
-    group: 1,
-  },
-];
-socialLinks.addProfile("inprnt", inprntMatches);
+export type DomainShortcuts = {
+  [K in keyof typeof DOMAIN_PATTERNS]?: string[];
+};
 
-const neocitiesMatches: ProfileMatch[] = [
-  {
-    match: "https?://([a-z0-9-]+).neocities.org",
-    group: 1,
-  },
-];
-socialLinks.addProfile("neocities", neocitiesMatches);
+const escapeForRegex = (input: string) =>
+  input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const blueSkyMatches: ProfileMatch[] = [
-  {
-    match: "https?://([a-z0-9-]+).bsky.(?:app|social)/?.*",
-    group: 1,
-  },
-  {
-    match: "https?://bsky.(?:app|social)/profile/([a-z0-9-.]+)/?.*",
-    group: 1,
-  },
-];
-socialLinks.addProfile("bsky", blueSkyMatches);
+export type CreateSocialLinksConfig = {
+  /**
+   * Register extra domains against a platform with a known URL shape
+   * (currently: `mastodon`). The library generates the correct regex.
+   */
+  domains?: DomainShortcuts;
+};
 
-const ao3Matches: ProfileMatch[] = [
-  {
-    match: "https?://archiveofourown.org/users/([a-z0-9-]+)",
-    group: 1,
-  },
-];
-socialLinks.addProfile("archiveofourown", ao3Matches);
+export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
+  const socialLinks = new SocialLinksLib();
 
-const dreamwidthMatches: ProfileMatch[] = [
-  {
-    match: "https?://([a-z0-9-]+).dreamwidth.org",
-    group: 1,
-  },
-];
-socialLinks.addProfile("dreamwidth", dreamwidthMatches);
+  const tumblrMatches: ProfileMatch[] = [
+    {
+      match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
+      // TODO: more may be necessary for things like extracting usernames
+      group: 1,
+    },
+    // Must be last because it's a more general match, or www will be as a username
+    {
+      match: "https?://([a-z0-9-]+).tumblr.com/?.*",
+      // TODO: more may be necessary for things like extracting usernames
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("tumblr", tumblrMatches);
+  const kofiMatches: ProfileMatch[] = [
+    {
+      match: "https?://ko-fi.com/([a-z0-9-_]+)",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("ko-fi", kofiMatches);
 
-const furaffinityMatches: ProfileMatch[] = [
-  {
-    match: "https?://www.furaffinity.net/user/([a-z0-9-]+)",
-    group: 1,
-  },
-];
-socialLinks.addProfile("furaffinity", furaffinityMatches);
+  const inprntMatches: ProfileMatch[] = [
+    {
+      match: "https?://(?:www.)?inprnt.com/gallery/([a-z0-9-]+)/?",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("inprnt", inprntMatches);
 
-const carrdMatches: ProfileMatch[] = [
-  {
-    match: "https?://([a-z0-9-]+).carrd.co/?",
-    group: 1,
-  },
-];
-socialLinks.addProfile("carrd", carrdMatches);
+  const neocitiesMatches: ProfileMatch[] = [
+    {
+      match: "https?://([a-z0-9-]+).neocities.org",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("neocities", neocitiesMatches);
 
-const kickstarterMatches: ProfileMatch[] = [
-  {
-    // https://www.kickstarter.com/projects/essential-randomness/the-fujoshi-guide-to-web-development
-    match: "https?://www.kickstarter.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
-    group: 1,
-  },
-];
-socialLinks.addProfile("kickstarter", kickstarterMatches);
+  const blueSkyMatches: ProfileMatch[] = [
+    {
+      match: "https?://([a-z0-9-]+).bsky.(?:app|social)/?.*",
+      group: 1,
+    },
+    {
+      match: "https?://bsky.(?:app|social)/profile/([a-z0-9-.]+)/?.*",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("bsky", blueSkyMatches);
 
-const npmMatches: ProfileMatch[] = [
-  {
-    // https://www.npmjs.com/package/@bobaboard/ao3.js
-    match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
-    group: 1,
-  },
-];
-socialLinks.addProfile("npm", npmMatches);
+  const ao3Matches: ProfileMatch[] = [
+    {
+      match: "https?://archiveofourown.org/users/([a-z0-9-]+)",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("archiveofourown", ao3Matches);
 
-// Social Links does not give us a way to add extra matches
-// but we chose to make it happen anyway.
+  const dreamwidthMatches: ProfileMatch[] = [
+    {
+      match: "https?://([a-z0-9-]+).dreamwidth.org",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("dreamwidth", dreamwidthMatches);
 
-const gitHubMatches: ProfileMatch[] = [
-  {
-    // https://github.com/FujoWebDev/AO3.js
-    match: "https?://github.com/([a-z0-9-]+/[a-z0-9-\\.]+)/?",
-    group: 1,
-  },
-  {
-    // https://github.com/orgs/FujoWebDev/
-    match: "https?://github.com/orgs/([a-z0-9-]+)/?",
-    group: 1,
-  },
-];
-// @ts-expect-error
-socialLinks.profiles.set("github", [
-  // @ts-expect-error
-  ...socialLinks.profiles.get("github"),
-  ...gitHubMatches,
-]);
+  const furaffinityMatches: ProfileMatch[] = [
+    {
+      match: "https?://www.furaffinity.net/user/([a-z0-9-]+)",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("furaffinity", furaffinityMatches);
 
-const xMatches: ProfileMatch[] = [
-  {
-    match: "(?:https?://)?(?:www.)?x.com/@?([a-z0-9-\\.]+)/?.*",
-    group: 1,
-  },
-];
-// @ts-expect-error
-socialLinks.profiles.set("twitter", [
-  // @ts-expect-error
-  ...socialLinks.profiles.get("twitter"),
-  ...xMatches,
-]);
+  const carrdMatches: ProfileMatch[] = [
+    {
+      match: "https?://([a-z0-9-]+).carrd.co/?",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("carrd", carrdMatches);
+
+  const kickstarterMatches: ProfileMatch[] = [
+    {
+      // https://www.kickstarter.com/projects/essential-randomness/the-fujoshi-guide-to-web-development
+      match: "https?://www.kickstarter.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("kickstarter", kickstarterMatches);
+
+  const npmMatches: ProfileMatch[] = [
+    {
+      // https://www.npmjs.com/package/@bobaboard/ao3.js
+      match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
+      group: 1,
+    },
+  ];
+  socialLinks.addProfile("npm", npmMatches);
+
+  // Social Links does not give us a way to add extra matches
+  // but we chose to make it happen anyway.
+
+  const gitHubMatches: ProfileMatch[] = [
+    {
+      // https://github.com/FujoWebDev/AO3.js
+      match: "https?://github.com/([a-z0-9-]+/[a-z0-9-\\.]+)/?",
+      group: 1,
+    },
+    {
+      // https://github.com/orgs/FujoWebDev/
+      match: "https?://github.com/orgs/([a-z0-9-]+)/?",
+      group: 1,
+    },
+  ];
+  appendMatches(socialLinks, "github", gitHubMatches);
+
+  const xMatches: ProfileMatch[] = [
+    {
+      match: "(?:https?://)?(?:www.)?x.com/@?([a-z0-9-\\.]+)/?.*",
+      group: 1,
+    },
+  ];
+  appendMatches(socialLinks, "twitter", xMatches);
+
+  for (const [platform, domains] of Object.entries(config.domains ?? {}) as [
+    keyof typeof DOMAIN_PATTERNS,
+    string[] | undefined,
+  ][]) {
+    const buildMatch = DOMAIN_PATTERNS[platform];
+    appendMatches(socialLinks, platform, (domains ?? []).map(buildMatch));
+  }
+
+  return socialLinks;
+};
+
+const appendMatches = (
+  socialLinks: SocialLinksLib,
+  platform: string,
+  matches: ProfileMatch[],
+) => {
+  // @ts-expect-error profiles is private on SocialLinks
+  const existing: ProfileMatch[] = socialLinks.profiles.get(platform) ?? [];
+  // @ts-expect-error profiles is private on SocialLinks
+  socialLinks.profiles.set(platform, [...existing, ...matches]);
+};
+
+export const socialLinks = createSocialLinks();
 
 // Extracted on 6/20/24
 type LIBRARY_TYPES =

@@ -1,4 +1,5 @@
-import { SOCIAL_TYPES, socialLinks } from "./social-links.ts";
+import type { SocialLinks as SocialLinksLib } from "social-links";
+import { SOCIAL_TYPES, socialLinks as defaultSocialLinks } from "./social-links.ts";
 
 export const getSocialIcon = (platform: SOCIAL_TYPES) => {
   if (platform === "inprnt") {
@@ -16,17 +17,21 @@ export const getSocialIcon = (platform: SOCIAL_TYPES) => {
   return "simple-icons:" + platform.replaceAll("-", "");
 };
 
-export const extractSocialData = ({ url }: { url: string }) => {
-  const lowerUrl = url.toLowerCase();
-  const socialLinkAttempt = socialLinks.detectProfile(lowerUrl) as SOCIAL_TYPES;
-  if (socialLinkAttempt) {
-    return {
-      url,
-      platform: socialLinkAttempt as SOCIAL_TYPES,
-      username: socialLinks.getProfileId(socialLinkAttempt, lowerUrl),
-      icon: getSocialIcon(socialLinkAttempt as SOCIAL_TYPES),
-    };
-  }
-  // If you cannot find it, return the original url
-  return { url, platform: "custom", username: null, icon: null };
-};
+export const createExtractSocialData =
+  (socialLinks: SocialLinksLib) =>
+  ({ url }: { url: string }) => {
+    const lowerUrl = url.toLowerCase();
+    const socialLinkAttempt = socialLinks.detectProfile(lowerUrl) as SOCIAL_TYPES;
+    if (socialLinkAttempt) {
+      return {
+        url,
+        platform: socialLinkAttempt as SOCIAL_TYPES,
+        username: socialLinks.getProfileId(socialLinkAttempt, lowerUrl),
+        icon: getSocialIcon(socialLinkAttempt as SOCIAL_TYPES),
+      };
+    }
+    // If you cannot find it, return the original url
+    return { url, platform: "custom", username: null, icon: null };
+  };
+
+export const extractSocialData = createExtractSocialData(defaultSocialLinks);
