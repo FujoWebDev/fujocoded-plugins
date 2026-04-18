@@ -1,5 +1,5 @@
-import { defineCollection, z } from "astro:content";
-import { atProtoStaticLoader } from "@fujocoded/astro-atproto-loader";
+import { defineLiveCollection, z } from "astro:content";
+import { atProtoLiveLoader } from "@fujocoded/astro-atproto-loader";
 
 interface BlueskyPost {
   uri: string;
@@ -33,8 +33,8 @@ const fetchBlueskyPost = async (
   };
 };
 
-const badges = defineCollection({
-  loader: atProtoStaticLoader({
+const badges = defineLiveCollection({
+  loader: atProtoLiveLoader({
     source: {
       repo: "atmosphereconf.org",
       collection: "community.lexicon.badge.definition",
@@ -47,8 +47,8 @@ const badges = defineCollection({
   }),
 });
 
-const streams = defineCollection({
-  loader: atProtoStaticLoader({
+const streams = defineLiveCollection({
+  loader: atProtoLiveLoader({
     source: {
       repo: "did:plc:r2vpg2iszskbkegoldmqa322",
       collection: "place.stream.livestream",
