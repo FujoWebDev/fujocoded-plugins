@@ -2,7 +2,7 @@
   "name": "@fujocoded/astro-atproto-loader",
   "type": "module",
   "version": "0.0.1",
-  "description": "Astro loaders for reading public AtProto records from one or more repos into collections.",
+  "description": "Astro loaders (live and static) for reading AtProto records into Astro content collections.",
   "module": "dist/index.js",
   "exports": {
     ".": {
