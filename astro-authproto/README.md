@@ -66,6 +66,7 @@ In this package, you'll find:
 
 - [Guestbook lexicons](https://github.com/FujoWebDev/lexicon-guestbook/)
 - [Fanfic archive](https://github.com/haetae-bit/fanfic-atproto)
+- [ATmosphereConf 2026 Website](https://atmosphereconf.org/) ([repo](https://github.com/ATProtocol-Community/atmosphereconf))
 
 # Getting started
 
@@ -77,7 +78,9 @@ In this package, you'll find:
 - [Server adapter](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters) to set up sessions
 - (Optional) [session driver](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver) to allow users to log in or log out
 
-> [!IMPORTANT] > `deno` requires a workaround due to a CJS/ESM import issue within
+> [!IMPORTANT]
+>
+> `deno` requires a workaround due to a CJS/ESM import issue within
 > `@atproto/oauth-client-node`. For now, avoid using `deno` and use other package managers.
 
 > [!IMPORTANT]
