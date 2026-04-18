@@ -1,5 +1,7 @@
 ---
-import { getCollection } from "astro:content";
+export const prerender = false;
+
+import { getLiveCollection } from "astro:content";
 
 const BADGES_REPO = "atmosphereconf.org";
 const STREAMS_DID = "did:plc:r2vpg2iszskbkegoldmqa322";
@@ -9,8 +11,16 @@ const STREAMS_COLLECTION = "place.stream.livestream";
 const pdsls = (did: string, collection: string, rkey: string) =>
   `https://pdsls.dev/at://${did}/${collection}/${rkey}`;
 
-const badges = await getCollection("badges");
-const streams = await getCollection("streams");
+const [badgesResult, streamsResult] = await Promise.all([
+  getLiveCollection("badges"),
+  getLiveCollection("streams"),
+]);
+
+const badges = badgesResult.entries ?? [];
+const streams = streamsResult.entries ?? [];
+
+const badgesError = badgesResult.error;
+const streamsError = streamsResult.error;
 ---
 
 <html lang="en">
@@ -18,18 +28,23 @@ const streams = await getCollection("streams");
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>@fujocoded/astro-atproto-loader static example</title>
+    <title>@fujocoded/astro-atproto-loader live example</title>
   </head>
   <body>
     <h1>Hello, Fujin!</h1>
     <p>
-      This example shows Astro <u><strong>static</strong></u> content collections
-      + AtProto repos. Snapshotted at build time!
+      This example shows Astro <u><strong>live</strong></u> collections + AtProto
+      repos. Fetched fresh for you!
     </p>
 
     <section>
       <h2><a href="https://atmosphereconf.org">ATmosphereConf</a> badges</h2>
       <p>These badges were awarded to the participant of Atmosphere Conf.</p>
+      {
+        badgesError && (
+          <p class="error">Could not load badges: {badgesError.message}</p>
+        )
+      }
       <ul>
         {
           badges.map((badge) => (
@@ -51,6 +66,11 @@ const streams = await getCollection("streams");
         <a href="https://essentialrandomness.com">Ms Boba</a>'s recent streams
       </h2>
       <p>Meet her on streamplace...sometimes!</p>
+      {
+        streamsError && (
+          <p class="error">Could not load streams: {streamsError.message}</p>
+        )
+      }
       <ul>
         {
           streams.map((stream) => (
@@ -87,5 +107,8 @@ const streams = await getCollection("streams");
     color: lightslategray;
     font-size: small;
     display: block;
+  }
+  .error {
+    color: darkred;
   }
 </style>
