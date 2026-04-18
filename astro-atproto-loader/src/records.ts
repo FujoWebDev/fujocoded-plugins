@@ -98,6 +98,18 @@ export const defaultTransform = <TData extends Record<string, unknown>>({
   data: value as TData,
 });
 
+// Return entries namespaced by did + collection so records from different
+// repos/collections don't collide when multiple sources share rkeys.
+export const getNamespacedEntry = <TData extends Record<string, unknown>>({
+  value,
+  did,
+  collection,
+  rkey,
+}: AtProtoRecordCallbackArgs): { id: string; data: TData } => ({
+  id: `${did}/${collection}/${rkey}`,
+  data: value as TData,
+});
+
 export const fetchAllFromPds = async <TEntry extends { id: string }>(
   source: AtProtoLoaderSource,
   options: AtProtoRecordCallbacks<TEntry>,
