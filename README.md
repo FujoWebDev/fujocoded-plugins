@@ -20,6 +20,7 @@ You can learn more about each plugin by looking at the `README.md` file in its d
 
 - [`astro-alt-text-toolkit`](/astro-alt-text-toolkit/README.md) - (WIP) Makes it easier to manage alt text on your Astro site, and beyond.
 - [`astro-ao3-loader`](/astro-ao3-loader/README.md) - Uses [AO3.js](https://github.com/fujowebdev/ao3.js) to load data from AO3 to your Astro site.
+- [`astro-atproto-loader`](/astro-atproto-loader/README.md) - Loads public AtProto records from one or more repos into Astro collections.
 - [`astro-authproto`](/astro-authproto/README.md) - Adds ATproto authentication to your Astro site.
 - [`astro-dev-only`](/astro-dev-only/README.md) - Renders pages to your Astro site during development (`npm run dev`), and removes them from the final build (`npm run build`).
 - [`astro-rehype-html-headings`](/astro-rehype-html-headings/README.md) - Returns Astro headings from an `.md` or `.mdx` including their rendered HTML.
