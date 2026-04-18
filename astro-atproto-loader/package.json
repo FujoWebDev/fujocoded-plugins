@@ -1,0 +1,63 @@
+{
+  "name": "@fujocoded/astro-atproto-loader",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Astro loaders for reading public AtProto records from one or more repos into collections.",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch src/",
+    "validate": "npx publint"
+  },
+  "keywords": [
+    "astro",
+    "withastro",
+    "astro-loader",
+    "astro-content",
+    "content-loader",
+    "atproto",
+    "bluesky"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "author": "FujoCoded LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "dependencies": {
+    "@atproto/api": "^0.17.3",
+    "@atproto/identity": "^0.4.8",
+    "@atproto/syntax": "^0.4.2"
+  },
+  "devDependencies": {
+    "@atproto/crypto": "^0.4.5",
+    "astro": "^5.16.14",
+    "msw": "^2.13.4",
+    "tsdown": "^0.14.2",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "astro": "^5.13.0 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
