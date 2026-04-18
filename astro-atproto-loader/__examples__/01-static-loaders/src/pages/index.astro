@@ -1,0 +1,93 @@
+---
+import { getCollection } from "astro:content";
+
+const BADGES_REPO = "atmosphereconf.org";
+const STREAMS_DID = "did:plc:r2vpg2iszskbkegoldmqa322";
+const BADGES_COLLECTION = "community.lexicon.badge.definition";
+const STREAMS_COLLECTION = "place.stream.livestream";
+
+const pdsls = (did: string, collection: string, rkey: string) =>
+  `https://pdsls.dev/at://${did}/${collection}/${rkey}`;
+
+const badges = await getCollection("badges");
+const streams = await getCollection("streams");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>@fujocoded/astro-atproto-loader static example</title>
+  </head>
+  <body>
+    <h1>Hello, Fujin!</h1>
+    <p>
+      This example shows Astro <u><strong>static</strong></u> content collections
+      + AtProto repos. Snapshotted at build time!
+    </p>
+
+    <section>
+      <h2><a href="https://atmosphereconf.org">ATmosphereConf</a> badges</h2>
+      <p>These badges were awarded to the participant of Atmosphere Conf.</p>
+      <ul>
+        {
+          badges.map((badge) => (
+            <li>
+              <a href={pdsls(BADGES_REPO, BADGES_COLLECTION, badge.id)}>
+                <strong>{badge.data.name}</strong>
+              </a>
+              {badge.data.description && (
+                <span> — {badge.data.description}</span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section>
+      <h2>
+        <a href="https://essentialrandomness.com">Ms Boba</a>'s recent streams
+      </h2>
+      <p>Meet her on streamplace...sometimes!</p>
+      <ul>
+        {
+          streams.map((stream) => (
+            <li>
+              <a href={pdsls(STREAMS_DID, STREAMS_COLLECTION, stream.id)}>
+                {stream.data.title}
+              </a>
+              {stream.data.post && (
+                <blockquote>
+                  <a
+                    href={`https://bsky.app/profile/${stream.data.post.authorHandle}`}
+                  >
+                    @{stream.data.post.authorHandle}
+                  </a>
+                  : {stream.data.post.text}
+                </blockquote>
+              )}
+              <datetime>
+                started {stream.data.createdAt.toLocaleString()}
+              </datetime>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </body>
+</html>
+
+<style>
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  datetime {
+    color: lightslategray;
+    font-size: small;
+    display: block;
+  }
+</style>
