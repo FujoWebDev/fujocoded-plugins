@@ -11,12 +11,17 @@ import {
   type SOCIAL_TYPES as INNER_SOCIAL_TYPES,
 } from "./social-links.ts";
 
+const urlSchema =
+  typeof (z as any).url === "function"
+    ? (z as any).url()
+    : z.string().url();
+
 export const SocialsSchema = z.union([
-  z.string().url(),
+  urlSchema,
   z.object({
     icon: z.string().optional(),
     platform: z.string().optional(),
-    url: z.string().url(),
+    url: urlSchema,
     username: z.string().optional(),
   }),
 ]);
