@@ -76,6 +76,7 @@
     "unstorage": "^1.16.1"
   },
   "devDependencies": {
+    "@astrojs/db": "^0.17.1",
     "drizzle-orm": "^0.42.0",
     "glob": "^13.0.6",
     "tsdown": "^0.17.2"
