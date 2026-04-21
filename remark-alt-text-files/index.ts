@@ -33,9 +33,9 @@ const getFilePath = ({
     options.root
       ? options.root
       : vfile.history[0]
-      ? dirname(vfile.history[0])
-      : process.cwd(),
-    filePath
+        ? dirname(vfile.history[0])
+        : process.cwd(),
+    filePath,
   );
 };
 
@@ -55,10 +55,10 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
         options: { pathPrefix, root },
       });
       loadingAltText.push(
-        readFile(filePath, "utf8").then((text) => (node.alt = text.trim()))
+        readFile(filePath, "utf8").then((text) => (node.alt = text.trim())),
       );
       loadingAltFiles.push(
-        `${node.alt.replace(pathPrefix, "")} (as ${filePath})`
+        `${node.alt.replace(pathPrefix, "")} (as ${filePath})`,
       );
     });
 
@@ -71,10 +71,10 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
     throw new Error(
       `Failed to load alt text from files: ${results
         .map((result, index) =>
-          result.status === "rejected" ? loadingAltFiles[index] : null
+          result.status === "rejected" ? loadingAltFiles[index] : null,
         )
         .filter((file) => file !== null)
-        .join(", ")}`
+        .join(", ")}`,
     );
   };
 

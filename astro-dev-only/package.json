@@ -1,8 +1,24 @@
 {
   "name": "@fujocoded/astro-dev-only",
-  "type": "module",
   "version": "0.0.4",
   "description": "An Astro integration for development-only pages",
+  "keywords": [
+    "astro-integration",
+    "withastro"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fujowebdev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -27,31 +43,15 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts middleware.ts --format cjs,esm --dts --clean --external 'fujocoded:dev-only-routes'",
     "validate": " npx publint"
   },
-  "keywords": [
-    "withastro",
-    "astro-integration"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fujowebdev/fujocoded-plugins.git"
-  },
-  "author": "FujoCoded LLC",
-  "license": "MIT",
   "devDependencies": {
     "astro-types-v4": "npm:astro@^4.0.0",
     "astro-types-v5": "npm:astro@^5.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

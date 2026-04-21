@@ -6,7 +6,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     getActionContext(context);
 
   const latestAction = await context.session?.get(
-    `smooth-actions:latest-astro-action`
+    `smooth-actions:latest-astro-action`,
   );
 
   if (latestAction) {

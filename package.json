@@ -1,6 +1,11 @@
 {
   "name": "fujocoded-plugins",
   "private": true,
+  "workspaces": [
+    "*/",
+    "!.*/"
+  ],
+  "type": "module",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "release": "npm run build && changeset publish --provenance",
@@ -11,11 +16,6 @@
     "format": "oxfmt && prettier --write \"**/*.astro\"",
     "format:check": "oxfmt --check && prettier --check \"**/*.astro\""
   },
-  "workspaces": [
-    "*/",
-    "!.*/"
-  ],
-  "packageManager": "npm@11.5.1",
   "dependencies": {
     "@changesets/cli": "^2.29.8"
   },
@@ -25,5 +25,6 @@
     "oxlint-tsgolint": "^0.21.1",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1"
-  }
+  },
+  "packageManager": "npm@11.5.1"
 }

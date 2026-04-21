@@ -1,8 +1,24 @@
 {
   "name": "@fujocoded/astro-ao3-loader",
-  "type": "module",
   "version": "0.0.4",
   "description": "Allows loading a series of AO3 works for the Astro Content Layer",
+  "keywords": [
+    "astro-loader",
+    "withastro"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "module": "dist/index.mjs",
   "exports": {
     ".": {
@@ -12,26 +28,13 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch src/",
     "validate": "npx publint"
-  },
-  "keywords": [
-    "withastro",
-    "astro-loader"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
   },
   "dependencies": {
     "@fujocoded/ao3.js": "^0.23.1",
@@ -46,8 +49,5 @@
   "peerDependencies": {
     "astro": "^5.0.0",
     "zod": "^3.0.0 || ^4.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

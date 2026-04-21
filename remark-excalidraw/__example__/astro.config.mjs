@@ -13,7 +13,10 @@ export default defineConfig({
     mode: "standalone",
   }),
 
-  integrations: [mdx({
-    remarkPlugins: [remarkExcalidraw],
-  }), react()],
+  integrations: [
+    mdx({
+      remarkPlugins: [remarkExcalidraw],
+    }),
+    react(),
+  ],
 });

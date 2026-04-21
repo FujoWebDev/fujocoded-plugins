@@ -49,7 +49,7 @@ export function pluginCodeCaption() {
             ];
           if (lastLine && lastLine.text.trim() === "") {
             context.codeBlock.deleteLine(
-              context.codeBlock.getLines().length - 1
+              context.codeBlock.getLines().length - 1,
             );
           }
         }
@@ -59,10 +59,10 @@ export function pluginCodeCaption() {
         const captionBlock = context.renderedGroupContents.find(
           (groupContent) => {
             const blockData = captionData.getOrCreateFor(
-              groupContent.codeBlock
+              groupContent.codeBlock,
             );
             return !!blockData.caption;
-          }
+          },
         );
         if (!captionBlock) {
           return;
@@ -76,10 +76,10 @@ export function pluginCodeCaption() {
             "figcaption",
             toHast(
               fromMarkdown(
-                captionData.getOrCreateFor(captionBlock.codeBlock).caption!
-              )
-            )
-          )
+                captionData.getOrCreateFor(captionBlock.codeBlock).caption!,
+              ),
+            ),
+          ),
         );
       },
     },

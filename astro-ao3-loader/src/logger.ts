@@ -1,4 +1,3 @@
-
 import type { LoaderContext } from "astro/loaders";
 
 const PROGRESS_INTERVAL_MS = 15 * 1000; // 15 seconds

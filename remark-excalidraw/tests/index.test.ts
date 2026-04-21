@@ -23,7 +23,7 @@ beforeEach(() => {
     {
       "./tests/test-image.excalidraw": `{ image: excalidraw }`,
     },
-    process.cwd()
+    process.cwd(),
   );
 });
 

@@ -25,7 +25,7 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
     { special, componentNames = [] }: PluginArgs = {
       special: DEFAULT_CAPITALIZATIONS_,
       componentNames: [],
-    }
+    },
   ) =>
   (tree) => {
     visit(tree, "heading", (node) => {
@@ -45,11 +45,11 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
         },
         (node) => {
           const titleAttribute = node.attributes.find(
-            (attribute) => "name" in attribute && attribute.name == "title"
+            (attribute) => "name" in attribute && attribute.name == "title",
           );
           if (titleAttribute) {
             const titleWithSplitCode = (titleAttribute.value as string).split(
-              new RegExp(CODE_REGEX)
+              new RegExp(CODE_REGEX),
             );
             titleAttribute.value = titleWithSplitCode
               .map((part, index) => {
@@ -69,7 +69,7 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
               })
               .join("");
           }
-        }
+        },
       );
     }
   };

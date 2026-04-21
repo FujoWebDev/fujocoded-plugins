@@ -29,7 +29,7 @@ export const astroRehypeHtmlHeadings: Plugin<
   return (tree, file) => {
     if (!file.data.astro) {
       throw new Error(
-        `[astro-rehype-html-headings]: Plugin can only be used within Astro context`
+        `[astro-rehype-html-headings]: Plugin can only be used within Astro context`,
       );
     }
 

@@ -21,7 +21,7 @@ type AstroIntegration = AstroIntegrationV4 & AstroIntegrationV5;
 
 const getDevOnlyStaticRoutes = (
   allRoutes: RouteData[],
-  routePatterns: Pattern[]
+  routePatterns: Pattern[],
 ) => {
   const matchesPattern = (route: RouteData, pattern: Pattern) => {
     if (typeof pattern === "string") {
@@ -32,7 +32,7 @@ const getDevOnlyStaticRoutes = (
   return allRoutes.filter(
     (route) =>
       route.prerender &&
-      routePatterns.some((pattern) => matchesPattern(route, pattern))
+      routePatterns.some((pattern) => matchesPattern(route, pattern)),
   );
 };
 
@@ -44,7 +44,7 @@ const throwIfNotInsideDist = (path: string | URL) => {
 
   if (!isWithinCwd) {
     throw new Error(
-      `Attempt to remove dangerous path: ${path} (${resolvedPath})`
+      `Attempt to remove dangerous path: ${path} (${resolvedPath})`,
     );
   }
 };
@@ -66,7 +66,7 @@ export const passRoutePatternsToMiddleware = (routePatterns: Pattern[]) => {
       if (id === "\0fujocoded:dev-only-routes") {
         return `export const excludedPatterns = [${routePatterns
           .map((route) =>
-            typeof route === "string" ? `"${route}"` : route.toString()
+            typeof route === "string" ? `"${route}"` : route.toString(),
           )
           .join(", ")}];`;
       }
@@ -122,14 +122,14 @@ export default function devOnlyRoutesIntegration({
                 Array.isArray(route.distURL)
                   ? route.distURL
                   : ([route.distURL] as URL[]),
-              ] as const
+              ] as const,
           );
 
         for (const [route, filePaths] of devOnlyRoutesAndPaths) {
           logger.info(
             dryRun
               ? `DRY RUN: ❌ (NOT) Removing file(s) for "src/pages${route}":`
-              : `❌ Removing files for "src/pages${route}" from final build`
+              : `❌ Removing files for "src/pages${route}" from final build`,
           );
           for (const filePath of filePaths) {
             const relativePath = relative(process.cwd(), filePath.pathname);

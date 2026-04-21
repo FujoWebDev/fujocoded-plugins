@@ -1,8 +1,8 @@
 table {
-	max-width: 50%;
-	border-spacing: 5px 10px;
-	border-top: 1px solid #ddd;
-	border-bottom: 1px solid #ddd;
+  max-width: 50%;
+  border-spacing: 5px 10px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 /*
@@ -12,16 +12,16 @@ table.deleted tbody tr td {
 */
 
 span.delete_response {
-	opacity: 1.0 !important;
-	text-decoration: none !important;
-	color: red;
+  opacity: 1 !important;
+  text-decoration: none !important;
+  color: red;
 }
 
 td:first-child {
-	font-weight: bold;
+  font-weight: bold;
 }
 table td + td {
-	border-left: 1px solid #ddd;
-	padding-left: 5px;
-	white-space: pre-line;
+  border-left: 1px solid #ddd;
+  padding-left: 5px;
+  white-space: pre-line;
 }

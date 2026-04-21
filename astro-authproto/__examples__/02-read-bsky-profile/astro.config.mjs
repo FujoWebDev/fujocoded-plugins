@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 import authProto from "@fujocoded/authproto";
 import node from "@astrojs/node";
 
@@ -11,14 +11,14 @@ export default defineConfig({
   }),
   integrations: [
     authProto({
-			applicationName: "Read Bluesky Profile",
-			applicationDomain: "localhost:4321",
-			driver: {
-				name: "fs",
-				options: {
-					base: "./tmp"
-				},
-			},
+      applicationName: "Read Bluesky Profile",
+      applicationDomain: "localhost:4321",
+      driver: {
+        name: "fs",
+        options: {
+          base: "./tmp",
+        },
+      },
     }),
-	],
+  ],
 });

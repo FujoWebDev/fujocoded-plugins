@@ -32,7 +32,7 @@ const showAltTextPopup = (image: HTMLElement) => {
         dialog.open = false;
       }
     },
-    { signal }
+    { signal },
   );
   dialog.addEventListener(
     "close",
@@ -40,12 +40,12 @@ const showAltTextPopup = (image: HTMLElement) => {
       dialog.remove();
       controller.abort();
     },
-    { signal }
+    { signal },
   );
 };
 
 const images = Array.from(
-  document.querySelectorAll<HTMLImageElement>(`img[alt]:not(img[alt=""])`)
+  document.querySelectorAll<HTMLImageElement>(`img[alt]:not(img[alt=""])`),
 );
 for (const image of images) {
   addBadgeToImage(image);

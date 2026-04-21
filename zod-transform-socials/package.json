@@ -1,8 +1,23 @@
 {
   "name": "@fujocoded/zod-transform-socials",
-  "type": "module",
   "version": "0.0.14",
   "description": "A Zod schema + transformer for social URLs",
+  "keywords": [
+    "zod"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -17,34 +32,19 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint"
   },
-  "keywords": [
-    "zod"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "publishConfig": {
-    "access": "public"
+  "dependencies": {
+    "social-links": "^1.14.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "tsup": "^8.1.0",
     "typescript": "^5.5.2"
-  },
-  "dependencies": {
-    "social-links": "^1.14.0",
-    "zod": "^3.23.8"
   }
 }

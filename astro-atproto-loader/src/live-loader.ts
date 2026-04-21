@@ -260,9 +260,7 @@ export const atProtoLiveLoader = <
         return {
           error: toError(
             error,
-            `Failed to load the AtProto record from ${getCollectionsLabel(
-              sources,
-            )}`,
+            `Failed to load the AtProto record from ${getCollectionsLabel(sources)}`,
           ),
         };
       }

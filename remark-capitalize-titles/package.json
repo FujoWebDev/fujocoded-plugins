@@ -1,8 +1,23 @@
 {
   "name": "@fujocoded/remark-capitalize-titles",
-  "type": "module",
   "version": "0.0.13",
   "description": "Make titles consistent with remark",
+  "keywords": [
+    "remark"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -17,24 +32,12 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint"
-  },
-  "keywords": [
-    "remark"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
   },
   "dependencies": {
     "title": "^4.0.1",
@@ -48,8 +51,5 @@
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
     "unified": "^11.0.4"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -2,8 +2,32 @@
   "name": "@fujocoded/authproto",
   "version": "0.3.0",
   "description": "Astro integration to easily authenticateyour site visitors using ATproto. For Bluesky and beyond.",
-  "main": "dist/index.js",
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "atproto",
+    "authentication",
+    "bluesky",
+    "withastro"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "type": "module",
+  "main": "dist/index.js",
   "exports": {
     ".": {
       "import": {
@@ -36,36 +60,12 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch src/",
     "validate": "npx publint",
     "test": "vitest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "keywords": [
-    "astro",
-    "withastro",
-    "astro-integration",
-    "atproto",
-    "bluesky",
-    "authentication"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
-  },
-  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "@atproto/api": "^0.17.3",
     "@atproto/identity": "^0.4.8",

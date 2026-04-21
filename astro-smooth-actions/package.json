@@ -1,11 +1,27 @@
 {
   "name": "@fujocoded/astro-smooth-action",
-  "type": "module",
   "version": "0.0.1",
+  "private": true,
   "description": "An Astro integration for smooth action handling",
+  "keywords": [
+    "astro-integration",
+    "withastro"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fujowebdev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
-  "private": true,
   "exports": {
     ".": {
       "import": {
@@ -14,32 +30,16 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "validate": " npx publint"
   },
-  "keywords": [
-    "withastro",
-    "astro-integration"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fujowebdev/fujocoded-plugins.git"
-  },
-  "author": "FujoCoded LLC",
-  "license": "MIT",
   "devDependencies": {
     "astro": "^5.0.0",
     "glob": "^13.0.6",
     "tsdown": "^0.14.1"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -39,7 +39,7 @@ const imageService: LocalImageService<AstroConfig["image"]> = {
 
     const imageEndpoint = path.join(
       import.meta.env.BASE_URL,
-      imageConfig.endpoint.route
+      imageConfig.endpoint.route,
     );
     return `${imageEndpoint}?${searchParams}`;
   },

@@ -1,10 +1,31 @@
 {
   "name": "@fujocoded/astro-alt-text-toolkit",
   "version": "0.0.1",
-  "description": "",
-  "main": "dist/index.js",
-  "type": "module",
   "private": true,
+  "description": "",
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "withastro"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
   "exports": {
     ".": {
       "import": {
@@ -13,33 +34,12 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
     "validate": "npx publint",
     "test": "vitest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "keywords": [
-    "astro",
-    "withastro",
-    "astro-integration"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
-  },
-  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {},
   "devDependencies": {
     "tsdown": "^0.14.1"

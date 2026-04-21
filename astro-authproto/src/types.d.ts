@@ -1,4 +1,7 @@
-import { AUTHPROTO_ERROR_CODE, AUTHPROTO_ERROR_DESCRIPTION } from "./routes/middleware.ts";
+import {
+  AUTHPROTO_ERROR_CODE,
+  AUTHPROTO_ERROR_DESCRIPTION,
+} from "./routes/middleware.ts";
 declare global {
   namespace App {
     interface SessionData {

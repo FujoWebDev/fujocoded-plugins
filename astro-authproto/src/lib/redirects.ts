@@ -7,7 +7,7 @@ import { didToHandle } from "./auth.js";
 
 const substituteRefererTemplate = (
   redirectToBase: string,
-  referer: string
+  referer: string,
 ): string => {
   const [basePath, baseParams] = redirectToBase.split("?");
   const [refererBasePath, refererParams] = referer.split("?");
@@ -28,7 +28,7 @@ const substituteRefererTemplate = (
       const processedValue = value.includes(REDIRECT_TO_REFERER_TEMPLATE)
         ? value.replaceAll(
             REDIRECT_TO_REFERER_TEMPLATE,
-            encodeURIComponent(referer)
+            encodeURIComponent(referer),
           )
         : value;
       finalParams.set(key, processedValue);
@@ -44,7 +44,7 @@ const substituteRefererTemplate = (
 
 const substituteUserTemplates = async (
   url: string,
-  did: string
+  did: string,
 ): Promise<string> => {
   let result = url;
 

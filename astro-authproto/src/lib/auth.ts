@@ -24,7 +24,7 @@ const REDIRECT_PATH = "/oauth/callback";
  * This is used both by the OAuth client and the client-metadata.json endpoint.
  */
 export const createClientMetadata = (
-  domain: string
+  domain: string,
 ): NodeOAuthClientOptions["clientMetadata"] => {
   const DOMAIN_URL = new URL(domain);
   const IS_LOCALHOST =
@@ -47,7 +47,7 @@ export const createClientMetadata = (
     CLIENT_ID.searchParams.set("scope", scopes.join(" "));
     CLIENT_ID.searchParams.set(
       "redirect_uri",
-      new URL(REDIRECT_PATH, ENDPOINT_URL).toString()
+      new URL(REDIRECT_PATH, ENDPOINT_URL).toString(),
     );
   }
 
@@ -86,7 +86,7 @@ export const didToHandle = async (did: string) => {
 };
 
 export const extractAuthError = (
-  e: unknown
+  e: unknown,
 ): { code: string | "UNKNOWN"; description: string | undefined } => {
   if (e instanceof Error) {
     return {

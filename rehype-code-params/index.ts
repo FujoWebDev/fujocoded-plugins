@@ -13,9 +13,9 @@ const PARAMETER_REGEX = /(\[[a-z0-9_\- ]+\])/gi;
 const isCodeWithSingleText = <
   T extends hast.Element & {
     children: [hast.Text];
-  }
+  },
 >(
-  node: hast.Node
+  node: hast.Node,
 ): node is T => {
   return (
     isElement(node) &&
@@ -63,7 +63,7 @@ export const rehypeCodeParams: Plugin<
 
         // @ts-expect-error We narrowed the type of children with isCodeWithSingleText, but newChildren is valid here.
         node.children = newChildren;
-      }
+      },
     );
   };
   ``;
