@@ -35,6 +35,11 @@ declare module "fujocoded:authproto/stores" {
   } from "@fujocoded/authproto/stores/unstorage";
 }
 
+declare module "*.astro" {
+  const Component: import("astro/runtime/server/index.js").AstroComponentFactory;
+  export default Component;
+}
+
 // astro:db types - @astrojs/db is an optional peer dependency
 declare module "astro:db" {
   export const db: any;

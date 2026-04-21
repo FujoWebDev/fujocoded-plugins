@@ -9,8 +9,8 @@ const substituteRefererTemplate = (
   redirectToBase: string,
   referer: string,
 ): string => {
-  const [basePath, baseParams] = redirectToBase.split("?");
-  const [refererBasePath, refererParams] = referer.split("?");
+  const [basePath = "", baseParams] = redirectToBase.split("?");
+  const [refererBasePath = "", refererParams] = referer.split("?");
 
   // Replace the referer template with the actual referer in the base path
   // of the redirectToBase

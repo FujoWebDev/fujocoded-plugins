@@ -20,8 +20,8 @@
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["./src/types.d.ts"]
+    "types": ["vite/client"]
   },
-  "include": ["./src/types.d.ts"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules"]
 }
