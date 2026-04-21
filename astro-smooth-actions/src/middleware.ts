@@ -2,8 +2,8 @@ import { getActionContext } from "astro:actions";
 import { type MiddlewareHandler } from "astro";
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
-  const { action, setActionResult, serializeActionResult } =
-    getActionContext(context);
+  const actionContext = getActionContext(context);
+  const { action } = actionContext;
 
   const latestAction = await context.session?.get(
     `smooth-actions:latest-astro-action`,
@@ -14,7 +14,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     // for this request and then delete the session entry. This makes it look
     // like the action was executed on this request, and there was no magic
     // redirect happening behind the scenes.
-    setActionResult(latestAction.name, latestAction.result);
+    actionContext.setActionResult(latestAction.name, latestAction.result);
     context.session?.delete(`smooth-actions:latest-astro-action`);
     return next();
   }
@@ -31,7 +31,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   const result = await action.handler();
   context.session?.set(`smooth-actions:latest-astro-action`, {
     name: action.name,
-    result: serializeActionResult(result),
+    result: actionContext.serializeActionResult(result),
   });
 
   if (result.error) {

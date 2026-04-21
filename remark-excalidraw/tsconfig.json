@@ -23,5 +23,11 @@
     "types": ["remark-mdx", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "dist", "__example__", "__examples__", "__tests__"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__example__",
+    "__examples__",
+    "__tests__"
+  ]
 }
