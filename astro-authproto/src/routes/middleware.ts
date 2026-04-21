@@ -17,8 +17,8 @@ export const onRequest: MiddlewareHandler = async (
       errorCode,
       errorDescription,
     };
-    await session?.delete(AUTHPROTO_ERROR_CODE);
-    await session?.delete(AUTHPROTO_ERROR_DESCRIPTION);
+    session?.delete(AUTHPROTO_ERROR_CODE);
+    session?.delete(AUTHPROTO_ERROR_DESCRIPTION);
   }
 
   if (!session || !userDid) {
@@ -39,8 +39,8 @@ export const onRequest: MiddlewareHandler = async (
       };
       locals.loggedInClient = loggedInClient;
     }
-  } catch (e) {
-    await session.delete("atproto-did");
+  } catch {
+    session.delete("atproto-did");
     locals.loggedInUser = null;
     locals.loggedInClient = null;
   }

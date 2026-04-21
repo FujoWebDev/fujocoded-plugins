@@ -18,11 +18,11 @@ const title = (...params: Parameters<typeof libraryTitle>) => {
 
 type PluginArgs = { special: string[]; componentNames: string[] };
 // We match command parameters of the form --flag [parameter_name]
-const CODE_REGEX = /(\`[a-z0-9_\-\s]+\`)/gi;
+const CODE_REGEX = /(`[a-z0-9_\-\s]+`)/gi;
 
 const plugin: Plugin<PluginArgs[], mdast.Root> =
   (
-    { special, componentNames = [] }: PluginArgs = {
+    { special, componentNames }: PluginArgs = {
       special: DEFAULT_CAPITALIZATIONS_,
       componentNames: [],
     },
@@ -52,7 +52,7 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
               new RegExp(CODE_REGEX),
             );
             titleAttribute.value = titleWithSplitCode
-              .map((part, index) => {
+              .map((part) => {
                 if (part.startsWith("`") && part.endsWith("`")) {
                   return part;
                   // } else if (index > 0) {

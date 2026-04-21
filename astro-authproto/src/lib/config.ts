@@ -31,7 +31,7 @@ export type OAuthScope =
   /**
    * Additional scopes not covered by the others.
    */
-  | string;
+  | (string & {});
 
 export interface ConfigOptions {
   applicationName: string;

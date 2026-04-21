@@ -1,8 +1,7 @@
 import { visitParents } from "unist-util-visit-parents";
 import type { Plugin } from "unified";
 import { readFile } from "node:fs/promises";
-import path, { join, dirname } from "node:path";
-import { exportToSvg } from "@excalidraw/excalidraw";
+import path, { dirname } from "node:path";
 
 import type mdast from "mdast";
 

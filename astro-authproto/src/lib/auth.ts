@@ -71,7 +71,7 @@ export const createClientMetadata = (
 const createClient = async (domain: string) => {
   return new NodeOAuthClient({
     clientMetadata: createClientMetadata(domain),
-    keyset: await Promise.all([JoseKey.generate()]),
+    keyset: [await JoseKey.generate()],
     stateStore: new Stores.StateStore(),
     sessionStore: new Stores.SessionStore(),
   });
@@ -87,7 +87,7 @@ export const didToHandle = async (did: string) => {
 
 export const extractAuthError = (
   e: unknown,
-): { code: string | "UNKNOWN"; description: string | undefined } => {
+): { code: "UNKNOWN" | (string & {}); description: string | undefined } => {
   if (e instanceof Error) {
     return {
       code: e.name ?? "UNKNOWN",

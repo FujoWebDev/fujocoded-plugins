@@ -34,7 +34,9 @@ const imageService: LocalImageService<AstroConfig["image"]> = {
     };
 
     Object.entries(params).forEach(([param, key]) => {
-      options[key] && searchParams.append(param, options[key].toString());
+      if (options[key]) {
+        searchParams.append(param, options[key].toString());
+      }
     });
 
     const imageEndpoint = path.join(

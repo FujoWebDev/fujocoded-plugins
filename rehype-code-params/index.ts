@@ -28,7 +28,7 @@ const isCodeWithSingleText = <
 export const rehypeCodeParams: Plugin<
   PluginArgs[],
   hast.Root
-> = ({}: PluginArgs = {}): Transformer<hast.Root> => {
+> = (): Transformer<hast.Root> => {
   return (tree) => {
     return visit(
       tree,
@@ -66,5 +66,4 @@ export const rehypeCodeParams: Plugin<
       },
     );
   };
-  ``;
 };

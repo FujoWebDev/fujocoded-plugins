@@ -67,8 +67,7 @@ export default (
   name: "fujocoded:authproto",
   hooks: {
     "astro:config:setup": (setupParams) => {
-      const { injectRoute, addMiddleware, createCodegenDir } = setupParams;
-      const codegenDir = createCodegenDir();
+      const { injectRoute, addMiddleware } = setupParams;
 
       addOAuthRoutes(injectRoute);
       addAtProtoRoutes(injectRoute);

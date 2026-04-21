@@ -75,7 +75,7 @@ export const passRoutePatternsToMiddleware = (routePatterns: Pattern[]) => {
 };
 
 export default function devOnlyRoutesIntegration({
-  routePatterns = [],
+  routePatterns,
   dryRun = false,
 }: {
   routePatterns: Pattern[];

@@ -63,7 +63,7 @@ export const getProgressTracker = ({
       failCount++;
       log();
       logger.error(
-        `${prefix} Failed to fetch ${itemsType.slice(0, -1)} ${id}: ${error}`,
+        `${prefix} Failed to fetch ${itemsType.slice(0, -1)} ${id}: ${String(error)}`,
       );
     },
     finish: () => {

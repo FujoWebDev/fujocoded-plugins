@@ -28,7 +28,7 @@ export async function getLoggedInAgent(
   try {
     const agent = new AtpBaseClient(loggedInUser.fetchHandler);
     return agent;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -56,7 +56,7 @@ export async function getPdsAgent(
     }
     const agent = new AtpBaseClient(destination);
     return agent;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -74,7 +74,7 @@ export async function getBlueskyAgent(user?: {
       user ? user.loggedInUser.fetchHandler : "https://public.api.bsky.app/",
     );
     return agent;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

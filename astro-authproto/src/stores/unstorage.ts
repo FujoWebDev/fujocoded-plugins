@@ -17,19 +17,19 @@ export class StateStore implements NodeSavedStateStore {
   /* Fulfills a request for the token */
   async get(key: string): Promise<NodeSavedState | undefined> {
     try {
-      const result = await storage.getItem(`authproto:state:${key}`);
+      const result = await storage?.getItem(`authproto:state:${key}`);
       return result as NodeSavedState;
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }
   /* Fulfills a request to set the token */
   async set(key: string, val: NodeSavedState) {
-    await storage.setItem(`authproto:state:${key}`, val);
+    await storage?.setItem(`authproto:state:${key}`, val);
   }
   /* Fulfills a request to delete the token */
   async del(key: string) {
-    await storage.del(`authproto:state:${key}`);
+    await storage?.del(`authproto:state:${key}`);
   }
 }
 
@@ -40,15 +40,15 @@ export class StateStore implements NodeSavedStateStore {
 export class SessionStore implements NodeSavedSessionStore {
   /* Fulfills a request to get the credential of the user, given a DID */
   async get(did: string): Promise<NodeSavedSession | undefined> {
-    const result = await storage.getItem(`authproto:session:${did}`);
+    const result = await storage?.getItem(`authproto:session:${did}`);
     return result as NodeSavedSession;
   }
   /* Fulfills a request to set the credential of the user, given a DID */
   async set(did: string, val: NodeSavedSession) {
-    await storage.setItem(`authproto:session:${did}`, val);
+    await storage?.setItem(`authproto:session:${did}`, val);
   }
   /* Fulfills a request to delete the credential of the user, given a DID */
   async del(did: string) {
-    await storage.del(`authproto:session:${did}`);
+    await storage?.del(`authproto:session:${did}`);
   }
 }

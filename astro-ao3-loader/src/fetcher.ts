@@ -98,8 +98,9 @@ const createFetcher = (logger: LoaderContext["logger"]) => {
     init?: RequestInit,
   ): Promise<Response> => {
     // We skip the queue if the response is already cached
-    if (RESPONSE_CACHE.has(input.toString())) {
-      return RESPONSE_CACHE.get(input.toString())!;
+    const cacheKey = JSON.stringify(input);
+    if (RESPONSE_CACHE.has(cacheKey)) {
+      return RESPONSE_CACHE.get(cacheKey)!;
     }
     return await queue.add(async () => await client(input, init));
   };

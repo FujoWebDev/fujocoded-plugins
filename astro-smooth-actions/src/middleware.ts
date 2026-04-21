@@ -15,7 +15,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     // like the action was executed on this request, and there was no magic
     // redirect happening behind the scenes.
     setActionResult(latestAction.name, latestAction.result);
-    await context.session?.delete(`smooth-actions:latest-astro-action`);
+    context.session?.delete(`smooth-actions:latest-astro-action`);
     return next();
   }
 
