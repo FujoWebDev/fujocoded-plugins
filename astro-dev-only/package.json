@@ -48,7 +48,8 @@
   },
   "scripts": {
     "build": "tsup index.ts middleware.ts --format cjs,esm --dts --clean --external 'fujocoded:dev-only-routes'",
-    "validate": " npx publint"
+    "validate": " npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "astro-types-v4": "npm:astro@^4.0.0",

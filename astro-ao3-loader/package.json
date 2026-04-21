@@ -34,7 +34,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch src/",
-    "validate": "npx publint"
+    "validate": "npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fujocoded/ao3.js": "^0.23.1",

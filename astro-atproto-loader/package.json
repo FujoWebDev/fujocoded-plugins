@@ -43,7 +43,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch src/",
-    "validate": "npx publint"
+    "validate": "npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@atproto/api": "^0.17.3",

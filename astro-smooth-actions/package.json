@@ -35,6 +35,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "typecheck": "tsc --noEmit",
     "validate": " npx publint"
   },
   "devDependencies": {

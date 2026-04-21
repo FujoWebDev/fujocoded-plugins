@@ -38,7 +38,8 @@
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint",
-    "test": "vitest --no-watch"
+    "test": "vitest --no-watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "mdast-util-to-hast": "^13.2.0"

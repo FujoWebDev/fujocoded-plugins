@@ -37,7 +37,8 @@
   },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
+    "validate": " npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "title": "^4.0.1",

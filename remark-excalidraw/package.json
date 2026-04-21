@@ -55,7 +55,8 @@
     "build:component": "tsup component.tsx --format cjs,esm --dts --external react",
     "validate": " npx publint",
     "test": "vitest",
-    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish"
+    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",

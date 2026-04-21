@@ -38,7 +38,8 @@
   },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
+    "validate": " npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "hast-util-heading-rank": "^3.0.0",

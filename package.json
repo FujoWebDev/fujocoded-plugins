@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "release": "npm run build && changeset publish --provenance",
     "sherif": "npx sherif@latest",
     "lint": "oxlint --type-aware",
