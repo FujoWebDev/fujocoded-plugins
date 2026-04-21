@@ -10,17 +10,15 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "release": "npm run build && changeset publish --provenance",
-    "sherif": "npx sherif@latest",
+    "sherif": "npx sherif@latest --ignore-rule non-existant-packages --fail-on-warnings",
     "lint": "oxlint --type-aware",
     "lint:fix": "oxlint --type-aware --fix",
     "lint:ci": "oxlint --type-aware --deny-warnings",
     "format": "oxfmt && prettier --write \"**/*.astro\"",
     "format:check": "oxfmt --check && prettier --check \"**/*.astro\""
   },
-  "dependencies": {
-    "@changesets/cli": "^2.29.8"
-  },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
     "oxlint-tsgolint": "^0.21.1",
