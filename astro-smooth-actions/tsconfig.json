@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
@@ -9,10 +8,8 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
-    /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    /* If transpiling with TypeScript: */
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
     "outDir": "dist",
@@ -22,5 +19,5 @@
     "noEmit": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "__examples__", "__tests__"]
+  "exclude": ["node_modules", "dist"]
 }

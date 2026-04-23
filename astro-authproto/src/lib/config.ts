@@ -31,7 +31,7 @@ export type OAuthScope =
   /**
    * Additional scopes not covered by the others.
    */
-  | string;
+  | (string & {});
 
 export interface ConfigOptions {
   applicationName: string;
@@ -70,13 +70,21 @@ export const getStoresImport = (driverName?: string) => {
   return `export { StateStore, SessionStore } from "@fujocoded/authproto/stores/unstorage";`;
 };
 
-export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: boolean }) => {
+export const getConfig = ({
+  options,
+  isDev,
+}: {
+  options: ConfigOptions;
+  isDev: boolean;
+}) => {
   const finalDriver = options.driver ?? {
     name: "memory",
     options: undefined,
   };
 
-  const externalDomain = options.externalDomain ?? (isDev ? "http://127.0.0.1:4321/" : options.applicationDomain);
+  const externalDomain =
+    options.externalDomain ??
+    (isDev ? "http://127.0.0.1:4321/" : options.applicationDomain);
 
   const scopes: OAuthScope[] = ["atproto"];
   if (Array.isArray(options.scopes)) {
@@ -116,17 +124,11 @@ export const getConfig = ({ options, isDev }: { options: ConfigOptions, isDev: b
     
     export const applicationName = "${options.applicationName}";
     export const applicationDomain = "${options.applicationDomain}";
-    export const defaultDevUser = ${JSON.stringify(
-      options.defaultDevUser ?? null
-    )};
+    export const defaultDevUser = ${JSON.stringify(options.defaultDevUser ?? null)};
     export const scopes = ${JSON.stringify(scopes)};
     export const driverName = "${finalDriver.name}";
-    export const redirectAfterLogin = ${JSON.stringify(
-      options.redirects?.afterLogin ?? "/"
-    )};
-    export const redirectAfterLogout = ${JSON.stringify(
-      options.redirects?.afterLogout ?? "/"
-    )};
+    export const redirectAfterLogin = ${JSON.stringify(options.redirects?.afterLogin ?? "/")};
+    export const redirectAfterLogout = ${JSON.stringify(options.redirects?.afterLogout ?? "/")};
     export const externalDomain = ${JSON.stringify(externalDomain)};
     export const clientMetadataDomain = process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? ${JSON.stringify(externalDomain)} ?? "${options.applicationDomain}";
     `;

@@ -26,7 +26,7 @@ export const remarkJsxAutoSlug: Plugin<PluginArgs[], mdast.Root> = ({
       },
       (node) => {
         const slug = node.attributes.find(
-          (attribute: any) => "name" in attribute && attribute.name == "slug"
+          (attribute: any) => "name" in attribute && attribute.name == "slug",
         )?.value as string;
 
         if (slug) {
@@ -34,12 +34,12 @@ export const remarkJsxAutoSlug: Plugin<PluginArgs[], mdast.Root> = ({
         }
 
         const title = node.attributes.find(
-          (attribute) => "name" in attribute && attribute.name == "title"
+          (attribute) => "name" in attribute && attribute.name == "title",
         )?.value as string;
 
         if (!title) {
           throw new Error(
-            `[remark-jsx-auto-slug]: ${node.name} should have title property`
+            `[remark-jsx-auto-slug]: ${node.name} should have title property`,
           );
         }
 
@@ -53,7 +53,7 @@ export const remarkJsxAutoSlug: Plugin<PluginArgs[], mdast.Root> = ({
               .replace(new RegExp(TITLE_REGEX), ""),
           });
         }
-      }
+      },
     );
   };
 };

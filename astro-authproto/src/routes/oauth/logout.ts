@@ -17,7 +17,9 @@ export const POST: APIRoute = async ({ redirect, session, request }) => {
 
   // Check if a custom redirect was passed in the form data
   const body = await request.formData();
-  const customRedirect = body.get("redirect")?.toString();
+  const redirectValue = body.get("redirect");
+  const customRedirect =
+    typeof redirectValue === "string" ? redirectValue : undefined;
   const referer = request.headers.get("referer");
   const redirectTo = await getRedirectUrl({
     redirectToBase: customRedirect ?? redirectAfterLogout ?? "/",

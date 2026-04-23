@@ -33,7 +33,7 @@ const getPathToAltTextMap = (
   },
   altTextModules: {
     [originalPath: string]: string;
-  }
+  },
 ) => {
   const pathToAltTextMap = new Map<string, string>();
   for (const [originalPath, module] of Object.entries(imageModules)) {
@@ -58,7 +58,7 @@ const getFinalSrc = async (image: typeof Astro.props.src) => {
 
 const finalPathToAltTextMap = getPathToAltTextMap(
   imageModules as any,
-  altTextModules as any
+  altTextModules as any,
 );
 
 const alt =

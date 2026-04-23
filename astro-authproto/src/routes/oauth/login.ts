@@ -9,8 +9,12 @@ import {
 
 export const POST: APIRoute = async ({ redirect, request, session }) => {
   const body = await request.formData();
-  const atprotoId = body.get("atproto-id")?.toString();
-  const customRedirect = body.get("redirect")?.toString();
+  const atprotoIdValue = body.get("atproto-id");
+  const atprotoId =
+    typeof atprotoIdValue === "string" ? atprotoIdValue : undefined;
+  const redirectValue = body.get("redirect");
+  const customRedirect =
+    typeof redirectValue === "string" ? redirectValue : undefined;
 
   // Get the referer to redirect back to the same page after login
   // if the developer asked us to do so

@@ -1,8 +1,33 @@
 {
   "name": "@fujocoded/astro-atproto-loader",
-  "type": "module",
   "version": "0.1.1",
   "description": "Astro loaders (live and static) for reading AtProto records into Astro content collections.",
+  "keywords": [
+    "astro",
+    "astro-content",
+    "astro-loader",
+    "atproto",
+    "bluesky",
+    "content-loader",
+    "withastro"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "module": "dist/index.js",
   "exports": {
     ".": {
@@ -12,36 +37,15 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch src/",
-    "validate": "npx publint"
+    "validate": "npx publint",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "astro",
-    "withastro",
-    "astro-loader",
-    "astro-content",
-    "content-loader",
-    "atproto",
-    "bluesky"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
-  },
-  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "@atproto/api": "^0.17.3",
     "@atproto/identity": "^0.4.8",
@@ -56,8 +60,5 @@
   },
   "peerDependencies": {
     "astro": "^5.13.0 || ^6.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

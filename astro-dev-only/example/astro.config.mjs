@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-import node from "@astrojs/node";
 import devOnly from "@fujocoded/astro-dev-only";
 
 // https://astro.build/config

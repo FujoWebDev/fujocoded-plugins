@@ -20,5 +20,7 @@
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist", "__examples__", "__tests__"]
 }

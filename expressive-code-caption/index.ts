@@ -2,7 +2,6 @@ import { definePlugin, AttachedPluginData } from "@expressive-code/core";
 import { h } from "@expressive-code/core/hast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
-import { pluginFrames } from "@expressive-code/plugin-frames";
 
 interface CaptionData {
   caption?: string;
@@ -49,7 +48,7 @@ export function pluginCodeCaption() {
             ];
           if (lastLine && lastLine.text.trim() === "") {
             context.codeBlock.deleteLine(
-              context.codeBlock.getLines().length - 1
+              context.codeBlock.getLines().length - 1,
             );
           }
         }
@@ -59,10 +58,10 @@ export function pluginCodeCaption() {
         const captionBlock = context.renderedGroupContents.find(
           (groupContent) => {
             const blockData = captionData.getOrCreateFor(
-              groupContent.codeBlock
+              groupContent.codeBlock,
             );
             return !!blockData.caption;
-          }
+          },
         );
         if (!captionBlock) {
           return;
@@ -76,10 +75,10 @@ export function pluginCodeCaption() {
             "figcaption",
             toHast(
               fromMarkdown(
-                captionData.getOrCreateFor(captionBlock.codeBlock).caption!
-              )
-            )
-          )
+                captionData.getOrCreateFor(captionBlock.codeBlock).caption!,
+              ),
+            ),
+          ),
         );
       },
     },

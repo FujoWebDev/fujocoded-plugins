@@ -13,7 +13,7 @@ const matchesPattern = (route: APIContext, pattern: Pattern) => {
 export const onRequest: MiddlewareHandler = async (context, next) => {
   if (context.isPrerendered) {
     // Route is pre-rendered, we've already done what we need to do
-    next();
+    return next();
   }
   if (excludedPatterns.some((pattern) => matchesPattern(context, pattern))) {
     return new Response(null, { status: 404 });

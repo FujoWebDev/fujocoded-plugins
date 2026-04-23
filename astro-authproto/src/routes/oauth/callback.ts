@@ -8,13 +8,7 @@ import {
 } from "../middleware.ts";
 import { type OAuthSession } from "@atproto/oauth-client-node";
 
-export const GET: APIRoute = async ({
-  params,
-  request,
-  redirect,
-  session,
-  locals,
-}) => {
+export const GET: APIRoute = async ({ request, redirect, session }) => {
   const requestUrl = new URL(request.url);
 
   let oauthSession: OAuthSession | null;

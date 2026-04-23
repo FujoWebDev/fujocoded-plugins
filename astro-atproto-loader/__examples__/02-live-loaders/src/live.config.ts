@@ -11,9 +11,7 @@ const fetchBlueskyPost = async (
   uri: string,
 ): Promise<BlueskyPost | undefined> => {
   const res = await fetch(
-    `https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(
-      uri,
-    )}`,
+    `https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(uri)}`,
   );
   if (!res.ok) return undefined;
 

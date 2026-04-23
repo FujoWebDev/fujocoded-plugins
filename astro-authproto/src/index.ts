@@ -1,7 +1,11 @@
 import type { AstroIntegration, InjectedRoute } from "astro";
 import path from "node:path";
 import { addVirtualImports } from "astro-integration-kit";
-import { getConfig, getStoresImport, type ConfigOptions } from "./lib/config.js";
+import {
+  getConfig,
+  getStoresImport,
+  type ConfigOptions,
+} from "./lib/config.js";
 import { readFile } from "node:fs/promises";
 
 export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
@@ -43,7 +47,7 @@ const addAtProtoRoutes = (injectRoute: (_: InjectedRoute) => void) => {
     pattern: "/oauth-client-metadata.json",
     entrypoint: path.join(
       import.meta.dirname,
-      "./routes/oauth-client-metadata.json.js"
+      "./routes/oauth-client-metadata.json.js",
     ),
     prerender: false,
   });
@@ -58,13 +62,12 @@ export default (
   configOptions: ConfigOptions = {
     applicationName: "AuthProto Application",
     applicationDomain: "http://localhost:4321",
-  }
+  },
 ): AstroIntegration => ({
   name: "fujocoded:authproto",
   hooks: {
     "astro:config:setup": (setupParams) => {
-      const { injectRoute, addMiddleware, createCodegenDir } = setupParams;
-      const codegenDir = createCodegenDir();
+      const { injectRoute, addMiddleware } = setupParams;
 
       addOAuthRoutes(injectRoute);
       addAtProtoRoutes(injectRoute);
@@ -99,30 +102,30 @@ export default (
     "astro:config:done": async ({ injectTypes, config, logger }) => {
       if (!config.session?.driver && !config.adapter) {
         logger.error(
-          "The ATproto OAuth integration uses Astro's session storage, which requires a session driver or an adapter. You have neither set. For more information, see https://docs.astro.build/en/guides/sessions/"
+          "The ATproto OAuth integration uses Astro's session storage, which requires a session driver or an adapter. You have neither set. For more information, see https://docs.astro.build/en/guides/sessions/",
         );
       }
       if (!configOptions.driver) {
         if (process.env.NODE_ENV === "development") {
           logger.warn(
-            "The ATproto OAuth integration requires a configured session driver in production. This will be ok for dev mode."
+            "The ATproto OAuth integration requires a configured session driver in production. This will be ok for dev mode.",
           );
         } else {
           throw new Error(
-            "The ATproto OAuth integration requires a configured session driver in production."
+            "The ATproto OAuth integration requires a configured session driver in production.",
           );
         }
       }
       if (!config.server.host && process.env.NODE_ENV === "development") {
         logger.error(
-          "ATproto requires the local redirect URL to be 127.0.0.1 (not localhost) but your site is not running on a network address. Run `astro dev --host` to fix this."
+          "ATproto requires the local redirect URL to be 127.0.0.1 (not localhost) but your site is not running on a network address. Run `astro dev --host` to fix this.",
         );
       }
       if (config.output === "static") {
         // TODO: check if a static site with some routes marked as dynamic
         // works.
         logger.warn(
-          `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`
+          `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`,
         );
       }
       injectTypes({
@@ -131,7 +134,7 @@ export default (
           path.join(import.meta.dirname, "./types.d.ts"),
           {
             encoding: "utf-8",
-          }
+          },
         ),
       });
     },

@@ -1,8 +1,7 @@
 import { visitParents } from "unist-util-visit-parents";
 import type { Plugin } from "unified";
 import { readFile } from "node:fs/promises";
-import path, { join, dirname } from "node:path";
-import { exportToSvg } from "@excalidraw/excalidraw";
+import path, { dirname } from "node:path";
 
 import type mdast from "mdast";
 
@@ -53,17 +52,17 @@ const plugin: Plugin<PluginArgs[], mdast.Root> = () => async (tree, vfile) => {
         ? dirname(vfile.history[0])
         : process.cwd();
       loadingFilePromises.push(
-        readFile(path.join(rootPath, node.url), "utf-8")
+        readFile(path.join(rootPath, node.url), "utf-8"),
       );
       attributeNodes.push(contentAttribute);
-    }
+    },
   );
 
   const fileContents = await Promise.all(loadingFilePromises);
   await Promise.all(
     fileContents.map(async (fileContent, index) => {
       attributeNodes[index]!.value = fileContent;
-    })
+    }),
   );
 
   if (fileContents.length > 0) {

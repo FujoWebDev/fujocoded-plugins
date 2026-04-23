@@ -98,7 +98,7 @@ test("Code with copy button", async () => {
   const copyButton = select("div.copy button", result.renderedGroupAst);
   // Note this shouldn't have the output in it
   expect(copyButton?.properties.dataCode).toBe(
-    `def foo():\x7F    for i in range(5):\x7F        print("This is the index ", i)\x7Ffoo()`
+    `def foo():\x7F    for i in range(5):\x7F        print("This is the index ", i)\x7Ffoo()`,
   );
 });
 
