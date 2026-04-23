@@ -102,9 +102,9 @@ describe("Handles inline code spans", () => {
   });
 
   test("handles multiple inline code spans with separators", async () => {
-    expect(
-      await processMarkdown("## git & github's `push`/`pull` dance"),
-    ).toBe("## Git & GitHub's `push`/`pull` Dance");
+    expect(await processMarkdown("## git & github's `push`/`pull` dance")).toBe(
+      "## Git & GitHub's `push`/`pull` Dance",
+    );
   });
 
   test("handles punctuation immediately following an inline code span", async () => {
@@ -132,9 +132,9 @@ describe("Handles hyphenated compound words", () => {
   });
 
   test("handles hyphenated words alongside a slash separator", async () => {
-    expect(
-      await processMarkdown("## push/pull: git's memory-sync dance"),
-    ).toBe("## Push/pull: Git's Memory-sync Dance");
+    expect(await processMarkdown("## push/pull: git's memory-sync dance")).toBe(
+      "## Push/pull: Git's Memory-sync Dance",
+    );
   });
 
   test("handles common hyphenated prefixes", async () => {
