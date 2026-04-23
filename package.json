@@ -15,7 +15,9 @@
     "lint:fix": "oxlint --type-aware --fix",
     "lint:ci": "oxlint --type-aware --deny-warnings",
     "format": "oxfmt && prettier --write \"**/*.astro\"",
-    "format:check": "oxfmt --check && prettier --check \"**/*.astro\""
+    "format:check": "oxfmt --check && prettier --check \"**/*.astro\"",
+    "check": "npm run format:check && npm run lint:ci && npm run sherif && npm run typecheck && npm run build",
+    "fix": "npm run format && npm run lint:fix"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",

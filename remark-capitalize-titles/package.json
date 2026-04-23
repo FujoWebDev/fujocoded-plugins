@@ -38,6 +38,7 @@
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "remark": "^15.0.1",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
-    "unified": "^11.0.4"
+    "unified": "^11.0.4",
+    "vitest": "^3.0.5"
   }
 }
