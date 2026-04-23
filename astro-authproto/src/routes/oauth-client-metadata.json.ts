@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { clientMetadataDomain } from "fujocoded:authproto/config";
 import { createClientMetadata } from "../lib/auth.js";
 
-export const GET: APIRoute = async ({}) => {
+export const GET: APIRoute = async () => {
   return new Response(
     JSON.stringify(createClientMetadata(clientMetadataDomain)),
     {
@@ -10,6 +10,6 @@ export const GET: APIRoute = async ({}) => {
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 };

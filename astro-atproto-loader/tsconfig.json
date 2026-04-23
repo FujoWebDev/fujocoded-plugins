@@ -17,5 +17,7 @@
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "__examples__", "__tests__"]
 }

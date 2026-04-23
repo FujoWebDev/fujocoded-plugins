@@ -2,10 +2,29 @@
   "name": "@fujocoded/remark-alt-text-files",
   "version": "0.0.2",
   "description": "Add alt text to your images directly from your filesystem",
+  "keywords": [
+    "accessibility",
+    "remark"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
-  "prefix": "./",
   "exports": {
     ".": {
       "import": {
@@ -18,34 +37,15 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
     "validate": " npx publint",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "keywords": [
-    "remark",
-    "accessibility"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
-  },
-  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "unist-util-visit": "^5.0.0"
   },
@@ -54,5 +54,6 @@
     "remark": "^15.0.1",
     "tsup": "^8.3.6",
     "vitest": "^3.0.5"
-  }
+  },
+  "prefix": "./"
 }

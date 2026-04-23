@@ -24,7 +24,9 @@ export const normalizeSources = <
     return options.sources;
   }
 
-  throw new Error("AtProto record loaders require either `source` or `sources`.");
+  throw new Error(
+    "AtProto record loaders require either `source` or `sources`.",
+  );
 };
 
 export const getCollectionsLabel = (sources: AtProtoLoaderSource[]) => {

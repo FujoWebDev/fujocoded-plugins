@@ -30,13 +30,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "followedBy" in usersRelationship &&
     Boolean(usersRelationship.followedBy);
   // True if target follows the current user
-  const following =
+  const _following =
     usersRelationship &&
     "following" in usersRelationship &&
     Boolean(usersRelationship.following);
   // True if this is a mutual relationship
-  const mutuals = follower && following;
-
+  const _mutuals = follower && _following;
   // This is where we redirect. Change the condition according to which
   // relationships give access to the page.
   if (!self && !follower) {

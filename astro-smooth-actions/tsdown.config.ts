@@ -1,5 +1,4 @@
-import { defineConfig, type UserConfig } from "tsdown";
-import { glob } from "glob";
+import { defineConfig } from "tsdown";
 
 export default defineConfig([
   {

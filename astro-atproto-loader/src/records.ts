@@ -50,8 +50,9 @@ export type AtProtoRecordTransform<TEntry> = (
   args: AtProtoRecordCallbackArgs,
 ) => MaybePromise<TEntry>;
 
-export interface AtProtoRecordCallbacks<TEntry>
-  extends AtProtoRecordFilterOptions {
+export interface AtProtoRecordCallbacks<
+  TEntry,
+> extends AtProtoRecordFilterOptions {
   /**
    * Convert a raw AtProto record into an Astro entry.
    */

@@ -1,5 +1,8 @@
 import type { SocialLinks as SocialLinksLib } from "social-links";
-import { SOCIAL_TYPES, socialLinks as defaultSocialLinks } from "./social-links.ts";
+import {
+  SOCIAL_TYPES,
+  socialLinks as defaultSocialLinks,
+} from "./social-links.ts";
 
 export const getSocialIcon = (platform: SOCIAL_TYPES) => {
   if (platform === "inprnt") {
@@ -21,7 +24,9 @@ export const createExtractSocialData =
   (socialLinks: SocialLinksLib) =>
   ({ url }: { url: string }) => {
     const lowerUrl = url.toLowerCase();
-    const socialLinkAttempt = socialLinks.detectProfile(lowerUrl) as SOCIAL_TYPES;
+    const socialLinkAttempt = socialLinks.detectProfile(
+      lowerUrl,
+    ) as SOCIAL_TYPES;
     if (socialLinkAttempt) {
       return {
         url,

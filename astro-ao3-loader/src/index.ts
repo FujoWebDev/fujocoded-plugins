@@ -5,12 +5,12 @@ import { parse } from "yaml";
 import type { Loader, LoaderContext } from "astro/loaders";
 import { z } from "zod";
 import { getFetcher } from "./fetcher.ts";
-import { getProgressTracker} from "./logger.ts";
+import { getProgressTracker } from "./logger.ts";
 
 /**
  * Loads items of the given "type" from the specified file ("yamlPath"). This uses the "itemFetcher"
  * function to fetch items from Archive of Our Own.
-**/
+ **/
 const loadItems = async <T extends { id: string | number }>(
   { store, logger }: LoaderContext,
   config: {

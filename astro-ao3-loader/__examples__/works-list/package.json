@@ -1,7 +1,7 @@
 {
   "name": "astro-5",
-  "type": "module",
   "version": "0.0.1",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -9,7 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.16.9",
-    "@fujocoded/astro-ao3-loader": "file:../.."
+    "@fujocoded/astro-ao3-loader": "file:../..",
+    "astro": "^5.16.9"
   }
 }

@@ -1,8 +1,23 @@
 {
   "name": "@fujocoded/expressive-code-caption",
-  "type": "module",
   "version": "0.0.3",
   "description": "Allow adding caption at the end of expressive code blocks.",
+  "keywords": [
+    "remark"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -17,24 +32,13 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
-  },
-  "keywords": [
-    "remark"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+    "validate": " npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "mdast-util-to-hast": "^13.2.0"
@@ -42,9 +46,6 @@
   "devDependencies": {
     "tsup": "^8.1.0",
     "typescript": "^5.5.2"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "peerDependencies": {
     "@expressive-code/core": "^0.35.3"

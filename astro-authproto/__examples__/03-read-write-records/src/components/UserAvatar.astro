@@ -2,15 +2,15 @@
 import { getBlueskyAgent } from "@fujocoded/authproto/helpers";
 
 if (!Astro.locals.loggedInUser) {
-    return null;
+  return null;
 }
 
 const agent = await getBlueskyAgent({
-    loggedInUser: Astro.locals.loggedInUser,
+  loggedInUser: Astro.locals.loggedInUser,
 });
 
 const response = await agent?.app.bsky.actor.getProfile({
-    actor: Astro.locals.loggedInUser.handle,
+  actor: Astro.locals.loggedInUser.handle,
 });
 const profile = response?.data;
 ---
@@ -18,9 +18,9 @@ const profile = response?.data;
 <img src={profile?.avatar} />
 
 <style>
-    img {
-        width: 30px;
-        border-radius: 100%;
-        height: auto;
-    }
+  img {
+    width: 30px;
+    border-radius: 100%;
+    height: auto;
+  }
 </style>

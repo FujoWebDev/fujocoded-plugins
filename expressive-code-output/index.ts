@@ -56,7 +56,7 @@ export function pluginCodeOutput() {
         if (!blockData.output.length) return;
 
         const lastPre = context.renderData.blockAst.children.findLastIndex(
-          (child) => child.type === "element" && child.tagName === "pre"
+          (child) => child.type === "element" && child.tagName === "pre",
         );
 
         if (lastPre === -1) return;
@@ -66,7 +66,7 @@ export function pluginCodeOutput() {
           ...currentChildren.slice(0, lastPre + 1),
           h(
             "pre.output",
-            blockData.output.map((line) => h("div", line))
+            blockData.output.map((line) => h("div", line)),
           ),
           ...currentChildren.slice(lastPre + 1),
         ];

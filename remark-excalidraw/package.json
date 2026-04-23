@@ -2,10 +2,29 @@
   "name": "@fujocoded/remark-excalidraw",
   "version": "0.0.2",
   "description": "Load excalidraw diagrams via remark",
+  "keywords": [
+    "excalidraw",
+    "remark"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded, LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
-  "prefix": "./",
   "exports": {
     ".": {
       "import": {
@@ -28,12 +47,6 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -42,22 +55,9 @@
     "build:component": "tsup component.tsx --format cjs,esm --dts --external react",
     "validate": " npx publint",
     "test": "vitest",
-    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish"
+    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish",
+    "typecheck": "tsc --noEmit"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
-  },
-  "keywords": [
-    "remark",
-    "excalidraw"
-  ],
-  "author": "FujoCoded, LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
-  },
-  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
     "unist-util-visit-parents": "^6.0.1"
@@ -68,5 +68,6 @@
     "remark-mdx": "^3.1.0",
     "tsup": "^8.3.6",
     "vitest": "^3.0.5"
-  }
+  },
+  "prefix": "./"
 }

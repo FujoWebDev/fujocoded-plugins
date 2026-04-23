@@ -1,8 +1,24 @@
 {
   "name": "@fujocoded/astro-rehype-html-headings",
-  "type": "module",
   "version": "0.0.2",
   "description": "Adds a list of headings to Astro's frontmatter that include rendered HTML code",
+  "keywords": [
+    "astro",
+    "rehype"
+  ],
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -17,25 +33,13 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint"
-  },
-  "keywords": [
-    "rehype",
-    "astro"
-  ],
-  "author": "FujoCoded LLC",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+    "validate": " npx publint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "hast-util-heading-rank": "^3.0.0",
@@ -47,8 +51,5 @@
     "tsup": "^8.1.0",
     "typescript": "^5.6.2",
     "unified": "^11.0.4"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

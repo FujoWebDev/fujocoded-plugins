@@ -25,7 +25,7 @@ const formatHtml = (html: string) => {
           !part.startsWith("</") &&
           !part.endsWith("/>") &&
           !["br", "img", "input", "meta", "link"].some((tag) =>
-            part.includes(tag)
+            part.includes(tag),
           )
         ) {
           indent++;
@@ -78,14 +78,14 @@ export const extractCodeBlockAndOutput = (element: Element) => {
     throw new Error("Figure element has no children in code output");
   }
   const codeBlockIndex = figureElement.children.findIndex(
-    (child) => child.type === "element" && child.tagName === "pre"
+    (child) => child.type === "element" && child.tagName === "pre",
   );
   const outputIndex = figureElement.children.findIndex(
     (child, index) =>
       child.type === "element" &&
       child.tagName === "pre" &&
       index > codeBlockIndex,
-    codeBlockIndex
+    codeBlockIndex,
   );
   return {
     codeBlock: figureElement.children[codeBlockIndex] ?? null,

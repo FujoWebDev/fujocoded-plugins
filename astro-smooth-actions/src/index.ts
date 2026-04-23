@@ -16,7 +16,7 @@ export default function astroActionSessions(): AstroIntegration {
       "astro:config:done": ({ config, logger }) => {
         if (!config.session?.driver && !config.adapter) {
           logger.warn(
-            "The astro-smooth-actions integration uses Astro's session storage, which requires a session driver or an adapter. You have neither set. For more information, see https://docs.astro.build/en/guides/sessions/"
+            "The astro-smooth-actions integration uses Astro's session storage, which requires a session driver or an adapter. You have neither set. For more information, see https://docs.astro.build/en/guides/sessions/",
           );
         }
       },

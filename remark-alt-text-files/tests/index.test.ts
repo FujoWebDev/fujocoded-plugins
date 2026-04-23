@@ -38,7 +38,7 @@ beforeEach(() => {
       "./root/directory/path/to/image.alt.txt":
         "This is the alt text for /path/to/image.png, relative to root/directory",
     },
-    process.cwd()
+    process.cwd(),
   );
 });
 
@@ -84,7 +84,7 @@ test("should load specific file when path is provided, from given root", async (
 ![file:./path/to/image.alt.txt](/path/to/image.png)`,
     {
       root: `${process.cwd()}/root/directory`,
-    }
+    },
   );
 
   expect(result).toBe(`# Hello, world!
@@ -107,9 +107,9 @@ test("should fail when file does not exist", async () => {
     async () =>
       await processMarkdown(`# Hello, world!
 
-  ![file:does-not-exist.txt](/path/to/image.png)`)
+  ![file:does-not-exist.txt](/path/to/image.png)`),
   ).rejects.toThrowError(
-    `Failed to load alt text from files: does-not-exist.txt (as ${process.cwd()}/does-not-exist.txt)`
+    `Failed to load alt text from files: does-not-exist.txt (as ${process.cwd()}/does-not-exist.txt)`,
   );
 });
 
