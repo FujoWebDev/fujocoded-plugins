@@ -1,21 +1,27 @@
-export { atProtoLiveLoader } from "./live-loader.ts";
+export { atProtoLiveLoader } from "./loaders/live.ts";
 export type {
   AtProtoLiveLoaderEntryFilter,
   AtProtoLiveLoaderOptions,
-  AtProtoLoadCollectionFilterArgs,
-} from "./live-loader.ts";
+  AtProtoQueryFilterArgs,
+} from "./loaders/live.ts";
 
-export { atProtoStaticLoader } from "./static-loader.ts";
+export { atProtoStaticLoader } from "./loaders/static.ts";
 export type {
   AtProtoStaticDataEntry,
   AtProtoStaticLoaderOptions,
-} from "./static-loader.ts";
+} from "./loaders/static.ts";
 
-export { getNamespacedEntry } from "./records.ts";
+export { toNamespacedEntry } from "./utils.ts";
 export type {
   AtProtoLoaderSource,
   AtProtoRecordCallbackArgs,
   AtProtoRecordContext,
   AtProtoRecordFilterOptions,
+  AtProtoRecordGroupBy,
+  AtProtoRecordGroupTransform,
+  AtProtoRecordGroupTransformArgs,
+  AtProtoRecordTransform,
+  FetchRecord,
+  OnSourceError,
   RecordValue,
-} from "./records.ts";
+} from "./types.ts";

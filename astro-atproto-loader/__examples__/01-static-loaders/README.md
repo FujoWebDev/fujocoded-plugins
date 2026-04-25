@@ -22,3 +22,6 @@ npm run dev
 ```
 
 Then open `http://127.0.0.1:4321`.
+
+If you want to inspect the built static output instead, run `npm run build`
+and then `npm run preview`.

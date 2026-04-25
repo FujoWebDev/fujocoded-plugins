@@ -5,8 +5,15 @@ live collections.
 
 It reads public AtProto badge records from `atmosphereconf.org` and the
 Streamplace data from `essentialrandom.bsky.social` and shows them
-on a page with `getLiveCollection()`. The data is collected at the time of
-requested, and re-fetched periodically.
+on a page with `getLiveCollection()`. The data is collected at request time
+and re-fetched periodically.
+
+> [!IMPORTANT]
+>
+> Astro live collections are still experimental. This example needs
+> `experimental.liveContentCollections: true` in `astro.config.mjs`, plus a
+> server-capable adapter such as `@astrojs/node`, because live collections are
+> rendered on demand.
 
 The page uses the loader two ways:
 

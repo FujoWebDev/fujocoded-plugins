@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import { getLiveCollection } from "astro:content";
+import RepostCard from "../components/RepostCard.astro";
+
+const result = await getLiveCollection("sharedReposts");
+const reposts = result.entries ?? [];
+const error = result.error;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Posts the FujoCoded crew reposted together</title>
+  </head>
+  <body>
+    <h1>Posts recently reposted by all 3 fujocoded accounts</h1>
+    <p>
+      This example reads <code>app.bsky.feed.repost</code>s from
+      <a href="https://bsky.app/profile/fujocoded.bsky.social"
+        >@fujocoded.bsky.social</a
+      >, <a href="https://bsky.app/profile/fujoweb.dev">@fujoweb.dev</a>, and
+      <a href="https://bsky.app/profile/bobaboard.bsky.social"
+        >@bobaboard.bsky.social</a
+      >, then groups them by the URI of the post being reposted. If it finds one
+      in all accounts, it gets printed here.
+    </p>
+
+    {error && <p class="error">Could not load reposts: {error.message}</p>}
+
+    {
+      !error && reposts.length === 0 && (
+        <p>No posts have been reposted by all three accounts recently.</p>
+      )
+    }
+
+    <ul class="posts">
+      {reposts.map((entry) => <RepostCard {...entry.data} />)}
+    </ul>
+  </body>
+</html>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 42rem;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    line-height: 1.5;
+  }
+  .posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+  }
+  .error {
+    color: darkred;
+  }
+</style>

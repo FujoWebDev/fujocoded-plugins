@@ -2,7 +2,7 @@
 
 <!-- banner -->
 
-AtProto records meet [Astro](https://docs.astro.build/en/concepts/why-astro/) content collections.
+ATproto records meet [Astro](https://docs.astro.build/en/concepts/why-astro/) content collections.
 Quick & Easy™
 
 <!-- badges -->
@@ -25,24 +25,32 @@ Quick & Easy™
 
 > [!IMPORTANT]
 >
-> This package handles **public reads only**. If you also want to write data
+> This package handles **reads only**. If you also want to write data
 > (like posting to Bluesky as a logged-in user), you'll want to start from
 > [`@fujocoded/authproto`](/astro-authproto/README.md).
 
 ## What is `@fujocoded/astro-atproto-loader`?
 
 `@fujocoded/astro-atproto-loader` pulls records from any public AtProto PDS
-straight into your Astro content collections. Point it at a handle or DID,
-choose your AtProto collection NSID, and use the data on your Astro site like
-you would with any content collection.
+straight into your Astro content collections. Point it at a user (e.g.
+`boba-tan.bsky.social`) or DID (e.g. `did:plc:abc123`), tell it which kind of
+record to read (e.g. `app.bsky.feed.post`), and use the data on your Astro site
+like you would with any content collection.
 
 Under the hood, `@fujocoded/astro-atproto-loader`:
 
 - resolves a handle to its DID (when needed)
-- resolves that DID to the repo's PDS
-- reads records with [`com.atproto.repo.listRecords`](https://docs.bsky.app/docs/api/com-atproto-repo-list-records) and `getRecord`
-- keeps a short in-memory cache and refreshes it in the background when a
-  request happens (stale-while-revalidate)
+- resolves that DID/handle to the user's PDS
+- reads records with
+  [`com.atproto.repo.listRecords`](https://docs.bsky.app/docs/api/com-atproto-repo-list-records)
+  and `getRecord`
+- shares one network hop when more than one callback asks for the same record
+  in the same load (via [`fetchRecord`](#fetchrecord-hydrating-records-by-at-uri)
+  to fetch a record by its AT-URI, the `at://...` address that uniquely
+  identifies a record on the network)
+- keeps a short in-memory cache for live collections and refreshes it in the
+  background when a request comes in (stale-while-revalidate: serve the cached
+  copy now, fetch a fresh one in the background)
 
 ## What's included in `@fujocoded/astro-atproto-loader`?
 
@@ -56,16 +64,30 @@ In this package, you'll find:
 ## What can you do with `@fujocoded/astro-atproto-loader`?
 
 - **Pull in content from the wider AtProto network**, including
-  [Bluesky](https://bsky.app/) posts, [RPG Actor](https://rpg.actor/about)
-  characters, [AtProto badges](https://pdsls.dev/at://did:plc:r2vpg2iszskbkegoldmqa322/community.lexicon.badge.award/i1oZsZlPLWqt0),
-  and anything else stored in a public repo. For example, you can:
+  [Bluesky](https://bsky.app/) posts, [Streamplace](https://stream.place/)
+  VODs, [RPG Actor](https://rpg.actor/about) characters,
+  [AtProto badges](https://pdsls.dev/at://did:plc:r2vpg2iszskbkegoldmqa322/community.lexicon.badge.award/i1oZsZlPLWqt0),
+  and anything else stored in a public repo (a user's per-protocol record
+  store). For example, you can:
   - Pin your favorite Bluesky posts or artist reposts on your homepage
-  - Embed your [Streamplace](https://stream.place/) VODs next to the articles they inspired
+  - Embed your Streamplace VODs next to the articles they inspired
   - Show off the cons you've been badged at, straight from your badge records
-- **Show records from multiple repos** into one Astro collection:
+- **Show records from multiple repos** in one Astro collection:
   - A list of recent posts both you and your friends liked
   - Profiles of your community members
   - ...and many creative uses!
+- **Hydrate linked records** like `strongRef`s and `subject` URIs from inside
+  your `transform`, so a post's quoted record or a label's subject lands ready
+  to render.
+
+> [!TIP]
+>
+> This loader is happiest reading one repo, or merging a small handful of them.
+> If you find yourself grouping hundreds of records across dozens of repos on
+> every request, you probably want an AppView (a service that pre-aggregates
+> records across many repos and exposes a query API) that emits the
+> pre-aggregated payload, or a domain library that owns the reshape, instead
+> of a loader that hits N PDSs each time.
 
 # Getting started
 
@@ -74,7 +96,8 @@ In this package, you'll find:
 - Astro 5.13 or later
 - An Astro project using the [Content Loader
   API](https://docs.astro.build/en/reference/content-loader-reference/)
-- A public AtProto repo and collection NSID (like `com.fujocoded.rolodex.card`) to read from
+- A public AtProto repo and collection NSID (like `com.fujocoded.rolodex.card`)
+  to read from
 
 ## Installation
 
@@ -133,61 +156,252 @@ export const collections = { documents };
 Check out the example sites included under the [examples
 folder](./__examples__/).
 
-You can start with either:
+You can start with any of these:
 
-- [`01-static-loaders`](./__examples__/01-static-loaders/) for `defineCollection({ loader })`, which will fetch the data once when your site builds (won't update live)
-- [`02-live-loaders`](./__examples__/02-live-loaders/) for `defineLiveCollection()`, which will fetch your data at each request (updates live)
+- [`01-static-loaders`](./__examples__/01-static-loaders/) for
+  `defineCollection({ loader })`, which fetches the data once when your site
+  builds (won't update live)
+- [`02-live-loaders`](./__examples__/02-live-loaders/) for
+  `defineLiveCollection()`, which fetches your data at each request (updates
+  live)
+- [`03-grouped-reposts`](./__examples__/03-grouped-reposts/) for reading from
+  multiple repos at once with `sources: [...]` and merging records with
+  `groupBy`
 
-Both examples show off two patterns:
+The first two examples show off two patterns:
 
 - passing records through directly and letting Zod validate and transform them
 - reshaping records with a loader `transform`
 
+The third one shows reading the same collection from three different repos,
+grouping records by a shared URI, and hydrating linked records via
+`fetchRecord`.
+
 > [!WARNING]
 >
-> If you're generatic your site as static HTML pages, for example for neocities,
-> you must use a static loader
+> If you're generating your site as static HTML pages (for example for
+> Neocities), you must use a static loader.
 
 # Configuring the loaders
 
-Both loaders share the same option...mostly.
+Both loaders share the same options...mostly.
 
 ## Shared options
 
-- `source`, required for the simplest case. A single AtProto source with:
-  - `repo`, required. A DID or a handle.
-  - `collection`, required. The AtProto collection NSID to load.
-  - `limit`, optional. Cap the number of entries loaded from this source.
-    Records rejected by `filter` do not count toward the limit. Records in a
-    collection are returned newest-first by rkey, so `limit: 5` gives you the
-    5 most recent.
-- `sources`, use this instead of `source` when you want to merge multiple
-  public repos or collections into one Astro collection. Each source in the
-  array accepts the same fields as `source` (including `limit`, applied
-  per-source).
+Each `source` (or each entry in `sources: [...]`) accepts:
 
-- `transform`, optional. Turns a raw AtProto record into an Astro entry. It
-  receives one object with `value`, `repo`, `collection`, `did`, `rkey`, `uri`,
-  and `cid`.
-  - For `atProtoLiveLoader()`, return a `LiveDataEntry` (`{ id, data, rendered?,
-cacheHint? }`).
-  - For `atProtoStaticLoader()`, return an `AtProtoStaticDataEntry` (`{ id,
-data, body?, filePath? }`).
-- `filter`, optional. Skip records before they are transformed. It receives the
-  same object-style callback argument as `transform`.
+- `repo`, required. A DID or a handle.
+- `collection`, required. The AtProto collection NSID to load.
+- `parseRecord`, optional. A `(unknown) => TRaw` function that runs once per
+  record before `filter`, so you can validate the record's shape (for example
+  with `$parse` from `@atproto/lex`). If it throws, that single record is
+  dropped with a warning. The rest of the source keeps loading and
+  `onSourceError` is _not_ triggered.
+- `limit`, optional. Cap on how many records to load from this source. See
+  [**Windowed reads**](#windowed-reads) below for the exact behavior.
+- `maxPages`, optional. Hard cap on the number of `listRecords` pages that get
+  fetched, regardless of `limit`.
 
-When `source` is used without `transform`, the loader defaults to:
+Use `source: {...}` to read from a single repo, or `sources: [...]` to merge a
+handful of repos or collections into one Astro collection.
+
+## Windowed reads
+
+> [!IMPORTANT]
+>
+> **Breaking change in v0.2.** v0.1 walked every cursor by default and pulled
+> in every record. v0.2 reads a single page by default, so big collections
+> don't surprise you with a long fetch on every build or request. If you
+> _want_ the old behavior, pass `limit: "all"` (see below).
+
+| `limit`           | What you get                                    | Default `maxPages` |
+| ----------------- | ----------------------------------------------- | ------------------ |
+| (omitted)         | One page, up to 100 records, no cursor walk     | `1`                |
+| `number` (e.g. 5) | Stop at that count, page size `min(limit, 100)` | `1`                |
+| `'all'`           | Walk every cursor, 100 records per page         | `Infinity`         |
+
+Records rejected by `filter` do not count toward `limit`, but `maxPages` always
+caps the raw pagination (so a stray `filter: () => false` can't make the loader
+walk forever).
+
+To keep the v0.1 behavior of reading every record from a source:
 
 ```ts
-({ value, rkey }) => ({
-  id: rkey,
-  data: value,
+source: {
+  repo: "did:plc:example1234",
+  collection: "com.fujocoded.rolodex.card",
+  limit: "all",
+}
+```
+
+## `parseRecord` vs `transform`
+
+`parseRecord` and `transform` are two different jobs:
+
+- **`parseRecord`** lives on the source. It checks that a raw record has the
+  shape you expect, and returns the typed value. It doesn't see `repo`,
+  `rkey`, `uri`, or `fetchRecord`, because at that stage it's just answering
+  "is this record well-formed?". That's perfect for a `$parse` call from
+  `@atproto/lex`, or any pure schema check.
+- **`transform`** receives the full per-record context plus `fetchRecord`, and
+  returns your Astro entry. This is where you do the domain-y work: resolving
+  `strongRef`s, combining a post with its embed, mapping records to your own
+  display model. Return `null` or `undefined` to drop an entry silently.
+
+Putting them together:
+
+```ts
+import { $parse, lexicons } from "@atproto/lex";
+
+atProtoLiveLoader({
+  source: {
+    repo: "did:plc:example1234",
+    collection: "app.bsky.feed.post",
+    parseRecord: (value) => $parse(lexicons, "app.bsky.feed.post", value), // schema gate
+  },
+  transform: async ({ value, uri, fetchRecord }) => {
+    // value is already the parsed lexicon type
+    const quoted =
+      value.embed?.$type === "app.bsky.embed.record"
+        ? await fetchRecord({ atUri: value.embed.record.uri })
+        : null;
+    return { id: uri, data: { text: value.text, quoted } };
+  },
 });
 ```
 
-When `sources` is used without `transform`, the loader namespaces the id by
-`did` and `collection` so records with the same `rkey` from different repos or
-collections don't collide:
+## `fetchRecord`: hydrating records by AT-URI
+
+Every `filter` and `transform` callback receives
+`fetchRecord({ atUri, parse? })`, which fetches a single record from any
+public PDS by its AT-URI. `atUri` is typed as `AtUriString` from
+`@atproto/syntax`, so the compiler keeps you honest about passing a real
+`at://...` URI. If multiple callbacks ask for the _same_ URI in the same
+cycle (for example a `subject` URI shared across many records), they share a
+single network hop.
+
+```ts
+import { $parse, lexicons } from "@atproto/lex";
+
+transform: async ({ value, uri, fetchRecord }) => {
+  const subject = await fetchRecord({
+    atUri: value.subject.uri,
+    parse: (v) => $parse(lexicons, "app.bsky.actor.profile", v),
+  });
+  if (!subject) return null; // record was missing, unparseable, or unreachable
+  return { id: uri, data: { label: value.val, subject } };
+};
+```
+
+`fetchRecord` returns `null` for every failure mode: a malformed AT-URI, a
+PDS that can't be reached, a 404, a record whose value isn't an object, or a
+`parse` callback that threw. Each of these logs a distinct warning to your
+console, so when something is missing you can tell which thing went wrong.
+
+## Multi-source reads and `onSourceError`
+
+When you're reading from `sources: [...]`, `onSourceError` decides what
+happens if one of those sources fails (PDS is down, repo is gone, etc.).
+Use `"skip"` to warn and drop that source's contribution, or `"throw"` to fail
+the load:
+
+```ts
+atProtoLiveLoader({
+  sources: [
+    { repo: "alice.test", collection: "app.bsky.feed.post" },
+    { repo: "bob.test", collection: "app.bsky.feed.post" }, // offline
+    { repo: "carol.test", collection: "app.bsky.feed.post" },
+  ],
+  onSourceError: "skip",
+});
+```
+
+The defaults are picked so each loader behaves sensibly out of the box:
+
+- **Live loader:** `sources: [...]` defaults to `"skip"` so one flaky PDS
+  doesn't take down your whole live collection. `source: {...}` defaults to
+  `"throw"`, because there's no alternate source to fall back to.
+- **Static loader:** defaults to `"throw"` everywhere, so a broken source
+  fails the build instead of quietly publishing partial content. Pass
+  `onSourceError: "skip"` if you'd rather ship the rest of the data anyway.
+
+You can also pass a function to decide case-by-case:
+
+```ts
+onSourceError: (error, source) =>
+  source.repo === "critical.test" ? "throw" : "skip",
+```
+
+> [!NOTE]
+>
+> When `onSourceError` is `"throw"`, the first source error fails the whole
+> load right away. When you're skipping errors and _every_ source ends up
+> failing, the pipeline throws an `AggregateError` so the failure isn't
+> swallowed silently. In a live loader, the cache holds onto its last good
+> snapshot when a refresh throws, so a transient outage won't blank out
+> your page.
+
+## `groupBy`: merging records from multiple sources
+
+When you're reading from `sources: [...]`, you can group records together
+before `transform` runs. Every record gets handed to `groupBy`, which returns
+a string key; records that share a key are passed to a single `transform`
+call as a group, in `sources[]` declaration order.
+
+For example, here's how you'd find Bluesky posts that all three FujoCoded
+accounts reposted, by reading each account's `app.bsky.feed.repost` collection
+and grouping by the URI of the post being reposted:
+
+```ts
+atProtoLiveLoader({
+  sources: [
+    { repo: "fujocoded.bsky.social", collection: "app.bsky.feed.repost" },
+    { repo: "fujoweb.dev", collection: "app.bsky.feed.repost" },
+    { repo: "bobaboard.bsky.social", collection: "app.bsky.feed.repost" },
+  ],
+  groupBy: ({ value }) => value.subject.uri,
+  transform: async ({ key, records, fetchRecord }) => {
+    if (records.length < 3) return null; // only keep posts all three reposted
+    const post = await fetchRecord({ atUri: key as AtUriString });
+    if (!post) return null;
+
+    return {
+      id: key,
+      data: {
+        post,
+        repostedBy: records.map((record) => record.did),
+      },
+    };
+  },
+});
+```
+
+A working version of this lives at
+[`__examples__/03-grouped-reposts`](./__examples__/03-grouped-reposts/).
+
+Use `filter` to drop records before they reach `groupBy`, or return a unique
+key like `uri` for records that shouldn't merge with anything else.
+
+> [!TIP]
+>
+> Think of `groupBy` as a **bridge**: it lets your multi-repo collection emit
+> the same shape an AppView method _would_ emit if one existed today. If/when
+> someone ships an AppView (or a domain library that owns the aggregation),
+> you can replace this loader's `sources: [...]` plumbing with a client that
+> calls the AppView and keep the downstream schema your pages already render.
+
+## Default transforms
+
+When the loader is configured with exactly one source and no `transform`, it
+defaults to:
+
+```ts
+({ value, rkey }) => ({ id: rkey, data: value });
+```
+
+When more than one source is configured and no `transform` is provided, the
+id is namespaced by `did`, `collection`, and `rkey` so records sharing an
+`rkey` across repos or collections don't collide:
 
 ```ts
 ({ value, did, collection, rkey }) => ({
@@ -196,22 +410,24 @@ collections don't collide:
 });
 ```
 
-This is exported as `getNamespacedEntry` if you want to compose it yourself.
+The latter is exported as `toNamespacedEntry` if you'd like to compose it
+yourself.
 
 ## Live-only options
 
 `atProtoLiveLoader()` also accepts:
 
-- `loadCollectionFilter`, optional. Applies request-time filtering for
+- `queryFilter`, optional. A request-time filter for
   `getLiveCollection("collection", filter)`. It receives `{ entry, filter }`.
+  (This was `loadCollectionFilter` in v0.1.)
 - `cacheTtl`, optional. Cache lifetime in milliseconds. Defaults to `60000`
   (1 minute).
-
+  
 # Support Us
 
 You can check out more of our plugins here:
 
-- [Authproto](https://github.com/FujoWebDev/fujocoded-plugins/tree/main/astro-authproto) — AtProto authentication for Astro sites
+- [Authproto](https://github.com/FujoWebDev/fujocoded-plugins/tree/main/astro-authproto): AtProto authentication for Astro sites
 - [Socials plugin](https://github.com/FujoWebDev/fujocoded-plugins/tree/main/zod-transform-socials)
 - [Alt text files plugin](https://github.com/FujoWebDev/fujocoded-plugins/tree/main/remark-alt-text-files)
 

@@ -1,0 +1,17 @@
+{
+  "name": "examples-atproto-grouped-reposts",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.2",
+    "@atproto/syntax": "^0.4.2",
+    "@fujocoded/astro-atproto-loader": "file:../..",
+    "astro": "^5.16.14"
+  }
+}

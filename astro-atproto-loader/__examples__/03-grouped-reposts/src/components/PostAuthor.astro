@@ -1,0 +1,34 @@
+---
+interface Props {
+  did: string;
+  displayName: string;
+  avatarUrl: string;
+  profileUrl: string;
+}
+
+const { did, displayName, avatarUrl, profileUrl } = Astro.props;
+---
+
+<header class="author">
+  {
+    avatarUrl && (
+      <img class="avatar" src={avatarUrl} alt="" width="48" height="48" />
+    )
+  }
+  <a href={profileUrl}>
+    <strong>{displayName ?? did}</strong>
+  </a>
+</header>
+
+<style>
+  .author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .avatar {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>

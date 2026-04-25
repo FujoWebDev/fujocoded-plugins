@@ -1,0 +1,71 @@
+---
+interface Reposter {
+  did: string;
+  handle: string;
+  displayName: string;
+  avatarUrl: string;
+  profileUrl: string;
+}
+
+interface Props {
+  reposters: Reposter[];
+}
+
+const { reposters } = Astro.props;
+---
+
+<footer class="reposted-by">
+  <span>Reposted by:</span>
+  <ul class="reposters">
+    {
+      reposters.map((reposter) => (
+        <li class="reposter">
+          <a href={reposter.profileUrl} title={reposter.did}>
+            {reposter.avatarUrl && (
+              <img
+                class="avatar small"
+                src={reposter.avatarUrl}
+                alt=""
+                width="24"
+                height="24"
+              />
+            )}
+            <span>
+              {reposter.displayName} (@{reposter.handle})
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</footer>
+
+<style>
+  .reposted-by {
+    color: lightslategray;
+    font-size: small;
+    margin-top: 0.75rem;
+  }
+  .reposters {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    gap: 0.5rem;
+  }
+  .avatar.small {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .reposter a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .reposter a:hover {
+    text-decoration: underline;
+  }
+</style>

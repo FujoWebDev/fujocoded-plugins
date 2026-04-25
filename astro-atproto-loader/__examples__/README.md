@@ -3,13 +3,13 @@
 Small Astro projects that show how to use `@fujocoded/astro-atproto-loader` to
 pull public AtProto records into your site.
 
-Pick one, then run `npm install` and `npm run dev`.
+Pick one, then run `npm install` and `npm run dev` inside that example folder.
 
 ## What's in here?
 
 1. [`01-static-loaders`](./01-static-loaders/)
    - reads public badge records from `community.lexicon.badge.definition` as a
-     static `badges` collection, with no `transform` — records flow straight
+     static `badges` collection, with no `transform`. Records flow straight
      into the schema
    - pulls in livestream records as a static `streams` collection, using
      `transform` to fetch the referenced Bluesky announcement post at build time
@@ -21,8 +21,17 @@ Pick one, then run `npm install` and `npm run dev`.
    - pulls in the same livestream records as a live `streams` collection, using
      `transform` to fetch the Bluesky announcement post
    - shows both on a server-rendered page with `getLiveCollection()`
+   - requires Astro's live collection flag and a server adapter, so the data is
+     fetched on demand when the page is requested
+3. [`03-grouped-reposts`](./03-grouped-reposts/)
+   - reads `app.bsky.feed.repost` from three Bluesky accounts at once using
+     `sources: [...]`
+   - groups reposts by the URI of the post being reposted using `groupBy`,
+     keeps only posts all three accounts reposted, then hydrates the original
+     post via `fetchRecord`
+   - shows the result on a server-rendered page with `getLiveCollection()`
 
 ## Configuring the loaders
 
-To unlock their full power—`source` vs `sources`, `transform`, IDs,
-handles vs DIDs—see the [main README](../README.md#configuring-the-loaders).
+To unlock their full power (`source` vs `sources`, `transform`, IDs, handles
+vs DIDs), see the [main README](../README.md#configuring-the-loaders).

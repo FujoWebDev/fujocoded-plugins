@@ -1,0 +1,58 @@
+---
+import PostAuthor from "./PostAuthor.astro";
+import RepostedBy from "./RepostedBy.astro";
+
+interface Reposter {
+  did: string;
+  handle: string;
+  displayName: string;
+  avatarUrl: string;
+  profileUrl: string;
+}
+
+interface Props {
+  uri: string;
+  postUrl: string;
+  text: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  author: {
+    did: string;
+    displayName: string;
+    avatarUrl: string;
+    profileUrl: string;
+  };
+  repostedBy: Reposter[];
+}
+
+const { postUrl, text, imageUrl, imageAlt, author, repostedBy } = Astro.props;
+---
+
+<li class="post">
+  <PostAuthor {...author} />
+
+  <blockquote>
+    {text}
+    <div><a href={postUrl}>Go to post ➡︎</a></div>
+    {imageUrl && <img class="post-image" src={imageUrl} alt={imageAlt ?? ""} />}
+  </blockquote>
+  <RepostedBy reposters={repostedBy} />
+</li>
+
+<style>
+  .post {
+    border: 1px solid lightgray;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  blockquote {
+    margin: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    border-left: 3px solid lightslategray;
+  }
+  .post-image {
+    max-width: 100%;
+    border-radius: 0.25rem;
+    margin: 0.5rem 0;
+  }
+</style>
