@@ -1,5 +1,4 @@
 import { AtUri } from "@atproto/api";
-import type { AtUriString } from "@atproto/syntax";
 
 import { getSingleRecord, isRecordValue } from "../client/records.ts";
 import type { FetchRecord, RecordValue } from "../types.ts";
@@ -19,7 +18,7 @@ export const createFetchRecord = (): FetchRecord => {
   const cache = new Map<string, Promise<RecordValue | null>>();
 
   const fetchBase = async (
-    atUri: AtUriString,
+    atUri: string,
   ): Promise<RecordValue | null> => {
     let parsed: AtUri;
     try {
@@ -62,7 +61,7 @@ export const createFetchRecord = (): FetchRecord => {
     atUri,
     parse,
   }: {
-    atUri: AtUriString;
+    atUri: string;
     parse?: (value: unknown) => Parsed;
   }): Promise<Parsed | null> => {
     let pending = cache.get(atUri);

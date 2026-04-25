@@ -67,10 +67,10 @@ export const toRkeyEntry = <Data extends Record<string, unknown>>({
  */
 export const toNamespacedEntry = <Data extends Record<string, unknown>>({
   value,
-  did,
+  repo,
   collection,
   rkey,
 }: AtProtoRecordCallbackArgs<unknown>): { id: string; data: Data } => ({
-  id: `${did}/${collection}/${rkey}`,
+  id: `${repo.did}/${collection}/${rkey}`,
   data: value as Data,
 });

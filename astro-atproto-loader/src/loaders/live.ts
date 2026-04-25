@@ -12,6 +12,8 @@ import type {
   AtProtoRecordTransform,
   MaybePromise,
   OnSourceError,
+  SchemaInput,
+  SchemaLike,
 } from "../types.ts";
 import {
   type AtProtoSourceOptions,
@@ -73,7 +75,7 @@ export type AtProtoLiveLoaderOptions<
   ) => MaybePromise<boolean>;
   /**
    * How long, in milliseconds, the cached collection is considered fresh
-   * before a background refresh is triggered. Defaults to one minute.
+   * before a background refresh is triggered. Defaults to five minutes.
    */
   cacheTtl?: number;
 } & AtProtoSourceOptions<Sources> &
@@ -252,7 +254,7 @@ export const atProtoLiveLoader = <
   options: AtProtoLiveLoaderOptions<Sources, Data, QueryFilter>,
 ): LiveLoader<Data, AtProtoLiveLoaderEntryFilter, QueryFilter> => {
   const sources = normalizeSources<Sources>(options);
-  const { cacheTtl = 60_000 } = options;
+  const { cacheTtl = 5 * 60_000 } = options;
   const fallbackTransform =
     sources.length > 1 ? toNamespacedEntry<Data> : toRkeyEntry<Data>;
   const callbacks: AtProtoRecordCallbacks<
@@ -352,3 +354,117 @@ export const atProtoLiveLoader = <
     },
   };
 };
+
+type LiveBaseConfig<
+  Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown>,
+> = {
+  outputSchema: Schema;
+  onSourceError?: OnSourceError;
+  cacheTtl?: number;
+  queryFilter?: (
+    args: AtProtoQueryFilterArgs<SchemaInput<Schema>, QueryFilter>,
+  ) => MaybePromise<boolean>;
+} & AtProtoRecordFilterOptions<Sources>;
+
+type LiveCollection<Schema extends SchemaLike> = {
+  type: "live";
+  schema: Schema;
+  loader: ReturnType<typeof atProtoLiveLoader>;
+};
+
+/**
+ * Live AtProto collection. `transform`'s return is typed against
+ * `z.input<outputSchema>`, so `value`, `did`, `rkey` etc. are inferred from
+ * each source's `parseRecord`. No `typeof sources` annotation needed.
+ *
+ * Accepts either `source: {...}` for one repo or `sources: [...]` for many.
+ *
+ * Pass `groupBy` to aggregate records across sources by key. The grouped
+ * `transform` then receives `{ key, records, fetchRecord }`.
+ */
+// Single source, grouped
+export function defineAtProtoLiveCollection<
+  const Source extends AtProtoLoaderSource<unknown>,
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown> = never,
+>(
+  config: LiveBaseConfig<readonly [Source], Schema, QueryFilter> & {
+    source: Source;
+    sources?: never;
+    groupBy: AtProtoRecordGroupBy<readonly [Source]>;
+    transform: AtProtoRecordGroupTransform<
+      readonly [Source],
+      LiveDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): LiveCollection<Schema>;
+// Single source, ungrouped
+export function defineAtProtoLiveCollection<
+  const Source extends AtProtoLoaderSource<unknown>,
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown> = never,
+>(
+  config: LiveBaseConfig<readonly [Source], Schema, QueryFilter> & {
+    source: Source;
+    sources?: never;
+    groupBy?: undefined;
+    transform?: AtProtoRecordTransform<
+      readonly [Source],
+      LiveDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): LiveCollection<Schema>;
+// Multi source, grouped
+export function defineAtProtoLiveCollection<
+  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown> = never,
+>(
+  config: LiveBaseConfig<Sources, Schema, QueryFilter> & {
+    source?: never;
+    sources: Sources;
+    groupBy: AtProtoRecordGroupBy<Sources>;
+    transform: AtProtoRecordGroupTransform<
+      Sources,
+      LiveDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): LiveCollection<Schema>;
+// Multi source, ungrouped
+export function defineAtProtoLiveCollection<
+  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown> = never,
+>(
+  config: LiveBaseConfig<Sources, Schema, QueryFilter> & {
+    source?: never;
+    sources: Sources;
+    groupBy?: undefined;
+    transform?: AtProtoRecordTransform<
+      Sources,
+      LiveDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): LiveCollection<Schema>;
+// Implementation signature. The four overloads above are the public,
+// fully-typed surface; this signature is invisible to callers. `any` is the
+// idiomatic escape hatch here: `LiveCollection<Schema>` returned from a
+// non-generic impl can't be assignable to `LiveCollection<Schema>` for
+// every overload's instantiated `Schema'` (covariance dead-end), and a
+// generic impl can't unify across overloads either.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function defineAtProtoLiveCollection(config: any): any {
+  const { outputSchema, ...loaderOptions } = config as {
+    outputSchema: SchemaLike;
+    [key: string]: unknown;
+  };
+  return {
+    type: "live" as const,
+    schema: outputSchema,
+    loader: atProtoLiveLoader(
+      loaderOptions as unknown as Parameters<typeof atProtoLiveLoader>[0],
+    ),
+  };
+}

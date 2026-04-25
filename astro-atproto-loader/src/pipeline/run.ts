@@ -34,7 +34,7 @@ const groupRecords = async <
     const key = await groupBy(recordArgs);
     if (typeof key !== "string") {
       throw new Error(
-        `AtProto loader groupBy must return a string key for ${args.repo}/${args.collection}/${args.rkey}`,
+        `AtProto loader groupBy must return a string key for ${args.repo.handle ?? args.repo.did}/${args.collection}/${args.rkey}`,
       );
     }
 

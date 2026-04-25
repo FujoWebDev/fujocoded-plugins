@@ -72,7 +72,7 @@ export const runSingleFetch = async <
     const key = await callbacks.groupBy(args as ArgsUnion<Sources>);
     if (typeof key !== "string") {
       throw new Error(
-        `AtProto loader groupBy must return a string key for ${args.repo}/${args.collection}/${args.rkey}`,
+        `AtProto loader groupBy must return a string key for ${args.repo.handle ?? args.repo.did}/${args.collection}/${args.rkey}`,
       );
     }
 
@@ -87,7 +87,7 @@ export const runSingleFetch = async <
 
   if (entry === null || entry === undefined) {
     console.debug(
-      `[atproto-loader] transform dropped entry: ${args.repo}/${args.collection}/${args.rkey}`,
+      `[atproto-loader] transform dropped entry: ${args.repo.handle ?? args.repo.did}/${args.collection}/${args.rkey}`,
     );
     return undefined;
   }

@@ -1,5 +1,5 @@
-import { defineCollection, z } from "astro:content";
-import { atProtoStaticLoader } from "@fujocoded/astro-atproto-loader";
+import { z } from "astro:content";
+import { defineAtProtoCollection } from "@fujocoded/astro-atproto-loader";
 
 interface BlueskyPost {
   uri: string;
@@ -31,52 +31,58 @@ const fetchBlueskyPost = async (
   };
 };
 
-const badges = defineCollection({
-  loader: atProtoStaticLoader({
-    source: {
-      repo: "atmosphereconf.org",
-      collection: "community.lexicon.badge.definition",
-    },
-  }),
-  schema: z.object({
+const badges = defineAtProtoCollection({
+  source: {
+    repo: "atmosphereconf.org",
+    collection: "community.lexicon.badge.definition",
+  },
+  outputSchema: z.object({
     name: z.string(),
     description: z.string().optional(),
     createdAt: z.string().optional(),
   }),
 });
 
-const streams = defineCollection({
-  loader: atProtoStaticLoader({
-    source: {
-      repo: "did:plc:r2vpg2iszskbkegoldmqa322",
-      collection: "place.stream.livestream",
-      limit: 5,
-    },
-    transform: async ({ value, rkey }) => {
-      const raw = value as {
-        post?: { uri?: string; cid?: string };
-      } & Record<string, unknown>;
+const StreamRecordSchema = z.object({
+  title: z.string(),
+  url: z.string().url(),
+  createdAt: z.string(),
+  endedAt: z.string().optional(),
+  post: z.object({ uri: z.string(), cid: z.string().optional() }).optional(),
+});
 
-      const post = raw.post?.uri
-        ? await fetchBlueskyPost(raw.post.uri)
-        : undefined;
+const streams = defineAtProtoCollection({
+  source: {
+    repo: "did:plc:r2vpg2iszskbkegoldmqa322",
+    collection: "place.stream.livestream",
+    limit: 5,
+    parseRecord: (value) => StreamRecordSchema.parse(value),
+  },
+  transform: async ({ value, rkey }) => {
+    const post = value.post?.uri
+      ? await fetchBlueskyPost(value.post.uri)
+      : undefined;
 
-      return {
-        id: rkey,
-        data: { ...raw, post },
-      };
-    },
-  }),
-  schema: z.object({
+    return {
+      id: rkey,
+      data: {
+        title: value.title,
+        url: value.url,
+        createdAt: value.createdAt,
+        endedAt: value.endedAt,
+        post,
+      },
+    };
+  },
+  outputSchema: z.object({
     title: z.string(),
     url: z.string().url(),
-    createdAt: z.coerce.date(),
-    endedAt: z.coerce.date().optional(),
+    createdAt: z.string(),
+    endedAt: z.string().optional(),
     post: z
       .object({
         uri: z.string(),
         text: z.string(),
-        // We can use zod transform to normalize data here
         authorHandle: z.string().toLowerCase(),
       })
       .optional(),

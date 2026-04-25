@@ -1,5 +1,5 @@
 import type { ComAtprotoRepoListRecords } from "@atproto/api";
-import type { AtUriString, DidString } from "@atproto/syntax";
+import type { DidString, HandleString } from "@atproto/syntax";
 
 export type RecordValue = ComAtprotoRepoListRecords.Record["value"];
 export type MaybePromise<Value> = Value | Promise<Value>;
@@ -48,12 +48,24 @@ export interface AtProtoLoaderSource<Raw = RecordValue> {
   maxPages?: number;
 }
 
-export interface AtProtoRecordContext {
-  repo: string;
-  collection: string;
+/**
+ * Identifier for the repo this record lives in.
+ *
+ * `did` is always set (resolved from the record's AT-URI).
+ * `handle` is set only when the source config provided a handle for this
+ * repo — the loader never reverse-resolves DID → handle, so callers that
+ * passed `repo: "did:..."` will see `handle: undefined`.
+ */
+export interface AtProtoRecordRepo {
   did: DidString;
+  handle?: HandleString;
+}
+
+export interface AtProtoRecordContext {
+  repo: AtProtoRecordRepo;
+  collection: string;
   rkey: string;
-  uri: AtUriString;
+  uri: string;
   cid?: string;
 }
 
@@ -63,9 +75,6 @@ export interface AtProtoRecordContext {
  * Concurrent callers for the same URI within one pipeline cycle share a
  * single network hop. Calling `fetchRecord({ atUri })` from many `transform`
  * or `filter` callbacks for the same target only hits the network once.
- *
- * `atUri` is typed as `AtUriString` from `@atproto/syntax`, so the compiler
- * can warn about passing a real `at://...` URI rather than an arbitrary string.
  *
  * Returns `null` on:
  *
@@ -80,7 +89,7 @@ export interface AtProtoRecordContext {
  */
 export type FetchRecord = <Parsed = RecordValue>(
   args: {
-    atUri: AtUriString;
+    atUri: string;
     parse?: (value: unknown) => Parsed;
   },
 ) => Promise<Parsed | null>;
@@ -208,3 +217,15 @@ export type OnSourceError =
   | "throw"
   | "skip"
   | ((error: unknown, source: AtProtoLoaderSource<unknown>) => "throw" | "skip");
+
+/**
+ * Structural extraction of a Zod schema's input type. Avoids depending on a
+ * specific zod version.
+ */
+export type SchemaInput<S> = S extends { readonly _input: infer Input }
+  ? Input extends Record<string, unknown>
+    ? Input
+    : never
+  : never;
+
+export type SchemaLike = { readonly _input: Record<string, unknown> };

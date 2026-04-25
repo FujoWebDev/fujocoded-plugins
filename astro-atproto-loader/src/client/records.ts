@@ -3,7 +3,7 @@ import {
   type ComAtprotoRepoGetRecord,
   type ComAtprotoRepoListRecords,
 } from "@atproto/api";
-import type { AtUriString, DidString } from "@atproto/syntax";
+import type { DidString, HandleString } from "@atproto/syntax";
 
 import type {
   AtProtoLoaderSource,
@@ -24,12 +24,17 @@ export const toRecordContext = (
     throw new Error(`Unexpected AtProto record URI: ${record.uri}`);
   }
 
+  // The repo's DID is the AT-URI host. The handle is only known when the
+  // source config gave us one — we don't reverse-resolve DID → handle.
+  const handle = source.repo.startsWith("did:")
+    ? undefined
+    : (source.repo as HandleString);
+
   return {
-    repo: source.repo,
+    repo: { did: aturi.host as DidString, handle },
     collection: source.collection,
-    did: aturi.host as DidString,
     rkey: aturi.rkey,
-    uri: record.uri as AtUriString,
+    uri: record.uri,
     cid: record.cid,
   };
 };

@@ -1,15 +1,9 @@
-export { atProtoLiveLoader } from "./loaders/live.ts";
+export { defineAtProtoLiveCollection } from "./loaders/live.ts";
 export type {
   AtProtoLiveLoaderEntryFilter,
-  AtProtoLiveLoaderOptions,
   AtProtoQueryFilterArgs,
 } from "./loaders/live.ts";
-
-export { atProtoStaticLoader } from "./loaders/static.ts";
-export type {
-  AtProtoStaticDataEntry,
-  AtProtoStaticLoaderOptions,
-} from "./loaders/static.ts";
+export { defineAtProtoCollection } from "./loaders/static.ts";
 
 export { toNamespacedEntry } from "./utils.ts";
 export type {
