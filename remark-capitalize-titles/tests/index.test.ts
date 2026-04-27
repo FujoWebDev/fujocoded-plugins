@@ -85,10 +85,82 @@ describe("Respects tricky punctuations", () => {
     expect(await processMarkdown("### ...and more!")).toBe("### ...and More!");
   });
 
-  test("handles parenthesized possessives", async () => {
+  test("handles an inner ellipsis with no trailing space", async () => {
+    expect(
+      await processMarkdown("### check it out before you...check it out!"),
+    ).toBe("### Check It Out before You...Check It Out!");
+  });
+
+  test("treats inner ellipsis as transparent for small words", async () => {
+    expect(await processMarkdown("# wait...and then more")).toBe(
+      "# Wait...and Then More",
+    );
+    expect(await processMarkdown("# stop...but think first")).toBe(
+      "# Stop...but Think First",
+    );
+  });
+
+  // Parens are transparent: title-case as if they weren't there. So small
+  // words after `)` stay lowercase, content words get capped, and a letter
+  // inside `(...)` is cased like the rest of its word.
+  test("treats parens as transparent for title-casing", async () => {
     expect(
       await processMarkdown("### traveling through (your code's) history"),
     ).toBe("### Traveling Through (Your Code's) History");
+
+    expect(
+      await processMarkdown("# employment region(s) for my application"),
+    ).toBe("# Employment Region(s) for My Application");
+
+    expect(await processMarkdown("# (s)omething or other")).toBe(
+      "# (S)omething or Other",
+    );
+
+    expect(await processMarkdown("# cat(s) can be a pain")).toBe(
+      "# Cat(s) Can Be a Pain",
+    );
+
+    expect(await processMarkdown("# (s)omethin(g)")).toBe("# (S)omethin(g)");
+  });
+});
+
+describe("Handles markdown inline delimiters", () => {
+  test("capitalizes a strikethrough leading word", async () => {
+    expect(
+      await processMarkdown("### ~~don't~~ forget your github addresses!"),
+    ).toBe("### ~~Don't~~ Forget Your GitHub Addresses!");
+  });
+
+  test("capitalizes a bold-wrapped word mid-title", async () => {
+    expect(
+      await processMarkdown("## the **only** thing you'll ever need"),
+    ).toBe("## The **Only** Thing You'll Ever Need");
+  });
+
+  // remark's stringifier normalizes `_em_` to `*em*`; the leading-letter
+  // capitalization is what matters here.
+  test("capitalizes an underscore-emphasized leading word", async () => {
+    expect(await processMarkdown("# _really_ important changes")).toBe(
+      "# *Really* Important Changes",
+    );
+  });
+
+  test("capitalizes an asterisk-emphasized word", async () => {
+    expect(await processMarkdown("## a *very* good idea")).toBe(
+      "## A *Very* Good Idea",
+    );
+  });
+
+  test("capitalizes a word adjacent to an em dash", async () => {
+    expect(await processMarkdown("## merging—your final boss")).toBe(
+      "## Merging—Your Final Boss",
+    );
+  });
+
+  test("capitalizes a word adjacent to an en dash", async () => {
+    expect(await processMarkdown("## merging–your final boss")).toBe(
+      "## Merging–Your Final Boss",
+    );
   });
 });
 
