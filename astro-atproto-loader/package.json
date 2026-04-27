@@ -44,7 +44,9 @@
     "build": "tsdown",
     "dev": "tsdown --watch src/",
     "validate": "npx publint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@atproto/api": "^0.17.3",
