@@ -260,7 +260,9 @@ const titleCase = (input: string, options: TitleOptions): string => {
   // A leading ellipsis (`...and more`) signals a continuation, so the
   // first-word force-cap is suppressed and small-word rules apply normally.
   const leadingHasMultiDot = /\.{2,}/.test(leadingText);
-  const leadingHasHardCap = Array.from(HARD_CAP).some((c) => leadingText.includes(c));
+  const leadingHasHardCap = Array.from(HARD_CAP).some((c) =>
+    leadingText.includes(c),
+  );
 
   const out: string[] = [];
   let cursor = 0;
