@@ -12,6 +12,7 @@ export const GET: APIRoute = async ({ request, redirect, session }) => {
   const requestUrl = new URL(request.url);
 
   let oauthSession: OAuthSession | null;
+  let oauthState: string | null = null;
   let error = requestUrl.searchParams.get("error");
   // This falls back to undefined so it will be compatible with the session
   // storage signature if not present.
@@ -20,6 +21,7 @@ export const GET: APIRoute = async ({ request, redirect, session }) => {
   try {
     const clientCallback = await oauthClient.callback(requestUrl.searchParams);
     oauthSession = clientCallback.session;
+    oauthState = clientCallback.state;
     session?.set("atproto-did", oauthSession.did);
   } catch (e) {
     // If there is an error during session restoration then it takes precedence
@@ -35,16 +37,18 @@ export const GET: APIRoute = async ({ request, redirect, session }) => {
     session?.set(AUTHPROTO_ERROR_DESCRIPTION, errorDescription);
   }
 
-  // Check if a custom redirect or referer was passed in the state
-  // Note: CSRF validation is already handled by oauthClient.callback() above,
-  // so it's safe to fall back to default redirect if state parsing fails here
+  // Check if a custom redirect or referer was passed in the state.
+  // The `state` value in the URL is NOT the state we sent during login: the
+  // OAuth client swaps it for its own internal id. Our original state comes
+  // back as `clientCallback.state`, so that's what we read.
+  // CSRF was already validated by oauthClient.callback() above, so if parsing
+  // fails here it's safe to fall back to the default redirect.
   let customRedirect: string | undefined;
   let referer: string | undefined;
-  const stateParam = requestUrl.searchParams.get("state");
-  if (stateParam) {
+  if (oauthState) {
     try {
       const stateData = JSON.parse(
-        Buffer.from(stateParam, "base64url").toString(),
+        Buffer.from(oauthState, "base64url").toString(),
       );
       customRedirect = stateData.redirect;
       referer = stateData.referer;

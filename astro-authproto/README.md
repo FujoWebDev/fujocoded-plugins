@@ -112,21 +112,33 @@ npm add @fujocoded/authproto
 
 2. Add the integration to your `astro.config.mjs` file, like this:
 
-```js
+````js
 import { defineConfig } from "astro/config";
 import node from "@astrojs/node";
-+ import authproto from "@fujocoded/authproto";
+import authproto from "@fujocoded/authproto";
 
 export default defineConfig({
-  output: "server", // you can read up more how this works here: https://docs.astro.build/en/guides/on-demand-rendering/
+  output: "server", // auth state is only available on dynamically rendered pages
   adapter: node({ mode: "standalone" }), // ... or whichever adapter you're using!
-+ integrations: [
-+   authproto({
-+     // config options here
-+   }),
-+ ],
+  // ATproto requires the server to be on a "loopback" address instead of
+  // simple localhost. If you don't know what this means,
+  // don't worry about it! Just set `host: true` :)
+  host: true,
+  integrations: [
+    authproto({
+      // The name of your app, shown on the login screen.
+      applicationName: "My super cool guestbook",
+      // The URL your site is (or will be) available at.
+      // Ignored during development.
+      applicationDomain: "https:// my-guestbook.fujocoded.com",
+    }),
+  ],
 });
-```
+
+This confinguration is enough to develop your authenticated
+website on your machine. Before putting your site online,
+see [Shipping it](#shipping-it-going-to-production-that-is) for things to
+pay attention to.
 
 > [!TIP]
 >
@@ -145,7 +157,7 @@ import { Login } from "@fujocoded/authproto/components";
 ---
 
 <Login />
-```
+````
 
 It'll look like a plain form:
 
@@ -195,8 +207,9 @@ These settings go inside the `authproto({ ... })` call in your
 
 - `applicationName`, required. The name of your application. For example, you
   can set this to `"My personal guestbook"`!
-- `applicationDomain`, required. It should be a domain that your site is on, or
-  you can just put in `"localhost:4321"` for now.
+- `applicationDomain`, required. The full URL where your site is (or will be)
+  available in production, including the scheme. For example:
+  `"https://example.com"`.
 - `defaultDevUser`, optional. A handle that gets pre-filled into the
   [login form](#customizing-the-login-form) while you're developing your site
   locally (never in production). Saves you from re-typing your handle every
@@ -249,6 +262,114 @@ You can change how `<Login />` looks and behaves by passing it these options:
   placeholder="you.bsky.social"
 />
 ```
+
+# Shipping it (going to production, that is)
+
+Before putting your site online, there are a few things to make sure of:
+
+1. **Your site uses [on-demand rendering](https://docs.astro.build/en/guides/on-demand-rendering/).**
+   Authproto needs `output: "server"` and a server adapter (like
+   `@astrojs/node`) so login state can be read on every request.
+2. **You've set up durable session storage** for both Astro's `session.driver`
+   and Authproto's `driver`. See [Storing authentication data](#storing-authentication-data)
+   and below for the options.
+
+Both default to in-memory storage, which means everything they hold lives
+only in your server's RAM. Restarting or redeploying your site wipes it
+and logs everyone out. That's fine for local dev, and you can keep it in
+production too if you don't mind your visitors having to log back in every
+time you ship.
+
+## Storing authentication data
+
+By default, Astro's `session.driver` and AuthProto's `driver` store their data
+in memory—that is, on your computer or server's RAM. This means that restarting
+or redeploying your site wipes it and logs everyone out.
+
+This is ok for development...and for production, if you don't mind your users
+being forced to log back in every time you ship a new versions.
+
+### With Astro DB
+
+The simplest durable setup uses [Astro's DB integration](https://docs.astro.build/en/guides/integrations-guide/db/)
+for both Astro's session and Authproto's store:
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import node from "@astrojs/node";
+import db from "@astrojs/db";
+import authproto from "@fujocoded/authproto";
+
+export default defineConfig({
+  output: "server",
+  adapter: node({ mode: "standalone" }),
+  session: {
+    driver: "db",
+  },
+  integrations: [
+    db(),
+    authproto({
+      applicationName: "My super cool guestbook",
+      applicationDomain: "https:// my-guestbook.fujocoded.com",
+      driver: { name: "astro:db" },
+    }),
+  ],
+});
+```
+
+> [!TIP]
+>
+> If you don't already have somewhere to host the database, [Turso](https://turso.tech/)
+> is the host Astro DB recommends, and it has a free tier you can start with.
+
+### Without a database
+
+If you can't run a classic database, you can:
+
+- pick a different driver from
+  [Astro's session driver list](https://docs.astro.build/en/reference/configuration-reference/#sessiondriver).
+  On serverless or edge hosting, options like Redis, Upstash, or Cloudflare
+  KV all work. Set the same kind of driver on both `session.driver` and
+  Authproto's `driver`.
+
+You can also leave both on the default `memory` driver if you're OK with
+visitors having to log back in every time the server restarts. Nothing
+else changes.
+
+### With a file on disk
+
+A file-based driver (like `fs`) writes Authproto's store directly to disk.
+The file holds everything Authproto needs to keep your visitors logged in,
+so treat it like a credentials file:
+
+- Set `options.base` to a path you control (don't rely on the driver's
+  default location)
+- Add that path to your `.gitignore`
+- Make sure only the server can read it on the host
+
+At startup, Authproto runs `git check-ignore` against your `base` path and
+warns if it isn't covered by `.gitignore`, so you'll hear about it before
+you commit anything.
+
+## If something may have gone wrong
+
+If you believe something that shouldn't bee has been expose, or you just want to
+invalidate every active session, you should clear out Authproto's store:
+
+- **Astro DB:** drop all rows in the table Authproto created.
+- **KV / Redis / file driver / etc.:** delete the keys (or file) Authproto
+  wrote. Each driver's docs cover how.
+- **Memory store:** close the app.
+
+Once the store is empty, anyone who was signed in goes back through the
+regular login flow the next time they visit.
+
+> [!NOTE]
+>
+> You may see a warning about a missing "lock mechanism" in your logs.
+> You can ignore it unless you're running multiple server instances. If
+> you are, you'll know how to handle it.
 
 # Support Us
 

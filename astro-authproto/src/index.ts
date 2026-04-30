@@ -1,5 +1,7 @@
 import type { AstroIntegration, InjectedRoute } from "astro";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 import { addVirtualImports } from "astro-integration-kit";
 import {
   getConfig,
@@ -7,6 +9,35 @@ import {
   type ConfigOptions,
 } from "./lib/config.js";
 import { readFile } from "node:fs/promises";
+
+/**
+ * Returns whether `git check-ignore` thinks the given absolute path is covered
+ * by the project's gitignore rules. Returns `null` when git can't answer (no
+ * git binary, not a git repo, etc.) so callers can fall back to a generic
+ * message instead of pretending they know.
+ */
+const checkPathGitignored = (
+  absolutePath: string,
+  cwd: string,
+): boolean | null => {
+  try {
+    execFileSync("git", ["check-ignore", "-q", "--", absolutePath], {
+      cwd,
+      stdio: "ignore",
+    });
+    return true;
+  } catch (e: unknown) {
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "status" in e &&
+      (e as { status?: number }).status === 1
+    ) {
+      return false;
+    }
+    return null;
+  }
+};
 
 export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
 export const LOGGED_IN_HANDLE_TEMPLATE = "{loggedInUser.handle}";
@@ -67,7 +98,7 @@ export default (
   name: "fujocoded:authproto",
   hooks: {
     "astro:config:setup": (setupParams) => {
-      const { injectRoute, addMiddleware } = setupParams;
+      const { injectRoute, addMiddleware, config } = setupParams;
 
       addOAuthRoutes(injectRoute);
       addAtProtoRoutes(injectRoute);
@@ -81,6 +112,7 @@ export default (
             content: getConfig({
               options: configOptions,
               isDev: process.env.NODE_ENV === "development",
+              devPort: config.server?.port,
             }),
             context: "server",
           },
@@ -127,6 +159,37 @@ export default (
         logger.warn(
           `Your Astro output config is "static". The login status is only available on dynamically rendered pages.`,
         );
+      }
+      if (
+        configOptions.driver?.name === "fs" ||
+        configOptions.driver?.name === "fs-lite"
+      ) {
+        const driverName = configOptions.driver.name;
+        const driverBase = (
+          configOptions.driver.options as { base?: string } | undefined
+        )?.base;
+        const projectRoot = fileURLToPath(config.root);
+
+        if (driverBase) {
+          const absoluteBase = path.isAbsolute(driverBase)
+            ? driverBase
+            : path.resolve(projectRoot, driverBase);
+          const ignored = checkPathGitignored(absoluteBase, projectRoot);
+          if (ignored === false) {
+            logger.warn(
+              `Authproto's "${driverName}" driver writes session data to "${driverBase}", which is NOT covered by your .gitignore. Add it before committing or you'll leak credentials. Also make sure only the server can read it on the host.`,
+            );
+          } else if (ignored === null) {
+            logger.warn(
+              `Authproto's "${driverName}" driver writes session data to "${driverBase}". Couldn't verify gitignore status (no git, or not a git repo). Make sure that location is gitignored and only the server can read it.`,
+            );
+          }
+          // ignored === true: silent. The path is gitignored, nothing to flag.
+        } else {
+          logger.warn(
+            `Authproto's "${driverName}" driver writes session data to disk. Set "options.base" to a path you control, add it to .gitignore, and make sure only the server can read it.`,
+          );
+        }
       }
       injectTypes({
         filename: "types.d.ts",

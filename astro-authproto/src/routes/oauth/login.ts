@@ -1,13 +1,29 @@
 import type { APIRoute } from "astro";
 import { extractAuthError, oauthClient } from "../../lib/auth.js";
-import { scopes } from "fujocoded:authproto/config";
+import { scopes, isDev, isDevServerHostSet } from "fujocoded:authproto/config";
 import { randomBytes } from "node:crypto";
 import {
   AUTHPROTO_ERROR_CODE,
   AUTHPROTO_ERROR_DESCRIPTION,
 } from "../../../src/routes/middleware.ts";
 
+const DEV_HOST_WARNING = [
+  "",
+  "  ATproto OAuth needs your dev server to bind to 127.0.0.1, but it",
+  "  isn't. Login will fail with a redirect URI error until you fix this.",
+  "",
+  "  Pick one:",
+  "    • Run:  astro dev --host",
+  "    • Or set in astro.config.mjs:",
+  "        server: { host: true }",
+  "",
+].join("\n");
+
 export const POST: APIRoute = async ({ redirect, request, session }) => {
+  if (isDev && !isDevServerHostSet) {
+    console.error(DEV_HOST_WARNING);
+  }
+
   const body = await request.formData();
   const atprotoIdValue = body.get("atproto-id");
   const atprotoId =

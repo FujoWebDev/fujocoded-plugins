@@ -73,9 +73,11 @@ export const getStoresImport = (driverName?: string) => {
 export const getConfig = ({
   options,
   isDev,
+  devPort,
 }: {
   options: ConfigOptions;
   isDev: boolean;
+  devPort?: number;
 }) => {
   const finalDriver = options.driver ?? {
     name: "memory",
@@ -84,7 +86,9 @@ export const getConfig = ({
 
   const externalDomain =
     options.externalDomain ??
-    (isDev ? "http://127.0.0.1:4321/" : options.applicationDomain);
+    (isDev
+      ? `http://127.0.0.1:${devPort ?? 4321}/`
+      : options.applicationDomain);
 
   const scopes: OAuthScope[] = ["atproto"];
   if (Array.isArray(options.scopes)) {
