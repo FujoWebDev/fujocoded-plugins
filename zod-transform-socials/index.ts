@@ -1,4 +1,3 @@
-import z from "zod";
 import {
   createExtractSocialData,
   extractSocialData,
@@ -11,10 +10,14 @@ import {
   type SOCIAL_TYPES as INNER_SOCIAL_TYPES,
 } from "./social-links.ts";
 
-const urlSchema =
-  typeof (z as any).url === "function"
-    ? (z as any).url()
-    : z.string().url();
+// Detect which Zod is in the user's project
+import * as z from "zod";
+
+const isZod4 = "_zod" in z.string();
+
+export const urlSchema = isZod4
+  ? (z as any).url() // z.url() → ZodURL in v4
+  : z.string().url(); // z.string().url() → ZodString in v3
 
 export const SocialsSchema = z.union([
   urlSchema,
@@ -36,11 +39,21 @@ export type CreateSocialsConfig = CreateSocialLinksConfig;
 const buildTransformSocial =
   (extractor: ReturnType<typeof createExtractSocialData>) =>
   (social: SocialsSchema) => {
-    if (typeof social == "string") {
-      return extractor({ url: social });
+    const urlString =
+      typeof social === "string"
+        ? social
+        : social instanceof URL
+          ? social.href
+          : social.url instanceof URL
+            ? social.url.href
+            : social.url;
+
+    if (typeof social === "string" || social instanceof URL) {
+      return extractor({ url: urlString as string });
     }
     const { icon, url, platform, username } = social;
-    const data = extractor({ url });
+    const urlStr = url instanceof URL ? url.href : url;
+    const data = extractor({ url: urlStr });
 
     return {
       icon:
@@ -48,7 +61,7 @@ const buildTransformSocial =
         (platform === undefined
           ? data.icon
           : getSocialIcon(platform as INNER_SOCIAL_TYPES)),
-      url: url ?? data.url,
+      url: urlStr,
       platform: platform ?? data.platform,
       username: username ?? data.username,
     };
@@ -61,8 +74,8 @@ export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
 
   const SocialLinks = z
     .array(SocialsSchema)
-    .default([])
-    .transform((socialUrls) => socialUrls.map(transformSocial));
+    .transform((socialUrls) => socialUrls.map(transformSocial))
+    .default([]);
 
   return { SocialsSchema, transformSocial, SocialLinks, socialLinks };
 };
@@ -72,7 +85,7 @@ export const transformSocial = buildTransformSocial(extractSocialData);
 
 export const SocialLinks = z
   .array(SocialsSchema)
-  .default([])
-  .transform((socialUrls) => socialUrls.map(transformSocial));
+  .transform((socialUrls) => socialUrls.map(transformSocial))
+  .default([]);
 
 export type SocialLinksData = z.infer<typeof SocialLinks>;
