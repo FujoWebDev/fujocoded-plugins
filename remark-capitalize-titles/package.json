@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/remark-capitalize-titles",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "description": "Make titles consistent with remark",
   "keywords": [
     "remark"

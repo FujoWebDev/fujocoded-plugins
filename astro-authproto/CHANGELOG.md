@@ -1,5 +1,24 @@
 # @fujocoded/authproto
 
+## 0.3.1
+
+### Patch Changes
+
+- 7e3f1e7: Fix custom-redirect / referer parsing in the OAuth callback so encoded
+  `redirect` and `referer` values are no longer silently dropped on login.
+- 7e3f1e7: Fix custom-redirect / referer state parsing in the OAuth callback. The OAuth client wraps our state under an opaque key in the URL `state` param and returns the original value as `clientCallback.state`, so we now read from there instead of `requestUrl.searchParams.get("state")` — which was always the wrapped value and never parsed as JSON.
+
+  Also improve `astro-authproto` README and `02-read-bsky-profile` example:
+  - Document `session` driver setup and full integration config in install steps.
+  - Clarify `applicationDomain` should be the full URL with scheme (e.g. `https://example.com`, or `http://127.0.0.1:4321` locally).
+  - Add a "Shipping it" production section.
+  - Update the read-profile example to use `getBlueskyAgent` from `@fujocoded/authproto/helpers` instead of constructing `AtpBaseClient` directly, and fix the avatar `alt` to use a JSX expression.
+
+- 7e3f1e7: Use Astro's actual dev server port for the OAuth callback URL in development
+  instead of always assuming `4321`. If you run `astro dev --port 4322` (or set
+  `server.port` in your Astro config), Authproto now points OAuth at the right
+  local URL.
+
 ## 0.3.0
 
 ### Minor Changes
