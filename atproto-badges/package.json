@@ -1,0 +1,56 @@
+{
+  "name": "@fujocoded/atproto-badges",
+  "version": "0.1.0",
+  "description": "ATProto badge attestation utilities",
+  "keywords": [
+    "atproto",
+    "badge"
+  ],
+  "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/FujoWebDev/fujocoded-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "FujoCoded LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "validate": "npx publint"
+  },
+  "dependencies": {
+    "@atproto/api": "^0.17.3",
+    "@atproto/crypto": "^0.4.3",
+    "@atproto/identity": "^0.4.3",
+    "@atproto/xrpc": "^0.7.7",
+    "@ipld/dag-cbor": "^9.2.2",
+    "multiformats": "^13.3.1",
+    "uint8arrays": "^5.1.0"
+  },
+  "devDependencies": {
+    "tsdown": "^0.17.2",
+    "vitest": "^3.1.1"
+  }
+}
