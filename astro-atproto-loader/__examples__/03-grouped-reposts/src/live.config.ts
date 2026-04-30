@@ -21,11 +21,16 @@ import { defineAtProtoLiveCollection } from "@fujocoded/astro-atproto-loader";
 // Set up validation for schemas via zod
 const BlobRefSchema = z
   .object({
-    ref: z.unknown(),
+    ref: z.union([z.string(), z.object({ $link: z.string() })]).nullish(),
     mimeType: z.string(),
   })
   .transform((blob) => ({
-    cid: blob.ref == null ? undefined : String(blob.ref),
+    cid:
+      blob.ref == null
+        ? undefined
+        : typeof blob.ref === "string"
+          ? blob.ref
+          : blob.ref.$link,
     mimeType: blob.mimeType,
   }));
 

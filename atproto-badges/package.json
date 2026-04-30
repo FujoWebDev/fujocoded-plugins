@@ -1,15 +1,10 @@
 {
-  "name": "@fujocoded/astro-atproto-loader",
-  "version": "0.1.1",
-  "description": "Astro loaders (live and static) for reading AtProto records into Astro content collections.",
+  "name": "@fujocoded/atproto-badges",
+  "version": "0.1.0",
+  "description": "ATProto badge attestation utilities",
   "keywords": [
-    "astro",
-    "astro-content",
-    "astro-loader",
     "atproto",
-    "bluesky",
-    "content-loader",
-    "withastro"
+    "badge"
   ],
   "homepage": "https://github.com/FujoWebDev/fujocoded-plugins#readme",
   "bugs": {
@@ -28,7 +23,7 @@
     "package.json"
   ],
   "type": "module",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "exports": {
     ".": {
       "import": {
@@ -42,25 +37,20 @@
   },
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch src/",
-    "validate": "npx publint",
-    "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "validate": "npx publint"
   },
   "dependencies": {
     "@atproto/api": "^0.17.3",
-    "@atproto/identity": "^0.4.8",
-    "@atproto/syntax": "^0.4.2"
+    "@atproto/crypto": "^0.4.3",
+    "@atproto/identity": "^0.4.3",
+    "@atproto/xrpc": "^0.7.7",
+    "@ipld/dag-cbor": "^9.2.2",
+    "multiformats": "^13.3.1",
+    "uint8arrays": "^5.1.0"
   },
   "devDependencies": {
-    "@atproto/crypto": "^0.4.5",
-    "astro": "^5.16.14",
-    "msw": "^2.13.4",
-    "tsdown": "^0.14.2",
-    "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "astro": "^5.13.0 || ^6.0.0"
+    "tsdown": "^0.17.2",
+    "vitest": "^3.1.1"
   }
 }

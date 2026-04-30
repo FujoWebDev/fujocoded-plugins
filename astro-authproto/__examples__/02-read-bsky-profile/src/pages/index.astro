@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { Login } from "@fujocoded/authproto/components";
-import { AtpBaseClient } from "@atproto/api";
+import { getBlueskyAgent } from "@fujocoded/authproto/helpers";
 import "../styles/bsky_table.css";
 
 const FUJOCODED_HANDLE = "fujocoded.bsky.social";
@@ -12,7 +12,12 @@ const display_user = !user
   ? { did: FUJOCODED_DID, handle: FUJOCODED_HANDLE }
   : user;
 
-const agent = new AtpBaseClient("https://public.api.bsky.app");
+const agent = await getBlueskyAgent(user ? { loggedInUser: user } : undefined);
+
+if (!agent) {
+  throw new Error("Could not create a Bluesky agent.");
+}
+
 const display_profile = await agent.app.bsky.actor.getProfile({
   actor: display_user.did,
 });
@@ -50,7 +55,7 @@ const display_profile = await agent.app.bsky.actor.getProfile({
             src={display_profile.data.avatar}
             width="50"
             height="50"
-            alt="{display_profile.data.displayName}'s avatar."
+            alt={`${display_profile.data.displayName}'s avatar.`}
           /></td
         >
       </tr>
