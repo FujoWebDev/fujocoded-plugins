@@ -74,11 +74,14 @@ export const getConfig = ({
   options,
   isDev,
   devPort,
+  devServerHost,
 }: {
   options: ConfigOptions;
   isDev: boolean;
   devPort?: number;
+  devServerHost?: string | boolean;
 }) => {
+  const isDevServerHostSet = Boolean(devServerHost);
   const finalDriver = options.driver ?? {
     name: "memory",
     options: undefined,
@@ -135,5 +138,7 @@ export const getConfig = ({
     export const redirectAfterLogout = ${JSON.stringify(options.redirects?.afterLogout ?? "/")};
     export const externalDomain = ${JSON.stringify(externalDomain)};
     export const clientMetadataDomain = process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? ${JSON.stringify(externalDomain)} ?? "${options.applicationDomain}";
+    export const isDev = ${JSON.stringify(isDev)};
+    export const isDevServerHostSet = ${JSON.stringify(isDevServerHostSet)};
     `;
 };

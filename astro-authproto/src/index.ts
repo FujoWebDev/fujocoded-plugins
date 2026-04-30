@@ -113,6 +113,7 @@ export default (
               options: configOptions,
               isDev: process.env.NODE_ENV === "development",
               devPort: config.server?.port,
+              devServerHost: config.server?.host,
             }),
             context: "server",
           },
