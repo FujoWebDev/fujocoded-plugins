@@ -37,7 +37,6 @@ export const GET: APIRoute = async ({ request, redirect, session }) => {
     session?.set(AUTHPROTO_ERROR_DESCRIPTION, errorDescription);
   }
 
-  // Check if a custom redirect or referer was passed in the state.
   // The `state` value in the URL is NOT the state we sent during login: the
   // OAuth client swaps it for its own internal id. Our original state comes
   // back as `clientCallback.state`, so that's what we read.
