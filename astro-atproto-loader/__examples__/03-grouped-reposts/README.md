@@ -23,7 +23,7 @@ reposted, with the original post hydrated for display.
   `app.bsky.feed.repost` collection
 - `parseRecord` runs once per record and drops anything that isn't a
   well-formed repost. Today this is hand-rolled Zod for `repost`, `post`,
-  and `profile`. 
+  and `profile`.
 - `groupBy` returns the URI of the post being reposted, so reposts of the
   same post end up in the same group
 - The `transform` keeps only groups of size 3, then uses `fetchRecord` to:

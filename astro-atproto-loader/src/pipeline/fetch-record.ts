@@ -17,9 +17,7 @@ import { getErrorMessage } from "../utils.ts";
 export const createFetchRecord = (): FetchRecord => {
   const cache = new Map<string, Promise<RecordValue | null>>();
 
-  const fetchBase = async (
-    atUri: string,
-  ): Promise<RecordValue | null> => {
+  const fetchBase = async (atUri: string): Promise<RecordValue | null> => {
     let parsed: AtUri;
     try {
       parsed = new AtUri(atUri);

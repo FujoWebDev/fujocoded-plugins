@@ -51,7 +51,6 @@ const PostSchema = z.object({
   embed: z.unknown().optional(),
 });
 
-
 // Pull the first image off a post, if it has one. Bluesky posts can
 // carry up to four; we keep this small.
 function getFirstPostImage(embed: unknown) {
@@ -235,4 +234,3 @@ const sharedReposts = defineAtProtoLiveCollection({
 });
 
 export const collections = { sharedReposts };
-

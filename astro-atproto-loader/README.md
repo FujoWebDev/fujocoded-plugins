@@ -363,7 +363,6 @@ A working version of this lives at
 Use `filter` to drop records before they reach `groupBy`, or return a unique
 key like `uri` for records that shouldn't merge with anything else.
 
-
 ## Default transforms
 
 When the loader is configured with exactly one source and no `transform`, it

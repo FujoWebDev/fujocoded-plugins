@@ -87,12 +87,10 @@ export interface AtProtoRecordContext {
  * Each failure mode logs a distinct warning, so callers can tell which thing
  * went wrong from the console.
  */
-export type FetchRecord = <Parsed = RecordValue>(
-  args: {
-    atUri: string;
-    parse?: (value: unknown) => Parsed;
-  },
-) => Promise<Parsed | null>;
+export type FetchRecord = <Parsed = RecordValue>(args: {
+  atUri: string;
+  parse?: (value: unknown) => Parsed;
+}) => Promise<Parsed | null>;
 
 /**
  * The bundle of args passed to each `filter` and `transform` callback for a
@@ -216,7 +214,10 @@ export type AtProtoRecordCallbacks<
 export type OnSourceError =
   | "throw"
   | "skip"
-  | ((error: unknown, source: AtProtoLoaderSource<unknown>) => "throw" | "skip");
+  | ((
+      error: unknown,
+      source: AtProtoLoaderSource<unknown>,
+    ) => "throw" | "skip");
 
 /**
  * Structural extraction of a Zod schema's input type. Avoids depending on a

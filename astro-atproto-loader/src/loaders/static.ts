@@ -32,10 +32,7 @@ type AtProtoStaticTransformOptions<
 > =
   | {
       groupBy?: never;
-      transform?: AtProtoRecordTransform<
-        Sources,
-        AtProtoStaticDataEntry<Data>
-      >;
+      transform?: AtProtoRecordTransform<Sources, AtProtoStaticDataEntry<Data>>;
     }
   | {
       groupBy: AtProtoRecordGroupBy<Sources>;
