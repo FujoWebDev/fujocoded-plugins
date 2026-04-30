@@ -134,10 +134,10 @@ export const mockGetRecord = ({
       url.searchParams.get("collection") !== collection ||
       url.searchParams.get("rkey") !== record.rkey
     ) {
-      return new HttpResponse(
-        JSON.stringify({ error: "RecordNotFound" }),
-        { status: 404, headers: { "content-type": "application/json" } },
-      );
+      return new HttpResponse(JSON.stringify({ error: "RecordNotFound" }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
     }
     return HttpResponse.json({
       uri: `at://${record.did}/${collection}/${record.rkey}`,

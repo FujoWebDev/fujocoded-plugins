@@ -395,8 +395,7 @@ describe("atProtoLiveLoader", () => {
           track: String(value.track),
         },
       }),
-      queryFilter: ({ entry, filter }) =>
-        entry.data.track === filter.track,
+      queryFilter: ({ entry, filter }) => entry.data.track === filter.track,
     });
 
     const result = await loader.loadCollection({

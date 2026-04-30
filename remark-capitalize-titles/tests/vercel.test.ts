@@ -8,7 +8,6 @@ const processMarkdown = async (value: Compatible) => {
   return file.toString().slice(0, -1);
 };
 
-
 // Test cases lifted verbatim from the upstream `title` package's own suite
 // (vercel/title, test/index.test.js) so we can see exactly how our wrapper
 // diverges from `title`'s standalone behavior. Some expected outputs have
@@ -37,9 +36,7 @@ describe("Imported from `title` package's test suite", () => {
 
   test("handles titles with special characters", async () => {
     expect(
-      await processMarkdown(
-        "# seattle’S BEST coffee & grandma's cookies",
-      ),
+      await processMarkdown("# seattle’S BEST coffee & grandma's cookies"),
     ).toBe("# Seattle’s Best Coffee & Grandma's Cookies");
   });
 
@@ -54,19 +51,18 @@ describe("Imported from `title` package's test suite", () => {
 
   test("handles Vercel product names with other special characters", async () => {
     expect(
-      await processWith(
-        "# aPi 2.0: lOG-in with zeit, new dOCs & more",
-        ["API", "ZEIT"],
-      ),
+      await processWith("# aPi 2.0: lOG-in with zeit, new dOCs & more", [
+        "API",
+        "ZEIT",
+      ]),
       // NOTE: upstream `title` produces "Log-In"; our wrapper applies
       // AP-style hyphenated-tail lowercasing, so we expect "Log-in".
     ).toBe("# API 2.0: Log-in with ZEIT, New Docs & More");
 
     expect(
-      await processWith(
-        "# toWArds NEXT.JS 5: Introducing cANaRY Updates",
-        ["Next.js"],
-      ),
+      await processWith("# toWArds NEXT.JS 5: Introducing cANaRY Updates", [
+        "Next.js",
+      ]),
     ).toBe("# Towards Next.js 5: Introducing Canary Updates");
   });
 
@@ -92,9 +88,9 @@ describe("Imported from `title` package's test suite", () => {
       "# Be Careful What You Wish For",
     );
 
-    expect(
-      await processWith("# XYZ: what is it good for", ["XYZ"]),
-    ).toBe("# XYZ: What Is It Good For");
+    expect(await processWith("# XYZ: what is it good for", ["XYZ"])).toBe(
+      "# XYZ: What Is It Good For",
+    );
   });
 
   test("supports international characters", async () => {
