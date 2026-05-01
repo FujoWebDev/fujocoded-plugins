@@ -20,7 +20,7 @@ export interface AtProtoLoaderSource<Raw = RecordValue> {
   /**
    * Optional per-record schema check, run once against each raw `value` before
    * `filter`. Use this for `$parse`-style lexicon validation. If it throws,
-   * that single record is dropped with a warning — the rest of the source
+   * that single record is dropped with a warning. The rest of the source
    * keeps loading and `onSourceError` is _not_ triggered.
    *
    * When omitted, records pass through unchecked as the raw `RecordValue` map
@@ -52,12 +52,16 @@ export interface AtProtoLoaderSource<Raw = RecordValue> {
  * Identifier for the repo this record lives in.
  *
  * `did` is always set (resolved from the record's AT-URI).
+ * `pds` is the resolved Personal Data Server URL for that DID. Useful for
+ * building blob URLs (`com.atproto.sync.getBlob`) or hitting any other PDS
+ * endpoint without re-resolving identity.
  * `handle` is set only when the source config provided a handle for this
- * repo — the loader never reverse-resolves DID → handle, so callers that
+ * repo. The loader never resolves a DID back to its handle, so callers that
  * passed `repo: "did:..."` will see `handle: undefined`.
  */
 export interface AtProtoRecordRepo {
   did: DidString;
+  pds: string;
   handle?: HandleString;
 }
 
@@ -76,6 +80,12 @@ export interface AtProtoRecordContext {
  * single network hop. Calling `fetchRecord({ atUri })` from many `transform`
  * or `filter` callbacks for the same target only hits the network once.
  *
+ * Resolves to `{ value, repo }` on success. `repo` carries the fetched
+ * record's owning DID and PDS, so callers can hand it straight to
+ * `toHostedBlob({ repo, blob })` for any blob inside the hydrated record
+ * without re-resolving identity. `handle` is omitted because the AT-URI
+ * only carries the DID.
+ *
  * Returns `null` on:
  *
  * - Malformed AT-URI
@@ -90,13 +100,13 @@ export interface AtProtoRecordContext {
 export type FetchRecord = <Parsed = RecordValue>(args: {
   atUri: string;
   parse?: (value: unknown) => Parsed;
-}) => Promise<Parsed | null>;
+}) => Promise<{ value: Parsed; repo: AtProtoRecordRepo } | null>;
 
 /**
  * The bundle of args passed to each `filter` and `transform` callback for a
- * single record. `Raw` is the value's parsed type — it comes from the
- * source's `parseRecord` return type when one is provided, and otherwise
- * defaults to the raw `RecordValue` map.
+ * single record. `Raw` is the value's parsed type. It comes from the
+ * source's `parseRecord` return type when one is provided, and defaults to
+ * the raw `RecordValue` map otherwise.
  */
 export interface AtProtoRecordCallbackArgs<
   Raw = RecordValue,
@@ -137,7 +147,7 @@ export interface AtProtoRecordFilterOptions<
 
 /**
  * Convert a per-record args bundle into an Astro entry. Returning `null` or
- * `undefined` drops the record — handy when a secondary hydration check or
+ * `undefined` drops the record. Handy when a secondary hydration check or
  * an inline schema parse decides the entry shouldn't ship.
  */
 export type AtProtoRecordTransform<

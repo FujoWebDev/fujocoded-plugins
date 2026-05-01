@@ -10,28 +10,30 @@ import type {
   AtProtoRecordContext,
   RecordValue,
 } from "../types.ts";
-import { getClient } from "./identity.ts";
+import { getClient, getPds } from "./identity.ts";
 
 export const isRecordValue = (value: unknown): value is RecordValue =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-export const toRecordContext = (
+export const toRecordContext = async (
   source: AtProtoLoaderSource<unknown>,
   record: { uri: string; cid?: string },
-): AtProtoRecordContext => {
+): Promise<AtProtoRecordContext> => {
   const aturi = new AtUri(record.uri);
   if (!aturi.rkey) {
     throw new Error(`Unexpected AtProto record URI: ${record.uri}`);
   }
 
   // The repo's DID is the AT-URI host. The handle is only known when the
-  // source config gave us one — we don't reverse-resolve DID → handle.
+  // source config gave us one, since the loader never makes an extra request
+  // to resolve a DID back to its handle.
   const handle = source.repo.startsWith("did:")
     ? undefined
     : (source.repo as HandleString);
+  const pds = await getPds(source.repo);
 
   return {
-    repo: { did: aturi.host as DidString, handle },
+    repo: { did: aturi.host as DidString, handle, pds },
     collection: source.collection,
     rkey: aturi.rkey,
     uri: record.uri,

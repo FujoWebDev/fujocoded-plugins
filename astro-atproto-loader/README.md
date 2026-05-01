@@ -57,6 +57,9 @@ In this package, you'll find:
   `defineLiveCollection()`
 - `defineAtProtoCollection()`, which reads public AtProto records at build
   time. Use it where you'd otherwise call Astro's `defineCollection()`
+- `toHostedBlob()` and `isAtBlob()`, helpers for turning a record's blob
+  ref (a profile avatar, a sprite sheet, a stream thumbnail) into a URL you
+  can drop into `<img src>`. Use them inside `transform`
 
 > [!WARNING]
 >
@@ -81,6 +84,9 @@ In this package, you'll find:
 - **Hydrate linked records** like `strongRef`s and `subject` URIs from inside
   your `transform`, so a post's quoted record or a label's subject is already
   resolved by the time your page renders
+- **Display blob-backed media** like profile avatars, sprite sheets, or
+  stream thumbnails by handing the blob ref to `toHostedBlob()` inside
+  `transform`
 
 > [!TIP]
 >
@@ -101,8 +107,26 @@ Before you start, you'll need:
 1. Run the following command:
 
 ```bash
-npm add @fujocoded/astro-atproto-loader
+npm add @fujocoded/astro-atproto-loader@latest
 ```
+
+> [!CAUTION]
+>
+> **`0.2.0` is broken. Upgrade to `0.2.1` or later.**
+>
+> If you're stuck on `0.2.0`, the correct code requires wrapping the call in "defineCollection":
+>
+> ```ts
+> import { defineCollection, z } from "astro:content";
+> import { defineAtProtoCollection } from "@fujocoded/astro-atproto-loader";
+>
+> const sprites = defineCollection(
+>   defineAtProtoCollection({
+>     source: { repo: "bmann.ca", collection: "actor.rpg.sprite" },
+>     outputSchema: z.any(),
+>   }),
+> );
+> ```
 
 2. Define a static collection (for build time magic)...
 
@@ -160,6 +184,9 @@ You can start with any of these:
 - [`03-grouped-reposts`](./__examples__/03-grouped-reposts/) for reading from
   multiple repos at once with `sources: [...]` and merging records with
   `groupBy`
+- [`04-single-entry`](./__examples__/04-single-entry/) for fetching one
+  record by `rkey` with `getEntry()` and `getLiveEntry()`, and turning the
+  record's blob into a URL with `toHostedBlob()`
 
 The first two examples show off two patterns:
 
@@ -240,7 +267,7 @@ defineAtProtoLiveCollection({
     // value is already the parsed lexicon type
     const quoted =
       value.embed?.$type === "app.bsky.embed.record"
-        ? await fetchRecord({ atUri: value.embed.record.uri })
+        ? (await fetchRecord({ atUri: value.embed.record.uri }))?.value
         : null;
     return { id: uri, data: { text: value.text, quoted } };
   },
@@ -256,16 +283,22 @@ Every `filter` and `transform` callback receives `fetchRecord({ atUri, parse?
 than one callback asks for the _same_ URI in the same cycle (for example a
 `subject` URI shared across many records), they share a single network call.
 
+A successful call resolves to `{ value, repo }`. `value` is the record body
+(or whatever your `parse` callback returned). `repo` is the fetched record's
+owning DID and PDS, already resolved. So you can hand it straight to
+`toHostedBlob({ repo, blob })` for any blob inside that hydrated record
+without re-resolving identity.
+
 ```ts
 import { $parse, lexicons } from "@atproto/lex";
 
 transform: async ({ value, uri, fetchRecord }) => {
-  const subject = await fetchRecord({
+  const result = await fetchRecord({
     atUri: value.subject.uri,
     parse: (v) => $parse(lexicons, "app.bsky.actor.profile", v),
   });
-  if (!subject) return null; // record was missing, unparseable, or unreachable
-  return { id: uri, data: { label: value.val, subject } };
+  if (!result) return null; // record was missing, unparseable, or unreachable
+  return { id: uri, data: { label: value.val, subject: result.value } };
 };
 ```
 
@@ -273,6 +306,55 @@ transform: async ({ value, uri, fetchRecord }) => {
 PDS that can't be reached, a 404, a record whose value isn't an object, or a
 `parse` callback that threw. Each of these logs a distinct warning to your
 console, so when something is missing you can tell which thing went wrong.
+
+## Blob helpers: turning record blobs (and images) into URLs
+
+When looking to display images or other files associated with records,
+you won't (unfortunately) find a simple address you can drop into
+`<img src>`: AtProto records don't store this content themselves, but instead
+only hold a "pointer" (called a _blob ref_) to the actual file on a user PDS.
+
+To show that profile avatar, sprite sheet, or video thumbnail on
+your page, we must turn the pointer into a real URL the browser
+can load. That's what `toHostedBlob()` is for.
+
+`toHostedBlob()` needs 2 things:
+
+- the `blob`ref itself
+- the `repo` that owns the file, that is the DID + PDS url wher the record
+  is hosted
+
+For records you own, `repo` will likely out of `args.repo`. While for records
+you've hydrated via `fetchRecord`, use the `repo` field on the result.
+
+```ts
+import {
+  defineAtProtoLiveCollection,
+  isAtBlob,
+  toHostedBlob,
+} from "@fujocoded/astro-atproto-loader";
+
+defineAtProtoLiveCollection({
+  source: { repo: "boba-tan.bsky.social", collection: "actor.rpg.sprite" },
+  outputSchema: z.object({
+    spriteSheet: z.object({
+      url: z.url(),
+      mimeType: z.string(),
+      size: z.number(),
+    }),
+  }),
+  transform: ({ repo, rkey, value }) => {
+    const v = value as { spriteSheet: unknown };
+    if (!isAtBlob(v.spriteSheet)) return undefined;
+    return {
+      id: rkey,
+      data: { spriteSheet: toHostedBlob({ repo, blob: v.spriteSheet }) },
+    };
+  },
+});
+```
+
+You can find a working example at [`__examples__/04-single-entry`](./__examples__/04-single-entry/).
 
 ## Multi-source reads and `onSourceError`
 

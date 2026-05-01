@@ -104,7 +104,11 @@ describe("atProtoLiveLoader", () => {
       1,
       expect.objectContaining({
         value: { title: "Opening", published: true },
-        repo: { did: "did:plc:resolved-handle", handle: "events.example.com" },
+        repo: {
+          did: "did:plc:resolved-handle",
+          handle: "events.example.com",
+          pds: PDS,
+        },
         collection: "community.lexicon.calendar.event",
         rkey: "first",
       }),
@@ -1249,6 +1253,71 @@ describe("atProtoStaticLoader", () => {
       body: undefined,
       filePath: undefined,
     });
+  });
+
+  test("preserves Date values returned by parseData", async () => {
+    server.use(
+      ...mockRepoIdentity({
+        did: "did:plc:dates-static",
+        pds: PDS,
+        handle: "dates.example.com",
+      }),
+      mockListRecords({
+        pds: PDS,
+        repo: "dates.example.com",
+        collection: "place.stream.livestream",
+        pages: [
+          [
+            {
+              did: "did:plc:dates-static",
+              rkey: "stream-1",
+              value: {
+                title: "Morning stream",
+                createdAt: "2026-04-04T00:30:21Z",
+              },
+            },
+          ],
+        ],
+      }),
+    );
+
+    const { atProtoStaticLoader } = await importLoader();
+
+    const createdAt = new Date("2026-04-04T00:30:21Z");
+    const store = { clear: vi.fn(), set: vi.fn() };
+    const parseData = vi.fn(async ({ data }) => ({
+      ...data,
+      createdAt,
+    }));
+
+    const loader = atProtoStaticLoader<
+      readonly [{ repo: string; collection: string }],
+      {
+        title: string;
+        createdAt: Date;
+      }
+    >({
+      source: {
+        repo: "dates.example.com",
+        collection: "place.stream.livestream",
+      },
+    });
+
+    await loader.load({
+      store,
+      parseData,
+    } as unknown as Parameters<typeof loader.load>[0]);
+
+    expect(store.set).toHaveBeenCalledWith({
+      id: "stream-1",
+      data: {
+        title: "Morning stream",
+        createdAt,
+      },
+      body: undefined,
+      filePath: undefined,
+    });
+    expect(store.set.mock.calls[0]?.[0].data.createdAt).toBeInstanceOf(Date);
   });
 
   test("surfaces schema parse failures from parseData", async () => {

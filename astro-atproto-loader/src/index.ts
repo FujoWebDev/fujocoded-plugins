@@ -1,3 +1,5 @@
+export { toHostedBlob, isAtBlob } from "./blobs.ts";
+export type { AtBlob } from "./blobs.ts";
 export { defineAtProtoLiveCollection } from "./loaders/live.ts";
 export type {
   AtProtoLiveLoaderEntryFilter,

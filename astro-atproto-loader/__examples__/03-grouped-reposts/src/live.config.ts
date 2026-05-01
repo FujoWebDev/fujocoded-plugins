@@ -140,7 +140,7 @@ const sharedReposts = defineAtProtoLiveCollection({
     // Hydrate the post, the author's profile, and every reposter's
     // profile in parallel. fetchRecord coalesces same-URI requests within
     // one load, so duplicate lookups across groups hit the network once.
-    const [post, authorProfile] = await Promise.all([
+    const [postResult, authorProfileResult] = await Promise.all([
       fetchRecord({
         atUri: key,
         parse: (value: unknown) => PostSchema.parse(value),
@@ -150,7 +150,9 @@ const sharedReposts = defineAtProtoLiveCollection({
         parse: (value: unknown) => ProfileSchema.parse(value),
       }),
     ]);
-    if (!post) return null;
+    if (!postResult) return null;
+    const post = postResult.value;
+    const authorProfile = authorProfileResult?.value;
 
     // Hydrate each reposter's profile. `record.repo.did` is the resolved
     // DID; `record.repo.handle` is set when the source config gave us a
@@ -158,10 +160,11 @@ const sharedReposts = defineAtProtoLiveCollection({
     // display and fall back to the DID otherwise.
     const repostedBy = await Promise.all(
       records.map(async (record) => {
-        const profile = await fetchRecord({
+        const profileResult = await fetchRecord({
           atUri: getProfileAtUri({ did: record.repo.did }),
           parse: (value: unknown) => ProfileSchema.parse(value),
         });
+        const profile = profileResult?.value;
         const avatarCid = profile?.avatar?.cid;
         const displayHandle = record.repo.handle ?? record.repo.did;
         return {

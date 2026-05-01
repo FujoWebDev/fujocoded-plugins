@@ -1,0 +1,36 @@
+---
+export const prerender = true;
+
+import { getEntry } from "astro:content";
+
+const sprite = await getEntry("sprites-static", "self");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Sprite (static)</title>
+  </head>
+  <body>
+    <nav><a href="/">static</a> · <a href="/live">live</a></nav>
+    <h1>Sprites — static fetch</h1>
+
+    {!sprite && <p class="error">Could not load sprite</p>}
+
+    {
+      sprite && (
+        <div>
+          <h2>
+            {sprite?.id} —{" "}
+            {new Intl.DateTimeFormat().format(sprite?.data.createdAt)}
+          </h2>
+          <img src={sprite?.data.spriteSheet.url} alt={"sprite sheet"} />
+        </div>
+      )
+    }
+  </body>
+</html>

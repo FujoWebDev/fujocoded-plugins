@@ -16,12 +16,11 @@ import { createFetchRecord } from "./fetch-record.ts";
  * Fetch and process a single record for the live loader's `loadEntry` path.
  *
  * Used when we know the exact rkey for a request and don't want to walk the
- * whole cached collection. Spins up a fresh per-call `fetchRecord` so
- * callbacks see the same behavior they would inside a normal load
- * cycle.
+ * whole cached collection. Creates a fresh per-call `fetchRecord` so
+ * callbacks see the same behavior they would inside a normal load cycle.
  *
  * Returns `undefined` if `parseRecord`, `filter`, or `transform` drop the
- * record — callers should fall back to the cached collection in that case.
+ * record. Callers should fall back to the cached collection in that case.
  */
 export const runSingleFetch = async <
   Sources extends readonly AtProtoLoaderSource<unknown>[],
@@ -40,7 +39,7 @@ export const runSingleFetch = async <
     );
   }
 
-  const context = toRecordContext(source, data);
+  const context = await toRecordContext(source, data);
 
   let value: unknown = data.value;
   if (source.parseRecord) {

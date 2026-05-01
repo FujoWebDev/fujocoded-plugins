@@ -1,3 +1,5 @@
+import { BlobRef } from "@atproto/api";
+
 import type {
   AtProtoLoaderSource,
   AtProtoRecordCallbackArgs,
@@ -14,6 +16,63 @@ export type AtProtoSourceOptions<
       source?: never;
       sources: Sources;
     };
+
+/**
+ * Astro's data store serializes with `devalue`, which rejects non-POJOs, which
+ * is a funny way to say non-"Plain Old JavaScript Objects" (e.g. class
+ * instances).  AtProto records returned by `@atproto/api` can include `BlobRef`
+ * and `CID` instances, which makes devalue unhappy, so we flatten those shapes
+ * into their canonical AT Protocol JSON form (`{$link}`, `{$bytes}`).
+ *
+ * Note: not *strictly* necessary for live collections (no devalue), but the
+ * issue can appear anyway in other contexts, so yay for consistency that also
+ * spares people some pain.
+ *
+ * See https://github.com/Rich-Harris/devalue#error-handling
+ */
+export const toSafePojo = <T>(value: T): T => toSafePojoValue(value) as T;
+
+const toSafePojoValue = (value: unknown): unknown => {
+  if (value === null || typeof value !== "object") return value;
+
+  if (value instanceof BlobRef) {
+    // BlobRef.toJSON() already returns the lex-JSON form (CID becomes {$link}).
+    return value.toJSON();
+  }
+
+  // Multiformats CID fingerprint: the `asCID` getter returns `this` for valid
+  // instances. Same check `CID.asCID()` uses internally.
+  if ((value as { asCID?: unknown }).asCID === value) {
+    return { $link: (value as { toString(): string }).toString() };
+  }
+
+  // devalue handles these natively, do not transform
+  if (
+    value instanceof Date ||
+    value instanceof RegExp ||
+    value instanceof URL ||
+    value instanceof Uint8Array
+  ) {
+    return value;
+  }
+
+  if (Array.isArray(value)) return value.map(toSafePojoValue);
+
+  if (value instanceof Map) {
+    return new Map(
+      [...value].map(([k, v]) => [toSafePojoValue(k), toSafePojoValue(v)]),
+    );
+  }
+  if (value instanceof Set) {
+    return new Set([...value].map(toSafePojoValue));
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, item] of Object.entries(value)) {
+    result[key] = toSafePojoValue(item);
+  }
+  return result;
+};
 
 export const toError = (error: unknown, message: string) =>
   error instanceof Error

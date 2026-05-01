@@ -1,0 +1,19 @@
+{
+  "name": "04-rpg-sprites",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^10.0.6",
+    "@fujocoded/astro-atproto-loader": "file:../..",
+    "astro": "^6.2.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

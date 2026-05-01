@@ -104,7 +104,7 @@ export const fetchFromSource = async <
     for (const record of data.records) {
       if (!isRecordValue(record.value)) continue;
 
-      const context = toRecordContext(source, record);
+      const context = await toRecordContext(source, record);
 
       let value: unknown = record.value;
       if (source.parseRecord) {

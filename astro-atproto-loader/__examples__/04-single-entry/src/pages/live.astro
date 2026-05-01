@@ -1,0 +1,49 @@
+---
+export const prerender = false;
+
+import { getLiveEntry } from "astro:content";
+
+const { entry, error } = await getLiveEntry("sprites-live", "self");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Sprite (live)</title>
+  </head>
+  <body>
+    <nav><a href="/">static</a> · <a href="/live">live</a></nav>
+    <h1>Sprites — fetched live</h1>
+    {error && <p class="error">Could not load sprites: {error.message}</p>}
+    {!entry && !error && <p class="error">Could not load sprite</p>}
+
+    {
+      entry && (
+        <div>
+          <h2>
+            {entry.id} —{" "}
+            {new Intl.DateTimeFormat().format(entry.data.createdAt)}
+          </h2>
+          <img src={entry.data.spriteSheet.url} alt={"sprite sheet"} />
+        </div>
+      )
+    }
+  </body>
+</html>
+
+<style>
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+  }
+  .error {
+    color: darkred;
+  }
+</style>

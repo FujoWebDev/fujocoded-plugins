@@ -4,12 +4,12 @@ import type { DidString } from "@atproto/syntax";
 
 const identityResolver = new IdResolver({});
 
-// Cache the in-flight promise (not just the resolved client) so concurrent
-// callers for the same repo share one identity lookup — that is, one round
-// of resolving the handle to a DID and then resolving the DID to its PDS.
-// If the lookup rejects, the entry is evicted so the next caller retries
-// instead of being stuck with a permanently failed result.
-const clientCache = new Map<string, Promise<AtpBaseClient>>();
+// Cache the in-flight identity lookup, keyed by the caller-provided repo
+// string. Each lookup resolves the handle to a DID, then the DID to a PDS.
+// Failed lookups are evicted so the next caller retries instead of reusing
+// the rejected promise.
+type AtprotoIdentity = { did: DidString; pds: string };
+const identityCache = new Map<string, Promise<AtprotoIdentity>>();
 
 export const getDid = async (repo: string): Promise<DidString> => {
   if (repo.startsWith("did:")) {
@@ -24,28 +24,34 @@ export const getDid = async (repo: string): Promise<DidString> => {
   return did as DidString;
 };
 
-const resolvePdsClient = async (repo: string): Promise<AtpBaseClient> => {
-  const did = await getDid(repo);
-  const atprotoData = await identityResolver.did.resolveAtprotoData(did);
-  const pds = atprotoData?.pds;
-  if (!pds) {
-    throw new Error(`Could not resolve a PDS for ${repo}`);
+const getIdentity = (repo: string): Promise<AtprotoIdentity> => {
+  const cached = identityCache.get(repo);
+  if (cached) {
+    return cached;
   }
-  return new AtpBaseClient(pds);
+
+  const request = (async () => {
+    const did = await getDid(repo);
+    const atprotoData = await identityResolver.did.resolveAtprotoData(did);
+    if (!atprotoData?.pds) {
+      throw new Error(`Could not resolve a PDS for ${repo}`);
+    }
+    return { did, pds: atprotoData.pds };
+  })();
+
+  identityCache.set(repo, request);
+  request.catch(() => {
+    // Kick out failed lookups so retries don't reuse the rejected promise.
+    if (identityCache.get(repo) === request) {
+      identityCache.delete(repo);
+    }
+  });
+
+  return request;
 };
 
-export const getClient = async (repo: string): Promise<AtpBaseClient> => {
-  let clientPromise = clientCache.get(repo);
+export const getPds = async (repo: string): Promise<string> =>
+  (await getIdentity(repo)).pds;
 
-  if (!clientPromise) {
-    clientPromise = resolvePdsClient(repo);
-    clientCache.set(repo, clientPromise);
-  }
-
-  try {
-    return await clientPromise;
-  } catch (error) {
-    clientCache.delete(repo);
-    throw error;
-  }
-};
+export const getClient = async (repo: string): Promise<AtpBaseClient> =>
+  new AtpBaseClient((await getIdentity(repo)).pds);

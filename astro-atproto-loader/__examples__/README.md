@@ -30,6 +30,13 @@ Pick one, then run `npm install` and `npm run dev` inside that example folder.
      keeps only posts all three accounts reposted, then hydrates the original
      post via `fetchRecord`
    - Shows the result on a server-rendered page with `getLiveCollection()`
+4. [`04-single-entry`](./04-single-entry/)
+   - Fetches one `actor.rpg.sprite` record by `rkey` with `getEntry()`
+     (static) and `getLiveEntry()` (live), instead of loading the whole
+     collection
+   - Uses `isAtBlob()` and `toHostedBlob()` inside `transform` to turn the
+     sprite sheet's blob ref into a URL ready for `<img src>`
+   - Shows the result on both a static and a server-rendered page
 
 ## Configuring the loaders
 

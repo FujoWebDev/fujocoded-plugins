@@ -1,3 +1,4 @@
+import { defineCollection } from "astro/content/config";
 import type { Loader, LoaderContext } from "astro/loaders";
 
 import { runPipeline } from "../pipeline/run.ts";
@@ -16,6 +17,7 @@ import {
   type AtProtoSourceOptions,
   normalizeSources,
   toNamespacedEntry,
+  toSafePojo,
   toRkeyEntry,
 } from "../utils.ts";
 
@@ -107,7 +109,7 @@ export const atProtoStaticLoader = <
 
         context.store.set({
           id: entry.id,
-          data,
+          data: toSafePojo(data),
           body: entry.body,
           filePath: entry.filePath,
         });
@@ -124,9 +126,10 @@ type StaticBaseConfig<
   onSourceError?: OnSourceError;
 } & AtProtoRecordFilterOptions<Sources>;
 
-type StaticCollection<Schema extends SchemaLike> = {
+type StaticCollection<Schema extends SchemaLike> = ReturnType<
+  typeof defineCollection
+> & {
   schema: Schema;
-  loader: ReturnType<typeof atProtoStaticLoader>;
 };
 
 /**
@@ -138,22 +141,8 @@ type StaticCollection<Schema extends SchemaLike> = {
  * Pass `groupBy` to aggregate records across sources by key. The grouped
  * `transform` then receives `{ key, records, fetchRecord }`.
  */
-// Single source, grouped
-export function defineAtProtoCollection<
-  const Source extends AtProtoLoaderSource<unknown>,
-  Schema extends SchemaLike,
->(
-  config: StaticBaseConfig<readonly [Source], Schema> & {
-    source: Source;
-    sources?: never;
-    groupBy: AtProtoRecordGroupBy<readonly [Source]>;
-    transform: AtProtoRecordGroupTransform<
-      readonly [Source],
-      AtProtoStaticDataEntry<SchemaInput<Schema>>
-    >;
-  },
-): StaticCollection<Schema>;
-// Single source, ungrouped
+// Single source, ungrouped (most common, so it goes first to make TS report
+// more sensible type errors)
 export function defineAtProtoCollection<
   const Source extends AtProtoLoaderSource<unknown>,
   Schema extends SchemaLike,
@@ -168,17 +157,17 @@ export function defineAtProtoCollection<
     >;
   },
 ): StaticCollection<Schema>;
-// Multi source, grouped
+// Single source, grouped
 export function defineAtProtoCollection<
-  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  const Source extends AtProtoLoaderSource<unknown>,
   Schema extends SchemaLike,
 >(
-  config: StaticBaseConfig<Sources, Schema> & {
-    source?: never;
-    sources: Sources;
-    groupBy: AtProtoRecordGroupBy<Sources>;
+  config: StaticBaseConfig<readonly [Source], Schema> & {
+    source: Source;
+    sources?: never;
+    groupBy: AtProtoRecordGroupBy<readonly [Source]>;
     transform: AtProtoRecordGroupTransform<
-      Sources,
+      readonly [Source],
       AtProtoStaticDataEntry<SchemaInput<Schema>>
     >;
   },
@@ -198,20 +187,35 @@ export function defineAtProtoCollection<
     >;
   },
 ): StaticCollection<Schema>;
+// Multi source, grouped
+export function defineAtProtoCollection<
+  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Schema extends SchemaLike,
+>(
+  config: StaticBaseConfig<Sources, Schema> & {
+    source?: never;
+    sources: Sources;
+    groupBy: AtProtoRecordGroupBy<Sources>;
+    transform: AtProtoRecordGroupTransform<
+      Sources,
+      AtProtoStaticDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): StaticCollection<Schema>;
 // Implementation signature. See the matching note in
-// `defineAtProtoLiveCollection`: `any` is the idiomatic escape hatch for
-// the impl of a generic overload set; the overloads above are the typed
-// surface that callers actually see.
+// `defineAtProtoLiveCollection`: `any` is the idiomatic escape hatch for the
+// implementation of a generic overload set; the overloads above are the types
+// the callers actually see.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function defineAtProtoCollection(config: any): any {
   const { outputSchema, ...loaderOptions } = config as {
     outputSchema: SchemaLike;
     [key: string]: unknown;
   };
-  return {
-    schema: outputSchema,
+  return defineCollection({
+    schema: outputSchema as Parameters<typeof defineCollection>[0]["schema"],
     loader: atProtoStaticLoader(
       loaderOptions as unknown as Parameters<typeof atProtoStaticLoader>[0],
     ),
-  };
+  });
 }

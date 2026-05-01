@@ -1,4 +1,5 @@
 import type { LiveDataEntry } from "astro";
+import { defineLiveCollection } from "astro/content/config";
 import type { LiveLoader } from "astro/loaders";
 
 import { runPipeline } from "../pipeline/run.ts";
@@ -21,6 +22,7 @@ import {
   normalizeSources,
   toNamespacedEntry,
   toError,
+  toSafePojo,
   toRkeyEntry,
 } from "../utils.ts";
 
@@ -221,11 +223,16 @@ const findEntryViaFetch = async <
   const matchesRequestedId = (entry: LiveDataEntry<Data>) =>
     !requestedId || entry.id === requestedId;
 
+  const flatten = (entry: LiveDataEntry<Data>): LiveDataEntry<Data> => ({
+    ...entry,
+    data: toSafePojo(entry.data),
+  });
+
   const [onlyCandidate] = candidates;
   if (candidates.length === 1 && onlyCandidate) {
     const entry = await runSingleFetch(onlyCandidate, callbacks, rkey);
     if (!entry) return undefined;
-    return matchesRequestedId(entry) ? entry : undefined;
+    return matchesRequestedId(entry) ? flatten(entry) : undefined;
   }
 
   if (candidates.length > 1) {
@@ -240,7 +247,7 @@ const findEntryViaFetch = async <
         matchesRequestedId(result.value),
     );
 
-    return match?.value;
+    return match ? flatten(match.value) : undefined;
   }
 
   return undefined;
@@ -283,12 +290,17 @@ export const atProtoLiveLoader = <
   const getEntries = createSwrCache<LiveDataEntry<Data>[]>({
     ttl: cacheTtl,
     initial: [],
-    fetch: () =>
-      runPipeline({
+    fetch: async () => {
+      const entries = await runPipeline({
         sources,
         callbacks,
         onSourceError,
-      }),
+      });
+      return entries.map((entry) => ({
+        ...entry,
+        data: toSafePojo(entry.data),
+      }));
+    },
     onError: (error) => {
       console.error(
         `[atproto-loader:${getCollectionsLabel(sources)}] refresh failed:`,
@@ -368,10 +380,10 @@ type LiveBaseConfig<
   ) => MaybePromise<boolean>;
 } & AtProtoRecordFilterOptions<Sources>;
 
-type LiveCollection<Schema extends SchemaLike> = {
-  type: "live";
+type LiveCollection<Schema extends SchemaLike> = ReturnType<
+  typeof defineLiveCollection
+> & {
   schema: Schema;
-  loader: ReturnType<typeof atProtoLiveLoader>;
 };
 
 /**
@@ -384,23 +396,8 @@ type LiveCollection<Schema extends SchemaLike> = {
  * Pass `groupBy` to aggregate records across sources by key. The grouped
  * `transform` then receives `{ key, records, fetchRecord }`.
  */
-// Single source, grouped
-export function defineAtProtoLiveCollection<
-  const Source extends AtProtoLoaderSource<unknown>,
-  Schema extends SchemaLike,
-  QueryFilter extends Record<string, unknown> = never,
->(
-  config: LiveBaseConfig<readonly [Source], Schema, QueryFilter> & {
-    source: Source;
-    sources?: never;
-    groupBy: AtProtoRecordGroupBy<readonly [Source]>;
-    transform: AtProtoRecordGroupTransform<
-      readonly [Source],
-      LiveDataEntry<SchemaInput<Schema>>
-    >;
-  },
-): LiveCollection<Schema>;
-// Single source, ungrouped
+// Single source, ungrouped (most common, so it goes first to make TS report
+// more sensible type errors)
 export function defineAtProtoLiveCollection<
   const Source extends AtProtoLoaderSource<unknown>,
   Schema extends SchemaLike,
@@ -416,18 +413,18 @@ export function defineAtProtoLiveCollection<
     >;
   },
 ): LiveCollection<Schema>;
-// Multi source, grouped
+// Single source, grouped
 export function defineAtProtoLiveCollection<
-  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  const Source extends AtProtoLoaderSource<unknown>,
   Schema extends SchemaLike,
   QueryFilter extends Record<string, unknown> = never,
 >(
-  config: LiveBaseConfig<Sources, Schema, QueryFilter> & {
-    source?: never;
-    sources: Sources;
-    groupBy: AtProtoRecordGroupBy<Sources>;
+  config: LiveBaseConfig<readonly [Source], Schema, QueryFilter> & {
+    source: Source;
+    sources?: never;
+    groupBy: AtProtoRecordGroupBy<readonly [Source]>;
     transform: AtProtoRecordGroupTransform<
-      Sources,
+      readonly [Source],
       LiveDataEntry<SchemaInput<Schema>>
     >;
   },
@@ -448,23 +445,40 @@ export function defineAtProtoLiveCollection<
     >;
   },
 ): LiveCollection<Schema>;
-// Implementation signature. The four overloads above are the public,
-// fully-typed surface; this signature is invisible to callers. `any` is the
-// idiomatic escape hatch here: `LiveCollection<Schema>` returned from a
-// non-generic impl can't be assignable to `LiveCollection<Schema>` for
-// every overload's instantiated `Schema'` (covariance dead-end), and a
-// generic impl can't unify across overloads either.
+// Multi source, grouped
+export function defineAtProtoLiveCollection<
+  const Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Schema extends SchemaLike,
+  QueryFilter extends Record<string, unknown> = never,
+>(
+  config: LiveBaseConfig<Sources, Schema, QueryFilter> & {
+    source?: never;
+    sources: Sources;
+    groupBy: AtProtoRecordGroupBy<Sources>;
+    transform: AtProtoRecordGroupTransform<
+      Sources,
+      LiveDataEntry<SchemaInput<Schema>>
+    >;
+  },
+): LiveCollection<Schema>;
+// For once, "any is fine": the four overloads above are the public, fully-typed
+// interface; `any` is just an escape hatch here. A non-generic implementation
+// cannot return something that's assignable to every overload's
+// `LiveCollection<Schema>` value, and a generic implementation for config
+// cannot cover all possible shapes of `LiveCollection<Schema>` at the same
+// time.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function defineAtProtoLiveCollection(config: any): any {
   const { outputSchema, ...loaderOptions } = config as {
     outputSchema: SchemaLike;
     [key: string]: unknown;
   };
-  return {
-    type: "live" as const,
-    schema: outputSchema,
+  return defineLiveCollection({
+    schema: outputSchema as Parameters<
+      typeof defineLiveCollection
+    >[0]["schema"],
     loader: atProtoLiveLoader(
       loaderOptions as unknown as Parameters<typeof atProtoLiveLoader>[0],
     ),
-  };
+  });
 }
