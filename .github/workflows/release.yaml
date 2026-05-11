@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      npm_tag:
+        description: "npm dist-tag to publish under. Manual releases cannot use latest."
+        required: true
+        type: string
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -19,24 +25,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        # with:
-        #   Figure out later if needed
-        #   fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Diagnose npm
-        run: |
-          npm --version
-          npm whoami --registry=https://registry.npmjs.org || true
-
       - name: Create Release PR or Publish
+        if: github.event_name == 'push'
         id: changesets
         uses: changesets/action@v1
         with:
@@ -45,4 +47,30 @@ jobs:
           commit: "chore: release packages 📦"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN - OIDC handles auth...in theory
+
+      - name: Validate manual npm tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
+        run: |
+          if [ "$NPM_TAG" = "latest" ]; then
+            echo "::error::Manual releases cannot publish to latest. Pushes to main publish to latest automatically."
+            exit 1
+          fi
+          if ! echo "$NPM_TAG" | grep -Eq '^[a-z][a-z0-9-]*$'; then
+            echo "::error::npm_tag must match ^[a-z][a-z0-9-]*$."
+            exit 1
+          fi
+
+      - name: Build
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run build
+
+      # Manual dispatch publishes packages from the selected ref that are not
+      # already on the registry under a non-latest npm dist-tag, for compatibility
+      # or preview channels. It does not retag already-published versions.
+      - name: Publish with manual npm tag
+        if: github.event_name == 'workflow_dispatch'
+        run: ./node_modules/.bin/changeset publish --tag "$NPM_TAG"
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
