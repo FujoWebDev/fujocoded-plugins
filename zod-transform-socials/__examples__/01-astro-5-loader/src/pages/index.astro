@@ -1,0 +1,33 @@
+---
+import { getCollection } from "astro:content";
+
+const team = await getCollection("team");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>zod-transform-socials Astro 5 loader example</title>
+  </head>
+  <body>
+    <h1>Astro 5 loader example</h1>
+    {
+      team.map((member) => (
+        <section>
+          <h2>{member.data.name}</h2>
+          <ul>
+            {member.data.contacts.map((contact) => (
+              <li>
+                <a href={contact.url}>{contact.platform}</a>
+                {contact.username && <span> — {contact.username}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </body>
+</html>
+

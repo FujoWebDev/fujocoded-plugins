@@ -1,0 +1,21 @@
+{
+  "name": "examples-zod-transform-socials-zod-3-standalone",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node parse.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fujocoded/zod-transform-socials": "file:../..",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "typescript": "^5.5.4"
+  },
+  "overrides": {
+    "zod": "^3.25.76"
+  }
+}

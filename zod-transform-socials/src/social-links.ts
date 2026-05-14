@@ -178,6 +178,9 @@ const appendMatches = (
   socialLinks.profiles.set(platform, [...existing, ...matches]);
 };
 
+// This top-level call is safe even under `"sideEffects": false` in package.json
+// because the logic in `createSocialLinks` only mutates the returned
+//  object, and doesn't touch anything observable from outside the package.
 export const socialLinks = createSocialLinks();
 
 // Extracted on 6/20/24
