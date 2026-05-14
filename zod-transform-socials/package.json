@@ -1,8 +1,6 @@
 {
   "name": "@fujocoded/zod-transform-socials",
-  "type": "module",
   "version": "0.0.14",
-  "sideEffects": false,
   "description": "A Zod schema + transformer for social URLs",
   "keywords": [
     "zod"
@@ -19,6 +17,8 @@
     "README.md",
     "package.json"
   ],
+  "type": "module",
+  "sideEffects": false,
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -52,9 +52,6 @@
     "typecheck": "tsc --noEmit",
     "validate": " npx publint"
   },
-  "peerDependencies": {
-    "zod": "^3.25.0 || ^4.0.0"
-  },
   "dependencies": {
     "social-links": "^1.14.0"
   },
@@ -63,5 +60,8 @@
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
     "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.0 || ^4.0.0"
   }
 }

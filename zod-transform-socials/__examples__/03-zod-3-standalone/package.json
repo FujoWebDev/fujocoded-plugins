@@ -1,8 +1,8 @@
 {
   "name": "examples-zod-transform-socials-zod-3-standalone",
-  "type": "module",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node parse.ts",
     "typecheck": "tsc --noEmit"

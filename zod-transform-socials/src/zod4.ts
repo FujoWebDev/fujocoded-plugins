@@ -37,7 +37,10 @@ const createSocialLinksSchema = (
 
 export const urlSchema = z.string().url();
 export const SocialsSchema = createSocialsSchema(urlSchema);
-export const SocialLinks = createSocialLinksSchema(SocialsSchema, transformSocial);
+export const SocialLinks = createSocialLinksSchema(
+  SocialsSchema,
+  transformSocial,
+);
 
 export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
   const SocialsSchema = createSocialsSchema(z.string().url());

@@ -29,7 +29,6 @@ Astro).
    > get packaged with this library anymore.
 
 2. Pick the entry that matches the `zod` in your project:
-
    - **Astro 5 / Zod 3** => `import { SocialLinks } from "@fujocoded/zod-transform-socials"`
    - **Astro 6 / Zod 4** => `import { SocialLinks } from "@fujocoded/zod-transform-socials/zod4"`
 

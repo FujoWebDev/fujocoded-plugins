@@ -34,7 +34,10 @@ const createSocialLinksSchema = (
 
 export const urlSchema: z.ZodString = z.string().url();
 export const SocialsSchema = createSocialsSchema(urlSchema);
-export const SocialLinks = createSocialLinksSchema(SocialsSchema, transformSocial);
+export const SocialLinks = createSocialLinksSchema(
+  SocialsSchema,
+  transformSocial,
+);
 
 export const createSocialsTransformer = (
   config: CreateSocialsConfig = {},
@@ -62,4 +65,9 @@ export type SocialsTransformer = {
   SocialLinks: z.ZodType<SocialLinkData[]>;
   socialLinks: SocialLinksLib;
 };
-export type { CreateSocialsConfig, DomainShortcuts, SocialLinkData, SocialsInput };
+export type {
+  CreateSocialsConfig,
+  DomainShortcuts,
+  SocialLinkData,
+  SocialsInput,
+};

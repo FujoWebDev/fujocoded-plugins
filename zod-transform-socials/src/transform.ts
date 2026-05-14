@@ -44,7 +44,9 @@ const createExtractSocialData =
   (socialLinks: SocialLinksLib) =>
   ({ url }: { url: string }): SocialLinkData => {
     const lowerUrl = url.toLowerCase();
-    const socialLinkAttempt = socialLinks.detectProfile(lowerUrl) as SOCIAL_TYPES;
+    const socialLinkAttempt = socialLinks.detectProfile(
+      lowerUrl,
+    ) as SOCIAL_TYPES;
     if (socialLinkAttempt) {
       return {
         url,
