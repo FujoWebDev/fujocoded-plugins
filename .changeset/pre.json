@@ -1,0 +1,26 @@
+{
+  "mode": "pre",
+  "tag": "zod4-test",
+  "initialVersions": {
+    "@fujocoded/astro-alt-text-toolkit": "0.0.1",
+    "@fujocoded/astro-ao3-loader": "0.0.4",
+    "@fujocoded/astro-atproto-loader": "0.2.1",
+    "@fujocoded/authproto": "0.3.1",
+    "@fujocoded/astro-dev-only": "0.0.4",
+    "@fujocoded/astro-rehype-html-headings": "0.0.2",
+    "@fujocoded/astro-remark-collect-components": "0.0.6",
+    "@fujocoded/astro-smooth-action": "0.0.1",
+    "@fujocoded/atproto-badges": "0.2.0",
+    "@fujocoded/expressive-code-caption": "0.0.3",
+    "@fujocoded/expressive-code-output": "0.1.0",
+    "@fujocoded/rehype-code-params": "0.0.5",
+    "@fujocoded/remark-alt-text-files": "0.0.2",
+    "@fujocoded/remark-capitalize-titles": "0.1.0",
+    "@fujocoded/remark-excalidraw": "0.0.2",
+    "@fujocoded/remark-jsx-auto-slug": "0.0.1",
+    "@fujocoded/zod-transform-socials": "0.0.14"
+  },
+  "changesets": [
+    "socials-zod-4"
+  ]
+}

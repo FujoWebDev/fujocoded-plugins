@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/zod-transform-socials",
-  "version": "0.0.14",
+  "version": "0.1.0-zod4-test.0",
   "description": "A Zod schema + transformer for social URLs",
   "keywords": [
     "zod"
