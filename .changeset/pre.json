@@ -20,7 +20,5 @@
     "@fujocoded/remark-jsx-auto-slug": "0.0.1",
     "@fujocoded/zod-transform-socials": "0.0.14"
   },
-  "changesets": [
-    "socials-zod-4"
-  ]
+  "changesets": ["socials-zod-4"]
 }
