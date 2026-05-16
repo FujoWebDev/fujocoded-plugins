@@ -6,10 +6,11 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      npm_tag:
-        description: "npm dist-tag to publish under. Manual releases cannot use latest."
-        required: true
-        type: string
+      publish_latest:
+        description: "Retry a failed latest publish (skips pre-mode check, publishes whatever's in package.json under the 'latest' tag). Leave off for normal prerelease dispatch."
+        required: false
+        default: false
+        type: boolean
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -48,17 +49,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate manual npm tag
+      - name: Validate dispatch mode
         if: github.event_name == 'workflow_dispatch'
         env:
-          NPM_TAG: ${{ inputs.npm_tag }}
+          PUBLISH_LATEST: ${{ inputs.publish_latest }}
         run: |
-          if [ "$NPM_TAG" = "latest" ]; then
-            echo "::error::Manual releases cannot publish to latest. Pushes to main publish to latest automatically."
-            exit 1
+          if [ "$PUBLISH_LATEST" = "true" ]; then
+            if [ -f .changeset/pre.json ]; then
+              echo "::error::publish_latest is true but .changeset/pre.json exists. Exit pre mode before publishing to latest."
+              exit 1
+            fi
+            echo "publish_latest=true: will publish under 'latest' (retry path)."
+            exit 0
           fi
-          if ! echo "$NPM_TAG" | grep -Eq '^[a-z][a-z0-9-]*$'; then
-            echo "::error::npm_tag must match ^[a-z][a-z0-9-]*$."
+          if [ ! -f .changeset/pre.json ]; then
+            echo "::error::Prerelease dispatch requires changesets pre mode. Run 'npx changeset pre enter <tag>' on the branch first, or re-dispatch with publish_latest=true to retry a latest publish."
             exit 1
           fi
 
@@ -66,11 +71,14 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: npm run build
 
-      # Manual dispatch publishes packages from the selected ref that are not
-      # already on the registry under a non-latest npm dist-tag, for compatibility
-      # or preview channels. It does not retag already-published versions.
-      - name: Publish with manual npm tag
-        if: github.event_name == 'workflow_dispatch'
-        run: ./node_modules/.bin/changeset publish --tag "$NPM_TAG"
-        env:
-          NPM_TAG: ${{ inputs.npm_tag }}
+      # Manual dispatch publishes whatever's already versioned on the branch.
+      # In pre mode, the dist-tag comes from .changeset/pre.json.
+      # With publish_latest=true, it retries a failed latest publish (--provenance
+      # mirrors the push-trigger path).
+      - name: Publish (prerelease)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_latest != true
+        run: ./node_modules/.bin/changeset publish
+
+      - name: Publish (latest retry)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_latest == true
+        run: ./node_modules/.bin/changeset publish --provenance

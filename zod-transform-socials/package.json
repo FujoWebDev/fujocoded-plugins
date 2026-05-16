@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/zod-transform-socials",
-  "version": "0.0.14",
+  "version": "0.1.0-zod4-test.0",
   "description": "A Zod schema + transformer for social URLs",
   "keywords": [
     "zod"
@@ -18,6 +18,7 @@
     "package.json"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -30,22 +31,37 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./zod4": {
+      "import": {
+        "types": "./dist/zod4.d.ts",
+        "default": "./dist/zod4.js"
+      },
+      "require": {
+        "types": "./dist/zod4.d.cts",
+        "default": "./dist/zod4.cjs"
+      }
     }
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
-    "validate": " npx publint",
-    "typecheck": "tsc --noEmit"
+    "build": "tsup src/index.ts src/zod4.ts --format cjs,esm --dts --clean",
+    "test:compat": "npm run build && node --experimental-strip-types scripts/check-compat.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": " npx publint"
   },
   "dependencies": {
-    "social-links": "^1.14.0",
-    "zod": "^3.23.8"
+    "social-links": "^1.14.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "tsup": "^8.1.0",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.0 || ^4.0.0"
   }
 }

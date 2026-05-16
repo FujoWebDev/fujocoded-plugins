@@ -19,5 +19,6 @@
     "declaration": true,
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": ["__examples__", "dist", "node_modules"]
 }

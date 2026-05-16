@@ -8,7 +8,7 @@ export type { ProfileMatch };
  */
 const DOMAIN_PATTERNS = {
   mastodon: (domain: string) => ({
-    match: `https?://${escapeForRegex(domain)}/@([a-z0-9-_]+)/?`,
+    match: `https?://${escapeForRegex(domain)}/@([a-z0-9-_]+)(?:/.*)?`,
     group: 1,
   }),
 } as const satisfies Record<string, (domain: string) => ProfileMatch>;
@@ -178,6 +178,9 @@ const appendMatches = (
   socialLinks.profiles.set(platform, [...existing, ...matches]);
 };
 
+// This top-level call is safe even under `"sideEffects": false` in package.json
+// because the logic in `createSocialLinks` only mutates the returned
+//  object, and doesn't touch anything observable from outside the package.
 export const socialLinks = createSocialLinks();
 
 // Extracted on 6/20/24
