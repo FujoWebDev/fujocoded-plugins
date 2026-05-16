@@ -15,7 +15,7 @@ import {
 } from "./transform.ts";
 import * as z from "zod/v4";
 
-const createSocialsSchema = (urlSchema: z.ZodString) =>
+const createSocialsSchema = (urlSchema: z.ZodType<string>) =>
   z.union([
     urlSchema,
     z.object({
@@ -35,7 +35,7 @@ const createSocialLinksSchema = (
     .transform((socialUrls) => socialUrls.map(transformSocial))
     .default([]);
 
-export const urlSchema = z.string().url();
+export const urlSchema = z.url();
 export const SocialsSchema = createSocialsSchema(urlSchema);
 export const SocialLinks = createSocialLinksSchema(
   SocialsSchema,
@@ -43,7 +43,7 @@ export const SocialLinks = createSocialLinksSchema(
 );
 
 export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
-  const SocialsSchema = createSocialsSchema(z.string().url());
+  const SocialsSchema = createSocialsSchema(z.url());
   const { transformSocial, socialLinks } = createTransformSocial(config);
   const SocialLinks = createSocialLinksSchema(SocialsSchema, transformSocial);
 

@@ -12,6 +12,14 @@ import {
 } from "./transform.ts";
 import * as z from "zod";
 
+// Zod 4 adds a top-level `toJSONSchema`; Zod 3 doesn't. If we see it, the
+// consumer (likely Astro 6) is on Zod 4 and should be using the /zod4 entry.
+if (typeof (z as { toJSONSchema?: unknown }).toJSONSchema === "function") {
+  console.warn(
+    "[@fujocoded/zod-transform-socials] Zod 4 is installed but you imported the Zod 3 entry. Use `@fujocoded/zod-transform-socials/zod4` instead.",
+  );
+}
+
 const createSocialsSchema = (urlSchema: z.ZodString): z.ZodType<SocialsInput> =>
   z.union([
     urlSchema,

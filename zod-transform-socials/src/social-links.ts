@@ -8,7 +8,7 @@ export type { ProfileMatch };
  */
 const DOMAIN_PATTERNS = {
   mastodon: (domain: string) => ({
-    match: `https?://${escapeForRegex(domain)}/@([a-z0-9-_]+)/?`,
+    match: `https?://${escapeForRegex(domain)}/@([a-z0-9-_]+)(?:/.*)?`,
     group: 1,
   }),
 } as const satisfies Record<string, (domain: string) => ProfileMatch>;

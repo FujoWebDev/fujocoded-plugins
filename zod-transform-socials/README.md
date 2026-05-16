@@ -80,6 +80,7 @@ For example, putting a custom icon on a personal homepage that would
 otherwise resolve to `"custom"` with no icon:
 
 ```yaml
+name: ms boba
 contacts:
   - url: https://essentialrandomness.com
     icon: simple-icons:firefox
@@ -91,14 +92,14 @@ Drop `SocialLinks` into a content collection (or any other Zod object):
 
 ```ts
 import { SocialLinks } from "@fujocoded/zod-transform-socials";
-// zod import,
+// zod import depends on version
 
 export const teamCollection = defineCollection({
   type: "data",
   schema: (tools) =>
     z.object({
       name: z.name(),
-      // contacts is
+      // contacts will contain your list of social URLs
       contacts: SocialLinks,
     });
 });
