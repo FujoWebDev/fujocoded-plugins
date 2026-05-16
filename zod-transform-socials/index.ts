@@ -15,6 +15,7 @@ export const SocialsSchema = z.union([
   z.string().url(),
   z.object({
     icon: z.string().optional(),
+    label: z.string().optional(),
     platform: z.string().optional(),
     url: z.string().url(),
     username: z.string().optional(),
@@ -28,14 +29,32 @@ export type { DomainShortcuts };
 
 export type CreateSocialsConfig = CreateSocialLinksConfig;
 
+const generateLabel = (
+  inputLabel: string | undefined,
+  platform: string,
+  url: string,
+): string => {
+  if (inputLabel) return inputLabel;
+  if (platform !== "custom") return platform;
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+    return hostname;
+  } catch {
+    return url;
+  }
+};
+
 const buildTransformSocial =
   (extractor: ReturnType<typeof createExtractSocialData>) =>
   (social: SocialsSchema) => {
     if (typeof social == "string") {
-      return extractor({ url: social });
+      const data = extractor({ url: social });
+      return { ...data, label: generateLabel(undefined, data.platform, social) };
     }
-    const { icon, url, platform, username } = social;
+    const { icon, label, url, platform, username } = social;
     const data = extractor({ url });
+
+    const resolvedPlatform = platform ?? data.platform;
 
     return {
       icon:
@@ -43,8 +62,9 @@ const buildTransformSocial =
         (platform === undefined
           ? data.icon
           : getSocialIcon(platform as INNER_SOCIAL_TYPES)),
+      label: generateLabel(label, resolvedPlatform, url),
       url: url ?? data.url,
-      platform: platform ?? data.platform,
+      platform: resolvedPlatform,
       username: username ?? data.username,
     };
   };
