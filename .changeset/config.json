@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.2/schema.json",
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "FujoWebDev/fujocoded-plugins" }
-  ],
+  "changelog": ["./changelog.mjs", { "repo": "FujoWebDev/fujocoded-plugins" }],
   "commit": false,
   "fixed": [],
   "linked": [],
