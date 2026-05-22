@@ -22,13 +22,26 @@ turn the blob ref into `{ url, mimeType, size }` ready for `<img src>`.
 
 ## Run it
 
+From this folder:
+
 ```bash
 npm install
 npm run dev
 ```
 
-Then open `http://127.0.0.1:4321` for the static page and
-`http://127.0.0.1:4321/live` for the live page.
+Then open `http://127.0.0.1:4321` for the static page and `http://127.0.0.1:4321/live` 
+for the live page.
 
-If you want to inspect the built static output instead, run `npm run build`
-and then `npm run preview`.
+> [!WARNING]
+> 
+> If you haven't done so already, you'll first need to build `astro-atproto-loader` itself.
+> If you don't remember if you have, don't worry: there's no harm in doing so again.
+> 
+> From the `astro-atproto-loader` folder—**not this one!**—run:
+> 
+> 1. `npm install`
+> 2. `npm run build`
+>
+> If all goes well, you will see a bunch of logs and eventually an
+> `[astro-atproto-loader] Build complete` message. You can then come back
+> to this folder and follow the "run it" section.
