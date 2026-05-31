@@ -29,16 +29,16 @@ npm install
 npm run dev
 ```
 
-Then open `http://127.0.0.1:4321` for the static page and `http://127.0.0.1:4321/live` 
+Then open `http://127.0.0.1:4321` for the static page and `http://127.0.0.1:4321/live`
 for the live page.
 
 > [!WARNING]
-> 
+>
 > If you haven't done so already, you'll first need to build `astro-atproto-loader` itself.
 > If you don't remember if you have, don't worry: there's no harm in doing so again.
-> 
+>
 > From the `astro-atproto-loader` folder—**not this one!**—run:
-> 
+>
 > 1. `npm install`
 > 2. `npm run build`
 >

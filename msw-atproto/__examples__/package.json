@@ -1,0 +1,10 @@
+{
+  "name": "msw-atproto-examples",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@atproto/api": "^0.19.16",
+    "@atproto/syntax": "^0.5.4"
+  }
+}
