@@ -24,7 +24,7 @@ const getCallback = async (url: string) => {
     request: new Request(url),
     session,
     redirect,
-  } as Parameters<typeof GET>[0]);
+  });
 
   return { response, session };
 };
@@ -57,10 +57,7 @@ describe("decodeOAuthState", () => {
 
   test("encode then decode preserves the owned fields", () => {
     const original = {
-      scopes: ["atproto", "transition:generic"] as [
-        "atproto",
-        "transition:generic",
-      ],
+      scopes: ["atproto", "transition:generic"],
       referer: "http://127.0.0.1:4321/start",
     };
 
@@ -135,7 +132,7 @@ describe("oauth callback route", () => {
       }),
       session,
       redirect,
-    } as Parameters<typeof POST>[0]);
+    });
 
     const state = parRequests[0]?.get("state");
     expect(state).toBeTruthy();
@@ -146,7 +143,7 @@ describe("oauth callback route", () => {
       ),
       session,
       redirect,
-    } as Parameters<typeof GET>[0]);
+    });
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/");

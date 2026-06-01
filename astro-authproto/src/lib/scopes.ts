@@ -25,7 +25,7 @@ export type ResolveScopesInput = {
   atprotoId: ResolveScopesAtprotoId;
   /**
    * The scopes Authproto is ready to request. Custom form values have already
-   * been checked against `allowedScopes`. `"atproto"` is always present.
+   * been checked against `allowedScopes`, and `"atproto"` is always present.
    */
   proposedScopes: readonly OAuthScope[];
   /**
@@ -118,15 +118,14 @@ const normalizeLoginScopes = (
 /**
  * Picks the final OAuth scopes for a login request.
  *
- * 1. Start from `requestedScopes`, dropping anything not in `configuredScopes`
- * 2. Fall back to `defaultScopes` when the request supplies no configured scopes
- * 3. Always keep `"atproto"`
- * 4. If a `resolveScopes` hook is configured and we know which account is
- *    logging in, call it with a readonly object of the proposed, allowed, and
- *    default scopes. The hook can return a new list, or `undefined` / `null` to
- *    accept the proposed one
- * 5. Filter the hook's output against `configuredScopes` too, so a hook cannot
- *    grant something the app did not declare
+ * Starts from `requestedScopes` after dropping anything not in
+ * `configuredScopes`, falls back to `defaultScopes` when the request supplies
+ * no configured scopes, and always keeps `"atproto"`. If a `resolveScopes`
+ * hook is configured and we know which account is logging in, the hook can
+ * rewrite the list from a readonly object containing the proposed, allowed,
+ * and default scopes. Returning `undefined` or `null` accepts the proposed
+ * list. We check the hook's output against the configured scopes too, so a hook
+ * cannot grant something the app did not declare.
  */
 export const resolveServerLoginScopes = async ({
   requestedScopes,

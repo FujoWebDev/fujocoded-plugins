@@ -61,10 +61,11 @@ describe("session state", () => {
   });
 
   test("drops non-string scope values left in session storage", async () => {
-    const session = createSession();
-    await session.set(AUTHPROTO_DID, "did:plc:b0b474nD1d");
-    // Existing session storage may already contain invalid scope values.
-    await session.set(AUTHPROTO_SCOPES, ["atproto", 123, "transition:generic"]);
+    const session = createSession({
+      [AUTHPROTO_DID]: "did:plc:b0b474nD1d",
+      // Existing session storage may already contain invalid scope values.
+      [AUTHPROTO_SCOPES]: ["atproto", 123, "transition:generic"],
+    });
 
     await expect(readSessionGrant(session)).resolves.toEqual({
       did: "did:plc:b0b474nD1d",

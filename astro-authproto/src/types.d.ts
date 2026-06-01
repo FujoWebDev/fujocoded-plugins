@@ -1,20 +1,8 @@
-import {
-  AUTHPROTO_ERROR_CODE,
-  AUTHPROTO_ERROR_DESCRIPTION,
-  AUTHPROTO_ERROR_URI,
-  AUTHPROTO_SCOPES,
-  AUTHPROTO_DID,
-} from "./lib/session-state.js";
+import type { AuthprotoSessionData } from "./lib/session-state.js";
 import type { OAuthScope } from "./lib/config.js";
 declare global {
   namespace App {
-    interface SessionData {
-      [AUTHPROTO_DID]: string | undefined;
-      [AUTHPROTO_SCOPES]: OAuthScope[] | undefined;
-      [AUTHPROTO_ERROR_CODE]: string | undefined;
-      [AUTHPROTO_ERROR_DESCRIPTION]: string | undefined;
-      [AUTHPROTO_ERROR_URI]: string | undefined;
-    }
+    interface SessionData extends AuthprotoSessionData {}
 
     interface Locals {
       /**

@@ -1,4 +1,4 @@
-import type { APIRoute } from "astro";
+import type { APIContext } from "astro";
 import {
   extractAuthError,
   getOAuthClient,
@@ -11,9 +11,17 @@ import {
   isDevServerHostSet,
 } from "fujocoded:authproto/config";
 import { resolveScopes } from "fujocoded:authproto/hooks";
-import { persistAuthprotoError } from "../../lib/session-state.js";
+import {
+  persistAuthprotoError,
+  type AuthprotoSession,
+} from "../../lib/session-state.js";
 import { resolveServerLoginScopes } from "../../lib/scopes.js";
 import { encodeOAuthState, type OAuthState } from "../../lib/oauth-state.js";
+
+// Restrict the type of the routes to just what we need to make them easier to test
+type LoginRouteContext = Pick<APIContext, "redirect" | "request"> & {
+  session?: AuthprotoSession;
+};
 
 const DEV_HOST_WARNING = [
   "",
@@ -27,7 +35,11 @@ const DEV_HOST_WARNING = [
   "",
 ].join("\n");
 
-export const POST: APIRoute = async ({ redirect, request, session }) => {
+export const POST = async ({
+  redirect,
+  request,
+  session,
+}: LoginRouteContext) => {
   if (isDev && !isDevServerHostSet) {
     console.error(DEV_HOST_WARNING);
   }

@@ -1,9 +1,10 @@
-import type { APIRoute } from "astro";
+import type { APIContext } from "astro";
 import { extractAuthError, getOAuthClient } from "../../lib/auth.js";
 import { getRedirectUrl } from "../../lib/redirects.js";
 import { redirectAfterLogin } from "fujocoded:authproto/config";
 import { decodeOAuthState } from "../../lib/oauth-state.js";
 import {
+  AuthprotoSession,
   persistAuthprotoError,
   persistLoginGrant,
 } from "../../lib/session-state.js";
@@ -13,6 +14,11 @@ type CallbackError = {
   code: string;
   description?: string;
   uri?: string;
+};
+
+// Restrict the type of the routes to just what we need to make them easier to test
+type CallbackRouteContext = Pick<APIContext, "redirect" | "request"> & {
+  session?: AuthprotoSession;
 };
 
 const readCallbackErrorParams = (
@@ -49,7 +55,11 @@ const tryOAuthCallback = async (
   }
 };
 
-export const GET: APIRoute = async ({ request, redirect, session }) => {
+export const GET = async ({
+  request,
+  redirect,
+  session,
+}: CallbackRouteContext) => {
   const requestUrl = new URL(request.url);
 
   const searchParamsError = readCallbackErrorParams(requestUrl.searchParams);

@@ -93,7 +93,7 @@ describe("server login scopes", () => {
     // dropped *before* the hook runs, so a user-supplied hook never sees
     // them.
     const resolveScopes = vi.fn(async ({ proposedScopes }) => [
-      // We don't resolve further scopes so if extra ones remains,
+      // We don't resolve further scopes so if extra ones remain,
       // it must be because it wasn't filtered by the hook.
       ...proposedScopes,
     ]);

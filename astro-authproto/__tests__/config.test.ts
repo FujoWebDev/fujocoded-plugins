@@ -25,7 +25,8 @@ describe("authproto config virtual module", () => {
       .replace(/^\s*import .*$/gm, "")
       .replace(/\bexport const\b/g, "const");
 
-    // Compiling the generated source is how we assert it is syntactically valid.
+    // We compile the generated source so we know we haven't fucked up its
+    // syntax.
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
     expect(() => new Function(parseableSource)).not.toThrow();
     expect(source).toContain(

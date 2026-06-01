@@ -1,4 +1,4 @@
-import type { AstroSession } from "astro";
+import { AstroSession } from "astro";
 import type { OAuthScope } from "./config.js";
 
 export const AUTHPROTO_ERROR_CODE = "authproto-error-code";
@@ -7,7 +7,17 @@ export const AUTHPROTO_ERROR_URI = "authproto-error-uri";
 export const AUTHPROTO_SCOPES = "atproto-scopes";
 export const AUTHPROTO_DID = "atproto-did";
 
-type AuthprotoSession = Pick<AstroSession, "get" | "set" | "delete">;
+export type AuthprotoSessionData = {
+  [AUTHPROTO_DID]: string | undefined;
+  [AUTHPROTO_SCOPES]: OAuthScope[] | undefined;
+  [AUTHPROTO_ERROR_CODE]: string | undefined;
+  [AUTHPROTO_ERROR_DESCRIPTION]: string | undefined;
+  [AUTHPROTO_ERROR_URI]: string | undefined;
+};
+
+export type AuthprotoSession = Pick<AstroSession, "get" | "set" | "delete">;
+type AuthprotoWritableSession = Pick<AstroSession, "set">;
+type AuthprotoReadableSession = Pick<AstroSession, "get" | "delete">;
 
 type AuthprotoError = {
   code?: string;
@@ -21,7 +31,7 @@ type LoginGrant = {
 };
 
 export const persistAuthprotoError = async (
-  session: AuthprotoSession | undefined,
+  session: AuthprotoWritableSession | undefined,
   { code, description, uri }: AuthprotoError,
 ) => {
   session?.set(AUTHPROTO_ERROR_CODE, code ?? "UNKNOWN");
@@ -30,7 +40,7 @@ export const persistAuthprotoError = async (
 };
 
 export const persistLoginGrant = async (
-  session: AuthprotoSession | undefined,
+  session: AuthprotoWritableSession | undefined,
   { did, scopes }: LoginGrant,
 ) => {
   session?.set(AUTHPROTO_DID, did);
@@ -43,7 +53,7 @@ export const persistLoginGrant = async (
 };
 
 export const readAndClearAuthprotoError = async (
-  session: AuthprotoSession | undefined,
+  session: AuthprotoReadableSession | undefined,
 ): Promise<AuthprotoError | null> => {
   const [code, description, uri] = await Promise.all([
     session?.get(AUTHPROTO_ERROR_CODE),
@@ -70,7 +80,7 @@ export const readAndClearAuthprotoError = async (
 };
 
 export const readSessionGrant = async (
-  session: AuthprotoSession | undefined,
+  session: AuthprotoReadableSession | undefined,
 ): Promise<{ did?: string; scopes: OAuthScope[] }> => {
   const did = await session?.get(AUTHPROTO_DID);
   const scopes = await session?.get(AUTHPROTO_SCOPES);
@@ -83,7 +93,7 @@ export const readSessionGrant = async (
 };
 
 export const clearSessionGrant = async (
-  session: AuthprotoSession | undefined,
+  session: AuthprotoReadableSession | undefined,
 ) => {
   session?.delete(AUTHPROTO_DID);
   session?.delete(AUTHPROTO_SCOPES);

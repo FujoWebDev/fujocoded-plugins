@@ -254,6 +254,18 @@ export default (
           },
         ),
       });
+      // Ship the virtual module declarations (config/hooks/stores) so apps that
+      // import from `fujocoded:authproto/config` typecheck. Without this, the
+      // declarations only exist inside the package's own source.
+      injectTypes({
+        filename: "virtual-modules.d.ts",
+        content: await readFile(
+          path.join(import.meta.dirname, "./virtual-modules.d.ts"),
+          {
+            encoding: "utf-8",
+          },
+        ),
+      });
     },
     "astro:db:setup": ({ extendDb }) => {
       if (configOptions.driver?.name == "astro:db") {

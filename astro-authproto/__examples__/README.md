@@ -21,6 +21,10 @@ how to use `@fujocoded/authproto` to achieve all your dreams.
    - restrict pages to logged-in users
    - restrict pages to e.g. mutuals
 5. Redirect configuration
+6. Custom scopes =>
+   - Pick exactly which scopes your app asks for, per login
+   - Re-auth a logged-in user to grant more (or fewer) scopes
+   - Build your own login form when `<Login />` is _Not Enough™_
 
 // FUTURE
 // Astro DB?

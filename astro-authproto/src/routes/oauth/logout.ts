@@ -1,11 +1,11 @@
-import type { APIRoute } from "astro";
-import { TokenRefreshError } from "@atproto/oauth-client";
+import type { APIContext } from "astro";
 import { getOAuthClient } from "../../lib/auth.js";
 import { getRedirectUrl } from "../../lib/redirects.js";
 import { redirectAfterLogout } from "fujocoded:authproto/config";
 import {
   clearSessionGrant,
   readSessionGrant,
+  type AuthprotoSession,
 } from "../../lib/session-state.js";
 
 // @atproto/oauth-client's SessionGetter throws TokenRefreshError with this
@@ -15,18 +15,28 @@ import {
 const ALREADY_DELETED_SESSION_MESSAGE =
   "The session was deleted by another process";
 
+// Restrict the type of the routes to just what we need to make them easier to test
+type LogoutRouteContext = Pick<APIContext, "redirect" | "request"> & {
+  session?: AuthprotoSession;
+};
+
 function isAlreadyDeletedSessionError(
   error: unknown,
   userDid: string,
 ): boolean {
   return (
-    error instanceof TokenRefreshError &&
+    error instanceof Error &&
+    "sub" in error &&
     error.sub === userDid &&
     error.message.includes(ALREADY_DELETED_SESSION_MESSAGE)
   );
 }
 
-export const POST: APIRoute = async ({ redirect, session, request }) => {
+export const POST = async ({
+  redirect,
+  session,
+  request,
+}: LogoutRouteContext) => {
   const { did: userDid } = await readSessionGrant(session);
   if (!session || !userDid) {
     console.error("User is not logged in but logout was attempted.");
