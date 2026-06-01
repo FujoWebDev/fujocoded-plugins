@@ -1,60 +1,99 @@
 import type { APIRoute } from "astro";
-import { extractAuthError, oauthClient } from "../../lib/auth.js";
+import { extractAuthError, getOAuthClient } from "../../lib/auth.js";
 import { getRedirectUrl } from "../../lib/redirects.js";
 import { redirectAfterLogin } from "fujocoded:authproto/config";
+import { decodeOAuthState } from "../../lib/oauth-state.js";
 import {
-  AUTHPROTO_ERROR_DESCRIPTION,
-  AUTHPROTO_ERROR_CODE,
-} from "../middleware.ts";
+  persistAuthprotoError,
+  persistLoginGrant,
+} from "../../lib/session-state.js";
 import { type OAuthSession } from "@atproto/oauth-client-node";
+
+type CallbackError = {
+  code: string;
+  description?: string;
+  uri?: string;
+};
+
+const readCallbackErrorParams = (
+  params: URLSearchParams,
+): CallbackError | null => {
+  const code = params.get("error");
+  const description = params.get("error_description") ?? undefined;
+  const uri = params.get("error_uri") ?? undefined;
+  if (!code && !description && !uri) {
+    return null;
+  }
+  const fallbackDescription = description ?? code;
+  return {
+    code: code ?? "UNKNOWN",
+    ...(fallbackDescription !== null && { description: fallbackDescription }),
+    ...(uri !== null && { uri }),
+  };
+};
+
+const tryOAuthCallback = async (
+  params: URLSearchParams,
+): Promise<
+  { session: OAuthSession; state: string | null } | { error: CallbackError }
+> => {
+  try {
+    const oauthClient = await getOAuthClient();
+    const { session, state } = await oauthClient.callback(params);
+    return { session, state };
+  } catch (e) {
+    const authError = extractAuthError(e);
+    return {
+      error: { code: authError.code, description: authError.description },
+    };
+  }
+};
 
 export const GET: APIRoute = async ({ request, redirect, session }) => {
   const requestUrl = new URL(request.url);
 
-  let oauthSession: OAuthSession | null;
-  let oauthState: string | null = null;
-  let error = requestUrl.searchParams.get("error");
-  // This falls back to undefined so it will be compatible with the session
-  // storage signature if not present.
-  let errorDescription =
-    requestUrl.searchParams.get("error_description") ?? undefined;
-  try {
-    const clientCallback = await oauthClient.callback(requestUrl.searchParams);
-    oauthSession = clientCallback.session;
-    oauthState = clientCallback.state;
-    session?.set("atproto-did", oauthSession.did);
-  } catch (e) {
-    // If there is an error during session restoration then it takes precedence
-    // over the one in the searchParams
-    const authError = extractAuthError(e);
-    error = authError.code ?? error;
-    errorDescription = authError.description;
-    oauthSession = null;
+  const searchParamsError = readCallbackErrorParams(requestUrl.searchParams);
+
+  // A provider-side error means there's nothing trustworthy to exchange —
+  // record the error and bail before we even talk to the OAuth client.
+  if (searchParamsError) {
+    await persistAuthprotoError(session, searchParamsError);
+    return redirect("/");
   }
 
-  if (error || errorDescription) {
-    session?.set(AUTHPROTO_ERROR_CODE, error ?? "UNKNOWN");
-    session?.set(AUTHPROTO_ERROR_DESCRIPTION, errorDescription);
+  if (!requestUrl.searchParams.has("code")) {
+    await persistAuthprotoError(session, {
+      code: "INVALID_CALLBACK",
+      description: 'Missing required "code" parameter in OAuth callback',
+    });
+    return redirect("/");
   }
 
-  // The `state` value in the URL is NOT the state we sent during login: the
-  // OAuth client swaps it for its own internal id. Our original state comes
-  // back as `clientCallback.state`, so that's what we read.
-  // CSRF was already validated by oauthClient.callback() above, so if parsing
-  // fails here it's safe to fall back to the default redirect.
-  let customRedirect: string | undefined;
-  let referer: string | undefined;
-  if (oauthState) {
-    try {
-      const stateData = JSON.parse(
-        Buffer.from(oauthState, "base64url").toString(),
-      );
-      customRedirect = stateData.redirect;
-      referer = stateData.referer;
-    } catch {
-      // If custom redirect parsing fails, use default redirect
-      // (CSRF protection is still validated by the OAuth client)
-    }
+  const callbackResult = await tryOAuthCallback(requestUrl.searchParams);
+  const oauthFailed = "error" in callbackResult;
+  const oauthSession = oauthFailed ? null : callbackResult.session;
+  const oauthState = oauthFailed ? null : callbackResult.state;
+
+  // A provider-side error already returned above, so the only failure that can
+  // reach here is the OAuth client failing to exchange the code.
+  if (oauthFailed) {
+    await persistAuthprotoError(session, callbackResult.error);
+  }
+
+  // Do not decode `requestUrl.searchParams.get("state")` here. It is not the
+  // app state we passed to `authorize()` during login: the OAuth client sets
+  // that callback value and uses it to validate the login attempt. After
+  // validation, `oauthClient.callback()` returns our app state and carries our
+  // redirect and granted scopes. If it cannot be decoded, we can still finish
+  // login and use the default redirect.
+  const stateData = decodeOAuthState(oauthState);
+  const { redirect: customRedirect, referer, scopes } = stateData;
+
+  if (oauthSession) {
+    await persistLoginGrant(session, {
+      did: oauthSession.did,
+      scopes,
+    });
   }
 
   const redirectTo = oauthSession

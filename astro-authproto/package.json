@@ -1,7 +1,7 @@
 {
   "name": "@fujocoded/authproto",
   "version": "0.3.1",
-  "description": "Astro integration to easily authenticateyour site visitors using ATproto. For Bluesky and beyond.",
+  "description": "Astro integration to easily authenticate your site visitors using ATproto. For Bluesky and beyond.",
   "keywords": [
     "astro",
     "astro-integration",
@@ -27,6 +27,7 @@
     "package.json"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "dist/index.js",
   "exports": {
     ".": {
@@ -71,15 +72,20 @@
     "@atproto/api": "^0.17.3",
     "@atproto/identity": "^0.4.8",
     "@atproto/jwk-jose": "^0.1.4",
+    "@atproto/oauth-client": "^0.5.14",
     "@atproto/oauth-client-node": "^0.3.8",
+    "@atproto/oauth-types": "^0.6.2",
     "astro-integration-kit": "^0.20.0",
     "unstorage": "^1.16.1"
   },
   "devDependencies": {
     "@astrojs/db": "^0.17.1",
+    "@fujocoded/msw-atproto": "^0.0.1",
     "drizzle-orm": "^0.42.0",
     "glob": "^13.0.6",
-    "tsdown": "^0.17.2"
+    "msw": "^2.13.4",
+    "tsdown": "^0.17.2",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@astrojs/db": "^0.17.1 || ^0.20.0",

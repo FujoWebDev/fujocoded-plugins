@@ -2,9 +2,10 @@ import {
   NodeOAuthClient,
   type NodeOAuthClientOptions,
 } from "@atproto/oauth-client-node";
+import { requestLocalLock } from "@atproto/oauth-client";
 import { JoseKey } from "@atproto/jwk-jose";
 
-import { DidResolver } from "@atproto/identity";
+import { DidResolver, HandleResolver } from "@atproto/identity";
 import {
   scopes,
   applicationName,
@@ -26,23 +27,20 @@ const REDIRECT_PATH = "/oauth/callback";
 export const createClientMetadata = (
   domain: string,
 ): NodeOAuthClientOptions["clientMetadata"] => {
-  const DOMAIN_URL = new URL(domain);
+  const ENDPOINT_URL = new URL(domain);
   const IS_LOCALHOST =
-    DOMAIN_URL.hostname === "127.0.0.1" || DOMAIN_URL.hostname === "localhost";
-
-  const ENDPOINT_URL = IS_LOCALHOST
-    ? (() => {
-        const loopback = new URL(domain);
-        loopback.hostname = "127.0.0.1";
-        return loopback;
-      })()
-    : DOMAIN_URL;
+    ENDPOINT_URL.hostname === "127.0.0.1" ||
+    ENDPOINT_URL.hostname === "localhost";
+  if (IS_LOCALHOST) {
+    // RFC 8252 requires the redirect_uri to use 127.0.0.1 (not "localhost").
+    ENDPOINT_URL.hostname = "127.0.0.1";
+  }
 
   // In local clients configuration for allowed scopes and redirects
   // is done through search params. In that case, the client ID must
   // be "http://localhost" but the redirect_uri must use 127.0.0.1 (RFC 8252).
   // See: https://atproto.com/specs/oauth#clients
-  const CLIENT_ID = new URL(IS_LOCALHOST ? "http://localhost" : DOMAIN_URL);
+  const CLIENT_ID = new URL(IS_LOCALHOST ? "http://localhost" : domain);
   if (IS_LOCALHOST) {
     CLIENT_ID.searchParams.set("scope", scopes.join(" "));
     CLIENT_ID.searchParams.set(
@@ -71,20 +69,48 @@ export const createClientMetadata = (
 const createClient = async (domain: string) => {
   return new NodeOAuthClient({
     clientMetadata: createClientMetadata(domain),
+    fetch: (input, init) => globalThis.fetch(input, init),
     keyset: [await JoseKey.generate()],
     stateStore: new Stores.StateStore(),
     sessionStore: new Stores.SessionStore(),
+    requestLock: requestLocalLock,
   });
 };
 
-export const oauthClient = await createClient(clientMetadataDomain);
+let oauthClient: Promise<NodeOAuthClient> | undefined;
+
+export const getOAuthClient = () => {
+  oauthClient ??= createClient(clientMetadataDomain);
+  return oauthClient;
+};
 
 const IDENTITY_RESOLVER = new DidResolver({});
+const HANDLE_RESOLVER = new HandleResolver({});
 export const didToHandle = async (did: string) => {
   const atprotoData = await IDENTITY_RESOLVER.resolveAtprotoData(did);
   return atprotoData.handle;
 };
 
+/**
+ * Resolves whatever the user typed into the login form (a handle or a DID) to
+ * the canonical DID and handle pair. Instant when the missing half is the only
+ * lookup; throws when a handle can't be resolved to a DID.
+ */
+export const resolveAtprotoIdentity = async (
+  atprotoId: string,
+): Promise<{ did: string; handle: string }> => {
+  if (atprotoId.startsWith("did:")) {
+    return { did: atprotoId, handle: await didToHandle(atprotoId) };
+  }
+  const did = await HANDLE_RESOLVER.resolve(atprotoId);
+  if (!did) {
+    throw new Error(`Could not resolve handle "${atprotoId}" to a DID`);
+  }
+  return { did, handle: atprotoId };
+};
+
+// The `"UNKNOWN" | (string & {})` return literal preserves IDE autocomplete
+// for the known code while still accepting any other Error.name.
 export const extractAuthError = (
   e: unknown,
 ): { code: "UNKNOWN" | (string & {}); description: string | undefined } => {
