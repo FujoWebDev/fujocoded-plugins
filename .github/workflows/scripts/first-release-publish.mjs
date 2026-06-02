@@ -123,5 +123,19 @@ for (const pkg of missingPackages) {
     process.exit(result.status ?? 1);
   }
 
-  console.log(`New tag: ${pkg.name}@${pkg.version}`);
+  const tagName = `${pkg.name}@${pkg.version}`;
+  const tag = spawnSync("git", ["tag", tagName], {
+    encoding: "utf8",
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  process.stdout.write(tag.stdout);
+  process.stderr.write(tag.stderr);
+
+  if (tag.status !== 0) {
+    console.error(`${pkg.name} was published, but git tag ${tagName} could not be created.`);
+    process.exit(tag.status ?? 1);
+  }
+
+  console.log(`New tag: ${tagName}`);
 }
