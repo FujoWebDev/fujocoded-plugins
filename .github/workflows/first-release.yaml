@@ -88,6 +88,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify npm token
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm whoami --registry https://registry.npmjs.org
+          npm access list packages @fujocoded --json
+
       - name: Publish first-release packages
         uses: changesets/action@v1
         with:
