@@ -19,7 +19,7 @@ name: First Package Release
 # Before running:
 # - Create a temporary npm granular access token with read/write access to the
 #   relevant scope, a short expiration, and 2FA bypass for automation.
-#   Command-line equivalent:
+#   Command-line equivalent (NOTE: wants NPM password):
 #     npm token create \
 #       --name "first-package-release" \
 #       --expires 1 \
