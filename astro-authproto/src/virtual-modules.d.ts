@@ -69,7 +69,7 @@ declare module "fujocoded:authproto/hooks" {
    */
   export const resolveScopes:
     | null
-    | import("@fujocoded/authproto").ResolveScopesHook;
+    | import("./lib/scopes.js").ResolveScopesHook;
 }
 
 declare module "fujocoded:authproto/stores" {
