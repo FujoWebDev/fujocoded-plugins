@@ -1,11 +1,27 @@
-import type { APIRoute } from "astro";
-import { extractAuthError, oauthClient } from "../../lib/auth.js";
-import { scopes, isDev, isDevServerHostSet } from "fujocoded:authproto/config";
-import { randomBytes } from "node:crypto";
+import type { APIContext } from "astro";
 import {
-  AUTHPROTO_ERROR_CODE,
-  AUTHPROTO_ERROR_DESCRIPTION,
-} from "../../../src/routes/middleware.ts";
+  extractAuthError,
+  getOAuthClient,
+  resolveAtprotoIdentity,
+} from "../../lib/auth.js";
+import {
+  defaultScopes,
+  scopes,
+  isDev,
+  isDevServerHostSet,
+} from "fujocoded:authproto/config";
+import { resolveScopes } from "fujocoded:authproto/hooks";
+import {
+  persistAuthprotoError,
+  type AuthprotoSession,
+} from "../../lib/session-state.js";
+import { resolveServerLoginScopes } from "../../lib/scopes.js";
+import { encodeOAuthState, type OAuthState } from "../../lib/oauth-state.js";
+
+// Restrict the type of the routes to just what we need to make them easier to test
+type LoginRouteContext = Pick<APIContext, "redirect" | "request"> & {
+  session?: AuthprotoSession;
+};
 
 const DEV_HOST_WARNING = [
   "",
@@ -19,7 +35,11 @@ const DEV_HOST_WARNING = [
   "",
 ].join("\n");
 
-export const POST: APIRoute = async ({ redirect, request, session }) => {
+export const POST = async ({
+  redirect,
+  request,
+  session,
+}: LoginRouteContext) => {
   if (isDev && !isDevServerHostSet) {
     console.error(DEV_HOST_WARNING);
   }
@@ -31,45 +51,52 @@ export const POST: APIRoute = async ({ redirect, request, session }) => {
   const redirectValue = body.get("redirect");
   const customRedirect =
     typeof redirectValue === "string" ? redirectValue : undefined;
+  const requestedScopes = body
+    .getAll("scope")
+    .filter((scope): scope is string => typeof scope === "string");
 
-  // Get the referer to redirect back to the same page after login
-  // if the developer asked us to do so
+  // Keep the current page as the fallback redirect. A custom `redirect` field
+  // still wins when a form sends one.
   const referer = request.headers.get("referer");
-
-  // Build state that includes both CSRF protection and optional redirect
-  const stateData = {
-    csrf: randomBytes(16).toString("base64url"),
-    ...(customRedirect && { redirect: customRedirect }),
-    ...(referer && !customRedirect && { referer }),
-  };
+  const errorRedirect = referer || "/";
 
   if (!atprotoId) {
-    session?.set(AUTHPROTO_ERROR_CODE, "MISSING_FIELD");
-    session?.set(
-      AUTHPROTO_ERROR_DESCRIPTION,
-      'Missing required "atproto-id" field in login form data',
-    );
-    return redirect(stateData.referer || "/");
+    await persistAuthprotoError(session, {
+      code: "MISSING_FIELD",
+      description: 'Missing required "atproto-id" field in login form data',
+    });
+    return redirect(errorRedirect);
   }
 
   try {
+    const finalScopes = await resolveServerLoginScopes({
+      requestedScopes,
+      configuredScopes: scopes,
+      defaultScopes,
+      atprotoId,
+      resolveScopes,
+      resolveIdentity: resolveAtprotoIdentity,
+    });
+    const oauthClient = await getOAuthClient();
     const url = await oauthClient.authorize(atprotoId, {
-      scope: scopes.join(" "),
-      // This random value protects against CSRF (Cross-Site Request
-      // Forgery) attacks. We send it along our authorization request, and the OAuth
-      // provider will send it back with the authentication response. By verifying
-      // it matches what we sent, we can be sure the callback is in response to
-      // OUR authorization request, not someone else's.
-      // We also encode the desired redirect URL if provided.
-      state: Buffer.from(JSON.stringify(stateData)).toString("base64url"),
+      scope: finalScopes.join(" "),
+      // The encoded state ties this callback to the login that started it.
+      // It also carries the redirect and selected scopes through the provider.
+      state: encodeOAuthState({
+        scopes: finalScopes,
+        ...(customRedirect && { redirect: customRedirect }),
+        ...(referer && !customRedirect && { referer }),
+      } satisfies OAuthState),
     });
 
     return redirect(url.toString());
   } catch (e) {
     const authError = extractAuthError(e);
-    session?.set(AUTHPROTO_ERROR_CODE, authError.code);
-    session?.set(AUTHPROTO_ERROR_DESCRIPTION, authError.description);
+    await persistAuthprotoError(session, {
+      code: authError.code,
+      description: authError.description,
+    });
 
-    return redirect(stateData.referer || "/");
+    return redirect(errorRedirect);
   }
 };

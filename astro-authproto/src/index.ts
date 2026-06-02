@@ -5,10 +5,23 @@ import { execFileSync } from "node:child_process";
 import { addVirtualImports } from "astro-integration-kit";
 import {
   getConfig,
+  getHooksImport,
   getStoresImport,
   type ConfigOptions,
 } from "./lib/config.js";
 import { readFile } from "node:fs/promises";
+
+export type { OAuthScope } from "./lib/config.js";
+export type { ResolveScopesHook, ResolveScopesInput } from "./lib/scopes.js";
+export {
+  account,
+  blob,
+  identity,
+  include,
+  permissionScopes,
+  repo,
+  rpc,
+} from "./lib/permissions.js";
 
 /**
  * Returns whether `git check-ignore` thinks the given absolute path is covered
@@ -122,7 +135,20 @@ export default (
             content: getStoresImport(configOptions.driver?.name),
             context: "server",
           },
+          {
+            id: "fujocoded:authproto/hooks",
+            content: getHooksImport(configOptions.resolveScopesEntrypoint),
+            context: "server",
+          },
         ],
+      });
+
+      addMiddleware({
+        order: "pre",
+        entrypoint: path.join(
+          import.meta.dirname,
+          "./routes/loopback-middleware.js",
+        ),
       });
 
       // Add request interception that deals with authorizing the users during
@@ -162,6 +188,33 @@ export default (
         );
       }
       if (
+        config.output === "server" &&
+        config.security?.checkOrigin !== false &&
+        (config.security?.allowedDomains?.length ?? 0) === 0
+      ) {
+        let publicHostname: string | undefined;
+        let publicProtocol: string | undefined;
+        try {
+          const parsed = new URL(configOptions.applicationDomain);
+          if (
+            parsed.protocol === "https:" &&
+            parsed.hostname !== "localhost" &&
+            parsed.hostname !== "127.0.0.1"
+          ) {
+            publicHostname = parsed.hostname;
+            publicProtocol = "https";
+          }
+        } catch {
+          // Non-URL applicationDomain values cannot produce a targeted hint.
+        }
+        const suggestion = publicHostname
+          ? `Add to astro.config: security: { allowedDomains: [{ hostname: "${publicHostname}", protocol: "${publicProtocol}" }] }`
+          : `Add your public hostname to security.allowedDomains in astro.config.`;
+        logger.warn(
+          `security.allowedDomains is empty. Behind a TLS-terminating proxy, login POSTs can fail with "Cross-site form submissions are forbidden" because Astro can't trust X-Forwarded-Proto. ${suggestion}`,
+        );
+      }
+      if (
         configOptions.driver?.name === "fs" ||
         configOptions.driver?.name === "fs-lite"
       ) {
@@ -196,6 +249,18 @@ export default (
         filename: "types.d.ts",
         content: await readFile(
           path.join(import.meta.dirname, "./types.d.ts"),
+          {
+            encoding: "utf-8",
+          },
+        ),
+      });
+      // Ship the virtual module declarations (config/hooks/stores) so apps that
+      // import from `fujocoded:authproto/config` typecheck. Without this, the
+      // declarations only exist inside the package's own source.
+      injectTypes({
+        filename: "virtual-modules.d.ts",
+        content: await readFile(
+          path.join(import.meta.dirname, "./virtual-modules.d.ts"),
           {
             encoding: "utf-8",
           },

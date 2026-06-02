@@ -5,7 +5,9 @@ import { spawnSync } from "node:child_process";
 const npmToken = process.env.NODE_AUTH_TOKEN ?? process.env.NPM_TOKEN;
 
 if (!npmToken) {
-  console.error("NODE_AUTH_TOKEN or NPM_TOKEN is required for first package releases.");
+  console.error(
+    "NODE_AUTH_TOKEN or NPM_TOKEN is required for first package releases.",
+  );
   process.exit(1);
 }
 
@@ -109,12 +111,16 @@ for (const pkg of missingPackages) {
     process.exit(whoami.status ?? 1);
   }
 
-  const result = spawnSync("npm", ["publish", "--provenance", "--access", "public"], {
-    cwd: pkg.dir,
-    encoding: "utf8",
-    env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
-    stdio: ["inherit", "pipe", "pipe"],
-  });
+  const result = spawnSync(
+    "npm",
+    ["publish", "--provenance", "--access", "public"],
+    {
+      cwd: pkg.dir,
+      encoding: "utf8",
+      env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
+      stdio: ["inherit", "pipe", "pipe"],
+    },
+  );
 
   process.stdout.write(result.stdout);
   process.stderr.write(result.stderr);
@@ -133,7 +139,9 @@ for (const pkg of missingPackages) {
   process.stderr.write(tag.stderr);
 
   if (tag.status !== 0) {
-    console.error(`${pkg.name} was published, but git tag ${tagName} could not be created.`);
+    console.error(
+      `${pkg.name} was published, but git tag ${tagName} could not be created.`,
+    );
     process.exit(tag.status ?? 1);
   }
 

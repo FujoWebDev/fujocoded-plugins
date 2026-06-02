@@ -28,6 +28,14 @@ export default defineConfig([
       "src/helpers.ts",
       "src/types.d.ts",
       "src/db/tables.ts",
+      "src/lib/scopes.ts",
+    ],
+    // Copy the virtual module declarations verbatim instead of bundling them.
+    // tsdown rewrites inline `import("x")` types into top-level `import * as`
+    // statements, which turns the file into a module and stops TypeScript from
+    // registering the `declare module "fujocoded:authproto/*"` ambient blocks.
+    copy: [
+      { from: "src/virtual-modules.d.ts", to: "dist/virtual-modules.d.ts" },
     ],
     external: astroFileExternal,
     ...COMMON_CONFIG,

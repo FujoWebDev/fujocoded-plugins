@@ -20,7 +20,7 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./__tests__/**/*"],
   "exclude": ["node_modules"],
   "files": ["./src/types.d.ts", "./src/config-module.d.ts"]
 }

@@ -1,26 +1,49 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import { defaultDevUser } from "fujocoded:authproto/config";
+import { defaultDevUser, defaultScopes } from "fujocoded:authproto/config";
+import { resolveLoginFormScopes } from "../lib/scopes.js";
+import type { OAuthScope } from "../lib/config.js";
 
 interface Props extends Omit<HTMLAttributes<"form">, "action" | "method"> {
-  /** Optional redirect URL after successful login/logout */
+  /**
+   * Where to send the user after they log in or log out.
+   */
   redirect?: string;
+  /**
+   * Placeholder text for the handle input.
+   */
   placeholder?: string;
+  /**
+   * Exact scopes this login form should request instead of `defaultScopes`.
+   * Authproto always adds `"atproto"` and ignores scopes you did not configure.
+   */
+  scopes?: OAuthScope[];
+  /**
+   * Extra scopes to request on top of `defaultScopes` (rather than on top of the
+   * current session's grant). Authproto ignores scopes you did not configure.
+   */
+  extendDefaultScopes?: OAuthScope[];
 }
 
 const {
   redirect: redirectUrl,
-  placeholder = "handle.bsky.social",
+  placeholder,
+  scopes,
+  extendDefaultScopes,
   ...formAttrs
 } = Astro.props;
 const currentUser = Astro.locals.loggedInUser;
 const currentError =
   Astro.locals.authproto?.errorDescription ?? Astro.locals.authproto?.errorCode;
+const resolvedScopes = resolveLoginFormScopes({
+  defaultScopes,
+  extendDefaultScopes,
+  scopes,
+});
 ---
 
 {
   currentUser ? (
-    // If there's a current user, show the log out button
     <form {...formAttrs} action="/oauth/logout" method="post">
       {redirectUrl && (
         <input type="hidden" name="redirect" value={redirectUrl} />
@@ -28,7 +51,6 @@ const currentError =
       <button type="submit">Logout</button>
     </form>
   ) : (
-    // If there's no current user, show the login button
     <form {...formAttrs} action="/oauth/login" method="post">
       <input
         type="text"
@@ -44,6 +66,9 @@ const currentError =
       {redirectUrl && (
         <input type="hidden" name="redirect" value={redirectUrl} />
       )}
+      {resolvedScopes.map((scope) => (
+        <input type="hidden" name="scope" value={scope} />
+      ))}
       <button type="submit">Login</button>
     </form>
   )

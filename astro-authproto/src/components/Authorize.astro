@@ -1,0 +1,82 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { defaultDevUser, defaultScopes } from "fujocoded:authproto/config";
+import { resolveAuthorizeFormScopes } from "../lib/scopes.js";
+import type { OAuthScope } from "../lib/config.js";
+
+interface Props extends Omit<HTMLAttributes<"form">, "action" | "method"> {
+  /**
+   * Where to send the user after authorization succeeds.
+   */
+  redirect?: string;
+  /**
+   * Placeholder text for the handle input when no user is logged in.
+   */
+  placeholder?: string;
+  /**
+   * Exact scopes this authorization form should request instead of
+   * `defaultScopes`. Authproto always adds `"atproto"` and ignores scopes you
+   * did not configure.
+   */
+  scopes?: OAuthScope[];
+  /**
+   * Extra scopes to request on top of `defaultScopes` (rather than on top of the
+   * current session's grant). Automatically ignores scopes you did not configure.
+   */
+  extendDefaultScopes?: OAuthScope[];
+}
+
+const {
+  redirect: redirectUrl,
+  placeholder,
+  scopes,
+  extendDefaultScopes,
+  ...formAttrs
+} = Astro.props;
+
+const currentUser = Astro.locals.loggedInUser;
+const uniqueScopes = resolveAuthorizeFormScopes({
+  defaultScopes,
+  extendDefaultScopes,
+  scopes,
+});
+// When the current session already has the requested grant, the component is a
+// deliberate no-op: there is nothing new to authorize.
+const alreadyAuthorized =
+  currentUser &&
+  uniqueScopes.length > 0 &&
+  uniqueScopes.every((scope) => currentUser.scopes.includes(scope));
+---
+
+{
+  alreadyAuthorized ? (
+    <slot name="authorized" />
+  ) : (
+    <form {...formAttrs} action="/oauth/login" method="post">
+      {currentUser ? (
+        <input type="hidden" name="atproto-id" value={currentUser.did} />
+      ) : (
+        <input
+          type="text"
+          name="atproto-id"
+          placeholder={placeholder}
+          inputmode="email"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="username"
+          spellcheck="false"
+          value={import.meta.env.DEV ? defaultDevUser : undefined}
+        />
+      )}
+      {redirectUrl && (
+        <input type="hidden" name="redirect" value={redirectUrl} />
+      )}
+      {uniqueScopes.map((scope) => (
+        <input type="hidden" name="scope" value={scope} />
+      ))}
+      <button type="submit">
+        <slot>Authorize</slot>
+      </button>
+    </form>
+  )
+}

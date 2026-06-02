@@ -74,11 +74,16 @@ export const getRedirectUrl = async ({
 }) => {
   let redirectTo = redirectToBase;
 
-  if (referer && redirectTo.includes(REDIRECT_TO_REFERER_TEMPLATE)) {
+  if (redirectTo.includes(REDIRECT_TO_REFERER_TEMPLATE)) {
     redirectTo = substituteRefererTemplate(redirectTo, referer);
   }
 
   redirectTo = await substituteUserTemplates(redirectTo, did);
+
+  // Empty {referer} substitution or an empty custom redirect should still land somewhere.
+  if (!redirectTo) {
+    redirectTo = "/";
+  }
 
   return redirectTo;
 };
