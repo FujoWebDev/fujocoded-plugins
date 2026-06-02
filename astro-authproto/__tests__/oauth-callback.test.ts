@@ -67,9 +67,15 @@ describe("decodeOAuthState", () => {
 
 describe("oauth callback route", () => {
   test("preserves provider callback errors before validating OAuth state", async () => {
-    const { response, session } = await getCallback(
-      "http://127.0.0.1:4321/oauth/callback?error=lexError&error_description=%40atproto%2Flexicon%20validation%20test&error_uri=https%3A%2F%2Fauth.fujocoded.test%2Ferrors%2FlexError&unknown=ignored",
-    );
+    const url = new URL("http://127.0.0.1:4321/oauth/callback");
+    url.search = new URLSearchParams({
+      error: "lexError",
+      error_description: "@atproto/lexicon validation test",
+      error_uri: "https://auth.fujocoded.test/errors/lexError",
+      unknown: "ignored",
+    }).toString();
+
+    const { response, session } = await getCallback(url.toString());
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/");
