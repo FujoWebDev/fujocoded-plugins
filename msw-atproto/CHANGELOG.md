@@ -1,4 +1,4 @@
-# @fujocoded/astro-smooth-action
+# @fujocoded/msw-atproto
 
 ## 0.0.1
 

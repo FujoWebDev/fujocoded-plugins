@@ -88,7 +88,8 @@ for (const pkg of missingPackages) {
 }
 
 for (const pkg of missingPackages) {
-  const result = spawnSync("npm", ["publish", `./${pkg.dir}`, "--provenance"], {
+  const result = spawnSync("npm", ["publish", "--provenance", "--access", "public"], {
+    cwd: pkg.dir,
     encoding: "utf8",
     stdio: ["inherit", "pipe", "pipe"],
   });
