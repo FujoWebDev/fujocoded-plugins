@@ -2,8 +2,10 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-if (!process.env.NPM_TOKEN) {
-  console.error("NPM_TOKEN is required for first package releases.");
+const npmToken = process.env.NODE_AUTH_TOKEN ?? process.env.NPM_TOKEN;
+
+if (!npmToken) {
+  console.error("NODE_AUTH_TOKEN or NPM_TOKEN is required for first package releases.");
   process.exit(1);
 }
 
@@ -88,9 +90,29 @@ for (const pkg of missingPackages) {
 }
 
 for (const pkg of missingPackages) {
+  const whoami = spawnSync(
+    "npm",
+    ["whoami", "--registry", "https://registry.npmjs.org"],
+    {
+      cwd: pkg.dir,
+      encoding: "utf8",
+      env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
+      stdio: ["inherit", "pipe", "pipe"],
+    },
+  );
+
+  process.stdout.write(whoami.stdout);
+  process.stderr.write(whoami.stderr);
+
+  if (whoami.status !== 0) {
+    console.error(`${pkg.name} could not authenticate to npm before publish.`);
+    process.exit(whoami.status ?? 1);
+  }
+
   const result = spawnSync("npm", ["publish", "--provenance", "--access", "public"], {
     cwd: pkg.dir,
     encoding: "utf8",
+    env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
     stdio: ["inherit", "pipe", "pipe"],
   });
 
