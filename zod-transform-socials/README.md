@@ -156,6 +156,40 @@ interface Props {
 }
 ```
 
+### Extending the input object
+
+If your content needs extra fields before the social links are transformed,
+extend `SocialLinkObjectSchema` and build your own schema:
+
+```ts
+import {
+  SocialLinkObjectSchema,
+  transformSocial,
+  urlSchema,
+} from "@fujocoded/zod-transform-socials"; // or from "@fujocoded/zod-transform-socials/zod4"
+import { z } from "zod";
+
+const SocialLinkWithLabel = z.union([
+  urlSchema.transform(transformSocial),
+  SocialLinkObjectSchema.extend({
+    label: z.string().optional(),
+  }).transform((socialLinkData) => ({
+    ...transformSocial(socialLinkData),
+    label: socialLinkData.label,
+  })),
+]);
+
+const Member = z.object({
+  name: z.string(),
+  contacts: z.array(SocialLinkWithLabel).default([]),
+});
+```
+
+For complete runnable versions, see the standalone extension examples:
+[`03-zod-3-standalone/parse-extension.ts`](./__examples__/03-zod-3-standalone/parse-extension.ts)
+and
+[`04-zod-4-standalone/parse-extension.ts`](./__examples__/04-zod-4-standalone/parse-extension.ts).
+
 ## Setting known domains
 
 For platforms without a fixed domain, like `mastodon`, the built-in matchers

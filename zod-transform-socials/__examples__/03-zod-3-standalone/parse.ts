@@ -2,8 +2,8 @@ import { strict as assert } from "node:assert";
 import { z } from "zod";
 import { SocialLinks } from "@fujocoded/zod-transform-socials";
 import type {
+  SocialLinkInput,
   SocialLinksData,
-  SocialsSchema,
 } from "@fujocoded/zod-transform-socials";
 
 // Use `SocialLinks` as a schema field to parse and enrich contact URLs.
@@ -12,9 +12,9 @@ const Member = z.object({
   contacts: SocialLinks,
 });
 
-// `SocialsSchema` types each item the schema will accept: a bare URL string,
+// `SocialLinkInput` types each item the schema will accept: a bare URL string,
 // or an object that overrides the detected platform / username / icon.
-const contacts: SocialsSchema[] = [
+const contacts: SocialLinkInput[] = [
   "https://essentialrandomness.com",
   "https://essential-randomness.tumblr.com",
   "https://twitter.com/essentialrandom",

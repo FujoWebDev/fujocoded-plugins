@@ -26,7 +26,14 @@ standalone example, except the import comes from
    npm start
    ```
 
-3. Run the type check. This checks the same `parse.ts` file and proves
+3. Run the extension script. It shows how to extend the object form with a
+   `label` field and keep that label in the transformed output:
+
+   ```bash
+   npm run extension
+   ```
+
+4. Run the type check. This checks both parse scripts and proves
    the package's `/zod4` exported types resolve correctly under Zod 4:
 
    ```bash
