@@ -1,5 +1,19 @@
 # @fujocoded/zod-transform-socials
 
+## 0.1.1
+
+### Patch Changes
+
+- [#48](https://github.com/FujoWebDev/fujocoded-plugins/pull/48) [`f1d01c7`](https://github.com/FujoWebDev/fujocoded-plugins/commit/f1d01c724952543c0d6d3d111cce48ab4405f7bf) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Exports `SocialLinkObjectSchema` so projects can extend the object form of a
+  social link without rebuilding the whole schema. `SocialLinkInputSchema` is also
+  available as the clearer name for the default one-item input schema, with
+  matching `SocialLinkObject` and `SocialLinkInput` types.
+
+  Adds standalone examples for preserving custom fields like `label` through
+  the transform.
+
 ## 0.1.0
 
 ### Minor Changes
