@@ -7,5 +7,5 @@
     "skipLibCheck": false,
     "noEmit": true
   },
-  "include": ["parse.ts"]
+  "include": ["parse*.ts"]
 }

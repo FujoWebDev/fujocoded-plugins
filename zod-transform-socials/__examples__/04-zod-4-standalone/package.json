@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "extension": "node parse-extension.ts",
     "start": "node parse.ts",
     "typecheck": "tsc --noEmit"
   },

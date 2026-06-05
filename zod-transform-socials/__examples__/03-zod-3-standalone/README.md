@@ -26,7 +26,14 @@ it: you build the schema, you call `.parse()`, you read the result.
    npm start
    ```
 
-3. Run the type check. This checks the same `parse.ts` file and proves
+3. Run the extension script. It shows how to extend the object form with a
+   `label` field and keep that label in the transformed output:
+
+   ```bash
+   npm run extension
+   ```
+
+4. Run the type check. This checks both parse scripts and proves
    the package's exported types resolve correctly under Zod 3:
 
    ```bash

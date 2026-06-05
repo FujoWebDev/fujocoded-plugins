@@ -6,8 +6,8 @@ import {
   transformSocial,
 } from "@fujocoded/zod-transform-socials/zod4";
 import type {
+  SocialLinkInput,
   SocialLinksData,
-  SocialsSchema,
 } from "@fujocoded/zod-transform-socials/zod4";
 
 // Use `SocialLinks` as a schema field to parse and enrich contact URLs.
@@ -16,15 +16,15 @@ const Member = z.object({
   contacts: SocialLinks,
 });
 
-// `SocialsSchema` types each contact: a bare URL string, or an object that
+// `SocialLinkInput` types each contact: a bare URL string, or an object that
 // overrides the detected platform / username / icon (here we force Mastodon
 // because the indiepocalypse.social host isn't a built-in match).
 const mastodonContact = {
   url: "https://indiepocalypse.social/@essentialrandom",
   platform: "mastodon",
-} satisfies SocialsSchema;
+} satisfies SocialLinkInput;
 
-const contacts: SocialsSchema[] = [
+const contacts: SocialLinkInput[] = [
   "https://essentialrandomness.com",
   "https://essential-randomness.tumblr.com",
   "https://twitter.com/essentialrandom",

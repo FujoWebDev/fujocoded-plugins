@@ -92,6 +92,7 @@ const cases: TestCase[] = [
     commands: [
       ["npm", ["run", "typecheck"]],
       ["npm", ["start"]],
+      ["npm", ["run", "extension"]],
     ],
   },
   {
@@ -99,6 +100,7 @@ const cases: TestCase[] = [
     commands: [
       ["npm", ["run", "typecheck"]],
       ["npm", ["start"]],
+      ["npm", ["run", "extension"]],
     ],
   },
 ];

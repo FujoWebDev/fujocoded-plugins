@@ -15,19 +15,21 @@ import {
 } from "./transform.ts";
 import * as z from "zod/v4";
 
-const createSocialsSchema = (urlSchema: z.ZodType<string>) =>
-  z.union([
-    urlSchema,
-    z.object({
-      icon: z.string().optional(),
-      platform: z.string().optional(),
-      url: urlSchema,
-      username: z.string().optional(),
-    }),
-  ]);
+const createSocialLinkObjectSchema = (urlSchema: z.ZodType<string>) =>
+  z.object({
+    icon: z.string().optional(),
+    platform: z.string().optional(),
+    url: urlSchema,
+    username: z.string().optional(),
+  });
+
+const createSocialLinkInputSchema = (
+  urlSchema: z.ZodType<string>,
+  SocialLinkObjectSchema = createSocialLinkObjectSchema(urlSchema),
+) => z.union([urlSchema, SocialLinkObjectSchema]);
 
 const createSocialLinksSchema = (
-  SocialsSchema: ReturnType<typeof createSocialsSchema>,
+  SocialsSchema: ReturnType<typeof createSocialLinkInputSchema>,
   transformSocial: (social: z.infer<typeof SocialsSchema>) => SocialLinkData,
 ) =>
   z
@@ -36,19 +38,37 @@ const createSocialLinksSchema = (
     .default([]);
 
 export const urlSchema = z.url();
-export const SocialsSchema = createSocialsSchema(urlSchema);
+export const SocialLinkObjectSchema = createSocialLinkObjectSchema(urlSchema);
+export const SocialLinkInputSchema = createSocialLinkInputSchema(
+  urlSchema,
+  SocialLinkObjectSchema,
+);
+/**
+ * @deprecated Use `SocialLinkInputSchema` instead.
+ */
+export const SocialsSchema = SocialLinkInputSchema;
 export const SocialLinks = createSocialLinksSchema(
-  SocialsSchema,
+  SocialLinkInputSchema,
   transformSocial,
 );
 
 export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
-  const SocialsSchema = createSocialsSchema(z.url());
+  const urlSchema = z.url();
+  const SocialLinkObjectSchema = createSocialLinkObjectSchema(urlSchema);
+  const SocialLinkInputSchema = createSocialLinkInputSchema(
+    urlSchema,
+    SocialLinkObjectSchema,
+  );
   const { transformSocial, socialLinks } = createTransformSocial(config);
-  const SocialLinks = createSocialLinksSchema(SocialsSchema, transformSocial);
+  const SocialLinks = createSocialLinksSchema(
+    SocialLinkInputSchema,
+    transformSocial,
+  );
 
   return {
-    SocialsSchema,
+    SocialLinkObjectSchema,
+    SocialLinkInputSchema,
+    SocialsSchema: SocialLinkInputSchema,
     transformSocial,
     SocialLinks,
     socialLinks,
@@ -57,7 +77,12 @@ export const createSocialsTransformer = (config: CreateSocialsConfig = {}) => {
 
 export { transformSocial };
 
-export type SocialsSchema = z.infer<typeof SocialsSchema>;
+export type SocialLinkInput = z.infer<typeof SocialLinkInputSchema>;
+export type SocialLinkObject = z.infer<typeof SocialLinkObjectSchema>;
+/**
+ * @deprecated Use `SocialLinkInput` instead.
+ */
+export type SocialsSchema = SocialLinkInput;
 export type SocialLinksData = z.infer<typeof SocialLinks>;
 export type SOCIAL_TYPES = INNER_SOCIAL_TYPES;
 export type { CreateSocialsConfig, DomainShortcuts, SocialLinkData };
