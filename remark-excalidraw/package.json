@@ -23,39 +23,27 @@
     "package.json"
   ],
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./component": {
-      "import": {
-        "types": "./dist/component.d.ts",
-        "default": "./dist/component.js"
-      },
-      "require": {
-        "types": "./dist/component.d.cts",
-        "default": "./dist/component.cjs"
-      }
+      "types": "./dist/component.d.ts",
+      "default": "./dist/component.js"
     }
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts",
-    "build:component": "tsup component.tsx --format cjs,esm --dts --external react",
+    "build": "tsdown",
+    "build:component": "npm run build",
     "validate": " npx publint",
     "test": "vitest",
-    "publish:patch": "npm run build && npm run build:component && npm version patch && npm publish",
+    "publish:patch": "npm run build && npm version patch && npm publish",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -64,9 +52,10 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.10",
+    "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "remark-mdx": "^3.1.0",
-    "tsup": "^8.3.6",
+    "tsdown": "^0.17.2",
     "vitest": "^3.0.5"
   },
   "prefix": "./"
