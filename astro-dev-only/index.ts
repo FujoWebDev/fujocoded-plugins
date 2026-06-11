@@ -10,6 +10,7 @@ import type {
 } from "astro-types-v5";
 import { rm } from "node:fs/promises";
 import { relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // We define RouteData as the union of RouteData in Astro 4 and RouteData in Astro 5.
 // This is because we might be passed either.
@@ -36,10 +37,13 @@ const getDevOnlyStaticRoutes = (
   );
 };
 
+const getFileSystemPath = (path: string | URL) =>
+  path instanceof URL ? fileURLToPath(path) : path;
+
 const throwIfNotInsideDist = (path: string | URL) => {
   // To avoid issues, we make sure the path we get is always inside the current
   // directory. `rm` is a dangerous command!
-  const resolvedPath = resolve(path.toString());
+  const resolvedPath = resolve(getFileSystemPath(path));
   const isWithinCwd = resolvedPath.startsWith(process.cwd());
 
   if (!isWithinCwd) {
@@ -66,7 +70,7 @@ export const passRoutePatternsToMiddleware = (routePatterns: Pattern[]) => {
       if (id === "\0fujocoded:dev-only-routes") {
         return `export const excludedPatterns = [${routePatterns
           .map((route) =>
-            typeof route === "string" ? `"${route}"` : route.toString(),
+            typeof route === "string" ? JSON.stringify(route) : route.toString(),
           )
           .join(", ")}];`;
       }
@@ -132,7 +136,10 @@ export default function devOnlyRoutesIntegration({
               : `❌ Removing files for "src/pages${route}" from final build`,
           );
           for (const filePath of filePaths) {
-            const relativePath = relative(process.cwd(), filePath.pathname);
+            const relativePath = relative(
+              process.cwd(),
+              getFileSystemPath(filePath),
+            );
             // This is just an extra precaution because I don't want to have anyone's files
             // on my conscience.
             throwIfNotInsideDist(filePath);
