@@ -1,8 +1,9 @@
 # @fujocoded/remark-capitalize-titles
 
-A version of [this Vercel plugin](https://github.com/vercel/remark-capitalize) that transforms all markdown titles with [title.sh](https://github.com/zeit/title)and also accepts options.
+A version of [this Vercel plugin](https://github.com/vercel/remark-capitalize) that transforms all markdown titles with [title.sh](https://github.com/zeit/title) and also accepts options.
 
 It also allows capitalizing the `title` prop of a given list of Astro components.
+Astro frontmatter `title` fields are capitalized by default.
 
 By default it uses FujoCoded's own list of capitalization exceptions.
 
@@ -21,6 +22,9 @@ export default defineConfig({
         [
           remarkCapitalizeTitles,
           {
+            // Capitalize Astro frontmatter `title` fields.
+            // Defaults to true.
+            frontmatterTitle: true,
             // Any component whose title prop should be capitalized
             componentNames: ["Callout", "ScenarioCallout"],
           },

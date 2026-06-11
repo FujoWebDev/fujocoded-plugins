@@ -27,7 +27,7 @@ describe("Handles the basics", () => {
 });
 
 describe("Preserves special cases", () => {
-  test("preserves GitHub, FujoCoded, LLC, and NPM", async () => {
+  test("preserves GitHub, FujoCoded, LLC, NPM, and NodeJS", async () => {
     expect(
       await processMarkdown(
         "## merging with github's interface: pull requests",
@@ -38,6 +38,9 @@ describe("Preserves special cases", () => {
     );
     expect(await processMarkdown("## next up: building with npm")).toBe(
       "## Next Up: Building with NPM",
+    );
+    expect(await processMarkdown("## npm scripts with nodejs")).toBe(
+      "## NPM Scripts with NodeJS",
     );
   });
 

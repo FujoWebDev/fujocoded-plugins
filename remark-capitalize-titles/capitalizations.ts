@@ -5,6 +5,7 @@ export const DEFAULT_CAPITALIZATIONS = [
   "FujoWebDev",
   "FujoGuide",
   "NPM",
+  "NodeJS",
   "SHA",
   "SHAs",
   "Next Up",

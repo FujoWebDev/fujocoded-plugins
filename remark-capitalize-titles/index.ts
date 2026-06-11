@@ -298,18 +298,45 @@ const titleCase = (input: string, options: TitleOptions): string => {
   return applySpecials(out.join(""), options.special);
 };
 
-type PluginArgs = { special: string[]; componentNames: string[] };
+type AstroFrontmatterData = {
+  astro?: {
+    frontmatter?: Record<string, unknown>;
+  };
+};
+
+type PluginOptions = {
+  special?: string[];
+  componentNames?: string[];
+  frontmatterTitle?: boolean;
+};
 // We match command parameters of the form --flag [parameter_name]
 const CODE_REGEX = /(`[a-z0-9_\-\s]+`)/gi;
 
-const plugin: Plugin<PluginArgs[], mdast.Root> =
+const plugin: Plugin<[PluginOptions?], mdast.Root> =
   (
-    { special, componentNames }: PluginArgs = {
+    {
+      special = DEFAULT_CAPITALIZATIONS_,
+      componentNames = [],
+      frontmatterTitle = true,
+    }: PluginOptions = {
       special: DEFAULT_CAPITALIZATIONS_,
       componentNames: [],
+      frontmatterTitle: true,
     },
   ) =>
-  (tree) => {
+  (tree, file) => {
+    if (frontmatterTitle) {
+      const frontmatter = (file.data as AstroFrontmatterData).astro
+        ?.frontmatter;
+      if (typeof frontmatter?.title === "string") {
+        frontmatter.title = titleCase(frontmatter.title, {
+          special,
+          isFirstTextNode: true,
+          isLastTextNode: true,
+        });
+      }
+    }
+
     visit(tree, "heading", (node) => {
       const textNodes: { value?: string }[] = [];
       visit(node, "text", (textNode) => {
