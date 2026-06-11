@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 
 import type mdast from "mdast";
-import type { MdxJsxAttribute } from "mdast-util-mdx";
+import type { MdxJsxAttribute, MdxJsxFlowElement } from "mdast-util-mdx";
 import {
   createDefaultImportNode,
   createMdxJsxAttribute,
@@ -16,6 +16,10 @@ import {
   createWrappedExcalidrawComponent,
   type ParentWithChildren,
 } from "./nodes.ts";
+import {
+  getSceneDimensions,
+  type SceneDimensions,
+} from "./scene-dimensions.ts";
 
 export interface ExcalidrawWrapperContext {
   alt: string;
@@ -36,6 +40,12 @@ export interface ExcalidrawWrapperOptions {
 }
 
 export interface PluginArgs {
+  /**
+   * Optional. Sets the padding added around the scene.
+   *
+   * When omitted, each drawing gets 10 pixels of padding on every side.
+   */
+  exportPadding?: number;
   wrapper?: ExcalidrawWrapperOptions;
 }
 
@@ -46,6 +56,7 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
   (options = {}) =>
   async (tree, vfile) => {
     const pendingFiles: Array<{
+      excalidrawComponent: MdxJsxFlowElement;
       fileContentProp: MdxJsxAttribute;
       fileContent: Promise<string>;
     }> = [];
@@ -76,8 +87,8 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
           }),
           ...createMdxJsxAttributes({ hProperties: node.data?.hProperties }),
           createMdxJsxAttribute({
-            name: "client:only",
-            value: "react",
+            name: "client:load",
+            value: null,
           }),
         ],
       });
@@ -90,6 +101,7 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
           })
         : excalidrawComponent;
       pendingFiles.push({
+        excalidrawComponent,
         fileContentProp,
         fileContent: readFile(sourcePath, "utf-8"),
       });
@@ -103,9 +115,16 @@ const plugin: Plugin<PluginArgs[], mdast.Root> =
     });
 
     await Promise.all(
-      pendingFiles.map(async ({ fileContentProp, fileContent }) => {
-        fileContentProp.value = await fileContent;
-      }),
+      pendingFiles.map(
+        async ({ excalidrawComponent, fileContentProp, fileContent }) => {
+          const loadedFileContent = await fileContent;
+          fileContentProp.value = loadedFileContent;
+          addInferredDimensionProps({
+            node: excalidrawComponent,
+            dimensions: getSceneDimensions(loadedFileContent, options),
+          });
+        },
+      ),
     );
 
     maybeAddImports({
@@ -134,6 +153,43 @@ function getParentSlot({
   }
 
   return { parent, indexInParent };
+}
+
+// We create the MDX node before the file read finishes. Once the content is
+// loaded, this adds the size props to that same node so the output keeps its
+// original attribute order.
+function addInferredDimensionProps({
+  node,
+  dimensions,
+}: {
+  node: MdxJsxFlowElement;
+  dimensions: SceneDimensions | undefined;
+}) {
+  if (!dimensions) return;
+
+  const clientLoadIndex =
+    node.attributes?.findIndex(
+      (attribute) =>
+        attribute.type === "mdxJsxAttribute" &&
+        attribute.name === "client:load",
+    ) ?? -1;
+  const dimensionAttributes = [
+    createMdxJsxAttribute({
+      name: "width",
+      value: String(dimensions.width),
+    }),
+    createMdxJsxAttribute({
+      name: "height",
+      value: String(dimensions.height),
+    }),
+  ];
+
+  if (clientLoadIndex === -1) {
+    node.attributes?.push(...dimensionAttributes);
+    return;
+  }
+
+  node.attributes?.splice(clientLoadIndex, 0, ...dimensionAttributes);
 }
 
 function createImageContext({
