@@ -48,6 +48,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts src/zod4.ts --format cjs,esm --dts --clean",
+    "test": "vitest",
     "test:compat": "npm run build && node --experimental-strip-types scripts/check-compat.ts",
     "typecheck": "tsc --noEmit",
     "validate": " npx publint"
@@ -59,6 +60,7 @@
     "@types/node": "^22.0.0",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
+    "vitest": "^3.0.5",
     "zod": "^3.25.76"
   },
   "peerDependencies": {

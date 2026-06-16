@@ -20,6 +20,12 @@ export type DomainShortcuts = {
 const escapeForRegex = (input: string) =>
   input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const DOMAIN_LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
+const HANDLE = `${DOMAIN_LABEL}(?:\\.${DOMAIN_LABEL})+`;
+// Bluesky profile URLs accept a DID in place of a handle, e.g.
+// `bsky.app/profile/did:plc:abc123` or `did:web:example.com`.
+const DID = "did:[a-z]+:[a-zA-Z0-9._:%-]*[a-zA-Z0-9._-]";
+
 export type CreateSocialLinksConfig = {
   /**
    * Register extra domains against a platform with a known URL shape
@@ -33,13 +39,13 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const tumblrMatches: ProfileMatch[] = [
     {
-      match: "https?://www.tumblr.com/([a-z0-9-]+)/?.*",
+      match: "https?://www\\.tumblr\\.com/([a-z0-9-]+)/?.*",
       // TODO: more may be necessary for things like extracting usernames
       group: 1,
     },
     // Must be last because it's a more general match, or www will be as a username
     {
-      match: "https?://([a-z0-9-]+).tumblr.com/?.*",
+      match: "https?://([a-z0-9-]+)\\.tumblr\\.com/?.*",
       // TODO: more may be necessary for things like extracting usernames
       group: 1,
     },
@@ -47,7 +53,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
   socialLinks.addProfile("tumblr", tumblrMatches);
   const kofiMatches: ProfileMatch[] = [
     {
-      match: "https?://ko-fi.com/([a-z0-9-_]+)",
+      match: "https?://ko-fi\\.com/([a-z0-9-_]+)",
       group: 1,
     },
   ];
@@ -55,7 +61,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const inprntMatches: ProfileMatch[] = [
     {
-      match: "https?://(?:www.)?inprnt.com/gallery/([a-z0-9-]+)/?",
+      match: "https?://(?:www\\.)?inprnt\\.com/gallery/([a-z0-9-]+)/?",
       group: 1,
     },
   ];
@@ -63,7 +69,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const neocitiesMatches: ProfileMatch[] = [
     {
-      match: "https?://([a-z0-9-]+).neocities.org",
+      match: "https?://([a-z0-9-]+)\\.neocities\\.org",
       group: 1,
     },
   ];
@@ -71,19 +77,19 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const blueSkyMatches: ProfileMatch[] = [
     {
-      match: "https?://([a-z0-9-]+).bsky.(?:app|social)/?.*",
+      match: "https?://([a-z0-9-]+)\\.bsky\\.(?:app|social)/?.*",
       group: 1,
     },
     {
-      match: "https?://bsky.(?:app|social)/profile/([a-z0-9-.]+)/?.*",
+      match: `https?://bsky\\.(?:app|social)/profile/(${HANDLE}|${DID})/?.*`,
       group: 1,
     },
   ];
-  socialLinks.addProfile("bsky", blueSkyMatches);
+  replaceMatches(socialLinks, "bsky", blueSkyMatches);
 
   const ao3Matches: ProfileMatch[] = [
     {
-      match: "https?://archiveofourown.org/users/([a-z0-9-]+)",
+      match: "https?://archiveofourown\\.org/users/([a-z0-9-]+)",
       group: 1,
     },
   ];
@@ -91,7 +97,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const dreamwidthMatches: ProfileMatch[] = [
     {
-      match: "https?://([a-z0-9-]+).dreamwidth.org",
+      match: "https?://([a-z0-9-]+)\\.dreamwidth\\.org",
       group: 1,
     },
   ];
@@ -99,7 +105,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const furaffinityMatches: ProfileMatch[] = [
     {
-      match: "https?://www.furaffinity.net/user/([a-z0-9-]+)",
+      match: "https?://www\\.furaffinity\\.net/user/([a-z0-9-]+)",
       group: 1,
     },
   ];
@@ -107,7 +113,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const carrdMatches: ProfileMatch[] = [
     {
-      match: "https?://([a-z0-9-]+).carrd.co/?",
+      match: "https?://([a-z0-9-]+)\\.carrd\\.co/?",
       group: 1,
     },
   ];
@@ -116,7 +122,8 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
   const kickstarterMatches: ProfileMatch[] = [
     {
       // https://www.kickstarter.com/projects/essential-randomness/the-fujoshi-guide-to-web-development
-      match: "https?://www.kickstarter.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
+      match:
+        "https?://www\\.kickstarter\\.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
       group: 1,
     },
   ];
@@ -124,8 +131,10 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const npmMatches: ProfileMatch[] = [
     {
-      // https://www.npmjs.com/package/@bobaboard/ao3.js
-      match: "https?://www.npmjs.com/package/([a-z0-9-@]+/[a-z0-9-\\.]+)/?",
+      // Scoped and unscoped packages, e.g.
+      // `npmjs.com/package/@bobaboard/ao3.js` or `npmjs.com/package/social-links`.
+      match:
+        "https?://www\\.npmjs\\.com/package/((?:@[a-z0-9-._]+/)?[a-z0-9-._]+)/?",
       group: 1,
     },
   ];
@@ -137,12 +146,12 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
   const gitHubMatches: ProfileMatch[] = [
     {
       // https://github.com/FujoWebDev/AO3.js
-      match: "https?://github.com/([a-z0-9-]+/[a-z0-9-\\.]+)/?",
+      match: "https?://github\\.com/([a-z0-9-]+/[a-z0-9-\\.]+)/?",
       group: 1,
     },
     {
       // https://github.com/orgs/FujoWebDev/
-      match: "https?://github.com/orgs/([a-z0-9-]+)/?",
+      match: "https?://github\\.com/orgs/([a-z0-9-]+)/?",
       group: 1,
     },
   ];
@@ -150,7 +159,7 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
 
   const xMatches: ProfileMatch[] = [
     {
-      match: "(?:https?://)?(?:www.)?x.com/@?([a-z0-9-\\.]+)/?.*",
+      match: "(?:https?://)?(?:www\\.)?x\\.com/@?([a-z0-9-\\.]+)/?.*",
       group: 1,
     },
   ];
@@ -176,6 +185,15 @@ const appendMatches = (
   const existing: ProfileMatch[] = socialLinks.profiles.get(platform) ?? [];
   // @ts-expect-error profiles is private on SocialLinks
   socialLinks.profiles.set(platform, [...existing, ...matches]);
+};
+
+const replaceMatches = (
+  socialLinks: SocialLinksLib,
+  platform: string,
+  matches: ProfileMatch[],
+) => {
+  // @ts-expect-error profiles is private on SocialLinks
+  socialLinks.profiles.set(platform, matches);
 };
 
 // This top-level call is safe even under `"sideEffects": false` in package.json
