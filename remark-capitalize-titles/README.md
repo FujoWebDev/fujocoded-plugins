@@ -35,6 +35,23 @@ export default defineConfig({
 });
 ```
 
+## Title-casing a string directly
+
+To title-case a string outside a Markdown tree, use the exported
+`capitalizeTitle` function:
+
+```ts
+import { capitalizeTitle } from "@fujocoded/remark-capitalize-titles";
+
+capitalizeTitle("merging with github via npm");
+// => "Merging with GitHub via NPM"
+
+// Override the capitalization exceptions:
+capitalizeTitle("my title", { special: ["MyBrand"] });
+```
+
+The default exception list is exported as `DEFAULT_CAPITALIZATIONS`.
+
 ### TODOs:
 
 - [ ] Fix issue where a title in a heading that has a previous sibling will be capitalized as if the first
