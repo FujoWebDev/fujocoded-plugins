@@ -1,3 +1,5 @@
+import type mdast from "mdast";
+
 import { SMALL_WORDS } from "./capitalizations.ts";
 
 // Characters that ride along with an adjacent word but don't break it:
@@ -180,16 +182,18 @@ const applySpecials = (text: string, specials: string[]): string => {
 // 3. decide per-word capitalization
 // 4. splice the cased segments back over the original text
 // 5. apply the special-casing post-pass.
-//
-// isFirstTextNode/isLastTextNode let a
-// caller mark whether this string is the start/end of the whole title (a
-// heading can arrive as several text nodes).
 export const titleCase = (
   input: string,
   options: {
     special: string[];
+    // let a caller mark whether this string is the start (isFirstTextNode) or
+    // end (isLastTextNode) of the whole title, since a heading can arrive as several
+    // text nodes.
     isFirstTextNode: boolean;
     isLastTextNode: boolean;
+    // marks a node whose first word is grammatically glued to the previous inline
+    // sibling (e.g. the `ing` in "`head`ing"), so it must not be force-capped
+    firstWordIsContinuation?: boolean;
   },
 ): string => {
   const text = input.toLowerCase();
@@ -199,6 +203,8 @@ export const titleCase = (
   if (!firstAtom) return applySpecials(text, options.special);
   const words = buildWords(text, atoms);
   attachTransparent(text, words);
+
+  const firstWordIsContinuation = options.firstWordIsContinuation === true;
 
   const leadingText = text.slice(0, firstAtom.start);
   // A leading ellipsis (`...and more`) signals a continuation, so the
@@ -213,6 +219,7 @@ export const titleCase = (
   words.forEach((word, idx) => {
     const isFirst = idx === 0;
     const isLast = idx === words.length - 1;
+    const isContinuation = isFirst && firstWordIsContinuation;
     // Capitalization precedence, highest first. The cap-forcing rules are
     // checked before the small-word exception so a small word still caps when
     // it's a compound, follows hard punctuation, or sits in first/last position.
@@ -221,6 +228,8 @@ export const titleCase = (
       shouldCap = true; // compound ("Up-to-date"): always cap the head segment
     } else if (word.forceCap) {
       shouldCap = true; // gap before it had hard-cap punctuation (`:`, `?`, …)
+    } else if (isContinuation) {
+      shouldCap = false; // glued to a preceding code span ("`head`ing"): leave it
     } else if (isFirst && leadingHasHardCap) {
       shouldCap = true; // hard-cap punctuation led the text node
     } else if (isFirst && options.isFirstTextNode && !leadingHasMultiDot) {
@@ -246,4 +255,86 @@ export const titleCase = (
   });
   out.push(text.slice(cursor));
   return applySpecials(out.join(""), options.special);
+};
+
+// A title's text doesn't live in one node: a heading (or a parsed component
+// title) is a tree of nodes, like text, inline code, emphasis, even an
+// enclosing block. So to decide first/last-word casing AND inline-code
+// continuations we flatten that tree into an ordered list of items, recording
+// which one is inline code so it still counts toward "which text node is
+// first/last".
+type TitleItem =
+  | { type: "text"; node: mdast.Text; firstWordIsContinuation: boolean }
+  | { type: "code" };
+
+type ParentNode = mdast.Nodes & { children: mdast.Nodes[] };
+
+const hasChildren = (node: mdast.Nodes): node is ParentNode =>
+  "children" in node && Array.isArray(node.children);
+
+// A node is a continuation of the previous code span when everything before
+// its first atom is transparent (`(s)`, `ing` with nothing or only parens/
+// delimiters in front). A leading space or other char means it's a fresh word.
+const startsAsCodeContinuation = (value: string): boolean => {
+  const firstAtom = findAtoms(value)[0];
+  if (!firstAtom) return false;
+  const leadingText = value.slice(0, firstAtom.start);
+  return Array.from(leadingText).every((c) => TRANSPARENT.has(c));
+};
+
+// Walk one node, appending its title items in source order and returning
+// whether the last emitted item was a (non-empty) code span — which the next
+// sibling needs to know to detect a continuation. Text nodes with no atoms
+// (pure whitespace/punctuation) are skipped but don't reset the "previous was
+// code" state, so `` `head` ``-then-`ing` survives an empty gap. Recursing
+// through any parent with children means an enclosing block (heading,
+// blockquote, list) is handled correctly, and only its text/code leaves become
+// items.
+const collectTitleItems = (
+  node: mdast.Nodes,
+  items: TitleItem[],
+  previousItemWasCode: boolean,
+): boolean => {
+  if (node.type === "text") {
+    if (findAtoms(node.value).length === 0) return previousItemWasCode;
+    items.push({
+      type: "text",
+      node,
+      firstWordIsContinuation:
+        previousItemWasCode && startsAsCodeContinuation(node.value),
+    });
+    return false;
+  }
+
+  if (node.type === "inlineCode") {
+    if (node.value.length === 0) return previousItemWasCode;
+    items.push({ type: "code" });
+    return true;
+  }
+
+  if (hasChildren(node)) {
+    let lastItemWasCode = previousItemWasCode;
+    for (const child of node.children) {
+      lastItemWasCode = collectTitleItems(child, items, lastItemWasCode);
+    }
+    return lastItemWasCode;
+  }
+
+  return previousItemWasCode;
+};
+
+// Flatten a node's children into ordered title items. The heading pass passes a
+// heading's phrasing children; the standalone string path passes the parsed
+// document's blocks (so a title that parses as a heading/list/blockquote still
+// reduces to its inline text). Both share this so first/last-word and
+// continuation rules behave identically.
+export const collectTitleItemsFromChildren = (
+  children: mdast.Nodes[],
+): TitleItem[] => {
+  const items: TitleItem[] = [];
+  let previousItemWasCode = false;
+  for (const child of children) {
+    previousItemWasCode = collectTitleItems(child, items, previousItemWasCode);
+  }
+  return items;
 };

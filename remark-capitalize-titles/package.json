@@ -42,12 +42,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "mdast-util-from-markdown": "^2.0.2",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "mdast": "^3.0.0",
     "mdast-util-mdx-jsx": "^3.1.2",
     "remark": "^15.0.1",
+    "remark-mdx": "^3.1.1",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
     "unified": "^11.0.4",

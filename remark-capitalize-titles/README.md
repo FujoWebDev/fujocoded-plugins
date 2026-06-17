@@ -47,13 +47,9 @@ capitalizeTitle("merging with github via npm");
 // => "Merging with GitHub via NPM"
 
 // Override the capitalization exceptions:
-capitalizeTitle("my title", { special: ["MyBrand"] });
+capitalizeTitle("my title", { special: ["MyPersonalNitpick"] });
 ```
 
-The default exception list is exported as `DEFAULT_CAPITALIZATIONS`.
-
-### TODOs:
-
-- [ ] Fix issue where a title in a heading that has a previous sibling will be capitalized as if the first
-      word was the beginning of the sentence
-- [ ] Something like "`head`ing" in titles where the word is compounded with a code thing will capitalize "ing".
+The default exception list is exported as `DEFAULT_CAPITALIZATIONS`, and
+overridden if special is passed as a parameter. If the change is meant to be
+additive, then import `DEFAULT_CAPITALIZATIONS` and extend it instead.

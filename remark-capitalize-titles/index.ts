@@ -1,35 +1,46 @@
 import { visit } from "unist-util-visit";
+import { fromMarkdown } from "mdast-util-from-markdown";
 import type { Plugin } from "unified";
 
 import type mdast from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 
 import { DEFAULT_CAPITALIZATIONS } from "./capitalizations.ts";
-import { titleCase } from "./title-case.ts";
+import { collectTitleItemsFromChildren, titleCase } from "./title-case.ts";
 
-// Matches a Markdown inline code span (backtick-wrapped) so titles can be
-// split around code spans and left untouched.
-const CODE_REGEX = /(`[a-z0-9_\-\s]+`)/gi;
-
-// Title-case a standalone string (treated as a whole title), leaving inline
-// code spans untouched. The plugin uses this for frontmatter and component
-// title props; it's exported for callers who want title-casing outside a
-// Markdown tree.
+// Title-case a standalone string (treated as a whole markdown title), handling
+// inline code spans, emphasis, escapes, etc. The plugin uses this for
+// frontmatter and component title props; it's exported for callers who want
+// title-casing outside a remark plugin.
 export const capitalizeTitle = (
   title: string,
   { special = DEFAULT_CAPITALIZATIONS }: { special?: string[] } = {},
 ): string => {
-  const parts = title.split(new RegExp(CODE_REGEX));
-  return parts
-    .map((part, idx) => {
-      if (part.startsWith("`") && part.endsWith("`")) return part;
-      return titleCase(part, {
-        special,
-        isFirstTextNode: idx === 0,
-        isLastTextNode: idx === parts.length - 1,
-      });
-    })
-    .join("");
+  const tree = fromMarkdown(title);
+  const items = collectTitleItemsFromChildren(tree.children);
+
+  // Re-case the original source bytes (via each text node's position offsets),
+  // NOT node.value: value is unescaped (`a \* b` => `a * b`) while its position
+  // spans the *escaped* source, so splicing value back would drop escapes and
+  // shift later offsets. Since titleCase only flips letters and copies all other
+  // characters through, escapes, `_`/`*` delimiters, and exact spacing survives.
+  let result = "";
+  let cursor = 0;
+  items.forEach((item, i) => {
+    if (item.type !== "text") return;
+    const start = item.node.position!.start.offset!;
+    const end = item.node.position!.end.offset!;
+    result += title.slice(cursor, start);
+    result += titleCase(title.slice(start, end), {
+      special,
+      isFirstTextNode: i === 0,
+      isLastTextNode: i === items.length - 1,
+      firstWordIsContinuation: item.firstWordIsContinuation,
+    });
+    cursor = end;
+  });
+  result += title.slice(cursor);
+  return result;
 };
 
 type AstroFrontmatterData = {
@@ -49,7 +60,7 @@ const plugin: Plugin<[PluginOptions?], mdast.Root> =
     special = DEFAULT_CAPITALIZATIONS,
     componentNames = [],
     frontmatterTitle = true,
-  }: PluginOptions = {}) =>
+  } = {}) =>
   (tree, file) => {
     // If frontmatterTitle is true, it will also format the title in the
     // frontmatter, but only if Astro is exposing it.
@@ -61,21 +72,21 @@ const plugin: Plugin<[PluginOptions?], mdast.Root> =
       }
     }
 
-    // Pass 1: every heading. A heading's text can be split across multiple text
-    // nodes (e.g. emphasis, links, inline code), so we collect them first to
-    // find out which is the first/last text node.
+    // Pass 1: every heading. A heading's text can be split across multiple
+    // phrasing nodes (emphasis, links, inline code), so we flatten them into
+    // ordered title items first — that tells us which text node is first/last
+    // and which ones continue a preceding code span ("`head`ing"). Headings
+    // mutate text nodes in place; the serializer re-emits them (and normalizes
+    // the body, e.g. `_em_` → `*em*`, which is the expected heading behavior).
     visit(tree, "heading", (node) => {
-      // Get every text node for this heading
-      const textNodes: { value?: string }[] = [];
-      visit(node, "text", (textNode) => {
-        textNodes.push(textNode);
-      });
-      // Lowercase each node, but be mindful of which one is first/last
-      textNodes.forEach((textNode, i) => {
-        textNode.value = titleCase(textNode.value ?? "", {
+      const items = collectTitleItemsFromChildren(node.children);
+      items.forEach((item, i) => {
+        if (item.type !== "text") return;
+        item.node.value = titleCase(item.node.value, {
           special,
           isFirstTextNode: i === 0,
-          isLastTextNode: i === textNodes.length - 1,
+          isLastTextNode: i === items.length - 1,
+          firstWordIsContinuation: item.firstWordIsContinuation,
         });
       });
     });
@@ -83,7 +94,8 @@ const plugin: Plugin<[PluginOptions?], mdast.Root> =
       return;
     }
     // Pass 2: title props of the named MDX components. Their value is one raw
-    // string, so capitalizeTitle handles code-span splitting itself.
+    // string, so capitalizeTitle parses and re-cases it (code spans, emphasis,
+    // escapes and all) on its own.
     visit(
       tree,
       (node): node is MdxJsxFlowElement => {

@@ -197,6 +197,26 @@ describe("Handles inline code spans", () => {
       "#### The Jokes Write Themselves: `ours`, `theirs`, and Three-way Merges",
     );
   });
+
+  test("treats a parenthetical suffix attached to a trailing code span as a continuation", async () => {
+    expect(
+      await processMarkdown(
+        "#### easier than real life: finding your `remote`(s)",
+      ),
+    ).toBe("#### Easier than Real Life: Finding Your `remote`(s)");
+  });
+
+  test("does not treat text after a leading code span as the title start", async () => {
+    expect(await processMarkdown("## `push` and pull")).toBe(
+      "## `push` and Pull",
+    );
+  });
+
+  test("treats a suffix attached directly to a code span as a continuation", async () => {
+    expect(await processMarkdown("## the `head`ing story")).toBe(
+      "## The `head`ing Story",
+    );
+  });
 });
 
 describe("Handles hyphenated compound words", () => {

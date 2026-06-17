@@ -31,4 +31,34 @@ describe("capitalizeTitle as standalone function export", () => {
       "The Flavors of `git reset`: Soft or Hard",
     );
   });
+
+  test("treats a suffix attached to a code span as a continuation", () => {
+    expect(capitalizeTitle("the `head`ing story")).toBe(
+      "The `head`ing Story",
+    );
+  });
+
+  test("does not treat text after a leading code span as the title start", () => {
+    expect(capitalizeTitle("`foo` and bar")).toBe("`foo` and Bar");
+  });
+
+  // The string path re-cases the original source bytes, so emphasis delimiters
+  // and backslash escapes are preserved verbatim (no `_em_` → `*em*`).
+  test("preserves emphasis delimiters and escapes without normalizing", () => {
+    expect(capitalizeTitle("a _really_ big \\* moment")).toBe(
+      "A _Really_ Big \\* Moment",
+    );
+  });
+
+  // A title can start with block-markdown punctuation; fromMarkdown parses it
+  // as a heading/list/blockquote, but the enclosing block is transparent, so
+  // the leading marker is preserved and the inline text (including code spans)
+  // is cased exactly as in a plain title.
+  test("preserves a leading heading marker and respects code spans", () => {
+    expect(capitalizeTitle("# the `git` thing")).toBe("# The `git` Thing");
+  });
+
+  test("preserves a leading blockquote marker", () => {
+    expect(capitalizeTitle("> push and pull")).toBe("> Push and Pull");
+  });
 });
