@@ -1,0 +1,21 @@
+{
+  "name": "astro-smooth-actions-astro-6-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/node": "^10.0.5",
+    "@fujocoded/astro-smooth-actions": "file:../..",
+    "astro": "^6.1.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3"
+  }
+}

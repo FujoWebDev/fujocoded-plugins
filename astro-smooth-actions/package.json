@@ -20,7 +20,8 @@
     "package.json"
   ],
   "type": "module",
-  "main": "dist/index.cjs",
+  "sideEffects": false,
+  "main": "dist/index.js",
   "module": "dist/index.js",
   "exports": {
     ".": {
@@ -35,12 +36,17 @@
   },
   "scripts": {
     "build": "tsdown",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "validate": " npx publint"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^22.19.21",
     "astro": "^5.0.0",
     "glob": "^13.0.6",
-    "tsdown": "^0.14.1"
+    "tsdown": "^0.14.1",
+    "vitest": "^3.2.4"
   }
 }

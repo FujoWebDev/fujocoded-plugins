@@ -1,0 +1,169 @@
+---
+import { actions } from "astro:actions";
+import { getActionInput } from "@fujocoded/astro-smooth-actions";
+import "../styles/example.css";
+
+const subscribeResult = Astro.getActionResult(actions.subscribe);
+const unsubscribeResult = Astro.getActionResult(actions.unsubscribe);
+const subscribeInput = await getActionInput({
+  locals: Astro.locals,
+  action: actions.subscribe,
+});
+const unsubscribeInput = await getActionInput({
+  locals: Astro.locals,
+  action: actions.unsubscribe,
+});
+
+const submittedSubscribeFormId = subscribeInput?.formId;
+const submittedUnsubscribeFormId = unsubscribeInput?.formId;
+const subscribeMessage =
+  subscribeResult?.error?.message ?? subscribeResult?.data?.message;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>astro-smooth-actions - Astro 5 example</title>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Smooth action demo</h1>
+      <p><a href="/special-cases">Go to the special cases</a></p>
+
+      <div class="status">
+        {
+          submittedSubscribeFormId || submittedUnsubscribeFormId ? (
+            <p>
+              Restored form:{" "}
+              {submittedSubscribeFormId ?? submittedUnsubscribeFormId}
+            </p>
+          ) : (
+            <p>Click a form and see what happens.</p>
+          )
+        }
+      </div>
+
+      <form
+        method="POST"
+        action={actions.subscribe}
+        aria-label="Primary subscribe"
+      >
+        <input type="hidden" name="formId" value="primary-subscribe" />
+        <h2>Primary subscribe</h2>
+        <div class="row">
+          <label for="primary-email">Email</label>
+          <input
+            id="primary-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="bobatan@fujocoded.com"
+          />
+        </div>
+        <div class="row">
+          <label for="primary-handle">Handle</label>
+          <input
+            id="primary-handle"
+            name="handle"
+            autocomplete="off"
+            value="bobatan"
+          />
+        </div>
+        <button type="submit">Subscribe</button>
+
+        {
+          submittedSubscribeFormId === "primary-subscribe" &&
+            subscribeResult?.data?.ok && (
+              <p class="message success">
+                Confirmed for <strong>{subscribeResult.data.email}</strong> as{" "}
+                <strong>{subscribeResult.data.handle}</strong>.
+              </p>
+            )
+        }
+
+        {
+          submittedSubscribeFormId === "primary-subscribe" &&
+            subscribeMessage && <p class="message error">{subscribeMessage}</p>
+        }
+      </form>
+
+      <form
+        method="POST"
+        action={actions.subscribe}
+        aria-label="Secondary subscribe"
+      >
+        <input type="hidden" name="formId" value="secondary-subscribe" />
+        <h2>Secondary subscribe</h2>
+        <div class="row">
+          <label for="secondary-email">Email</label>
+          <input
+            id="secondary-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="blocked@blocked.test"
+          />
+        </div>
+        <div class="row">
+          <label for="secondary-handle">Handle</label>
+          <input
+            id="secondary-handle"
+            name="handle"
+            autocomplete="off"
+            value="blocked"
+          />
+        </div>
+        <button type="submit">Subscribe</button>
+
+        {
+          submittedSubscribeFormId === "secondary-subscribe" &&
+            subscribeResult?.data?.ok && (
+              <p class="message success">
+                Confirmed for <strong>{subscribeResult.data.email}</strong> as{" "}
+                <strong>{subscribeResult.data.handle}</strong>.
+              </p>
+            )
+        }
+
+        {
+          submittedSubscribeFormId === "secondary-subscribe" &&
+            subscribeMessage && <p class="message error">{subscribeMessage}</p>
+        }
+      </form>
+
+      <form method="POST" action={actions.unsubscribe} aria-label="Unsubscribe">
+        <input type="hidden" name="formId" value="unsubscribe" />
+        <h2>Unsubscribe</h2>
+        <div class="row">
+          <label for="unsubscribe-email">Email</label>
+          <input
+            id="unsubscribe-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="bobatan@fujocoded.com"
+          />
+        </div>
+        <button type="submit">Unsubscribe</button>
+
+        {
+          submittedUnsubscribeFormId === "unsubscribe" &&
+            unsubscribeResult?.data?.ok && (
+              <p class="message success">
+                Unsubscribed <strong>{unsubscribeResult.data.email}</strong>.
+              </p>
+            )
+        }
+
+        {
+          submittedUnsubscribeFormId === "unsubscribe" &&
+            unsubscribeResult?.error && (
+              <p class="message error">{unsubscribeResult.error.message}</p>
+            )
+        }
+      </form>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  padding: 2rem;
+}
+
+.card {
+  max-width: 32rem;
+  padding: 1.25rem;
+}
+
+form + form {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.row {
+  margin-bottom: 0.75rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.message {
+  margin-top: 0.75rem;
+}
+
+.message.success {
+  color: green;
+}
+
+.message.error {
+  color: red;
+}
+
+.message.note {
+  color: dimgray;
+}
+
+.status {
+  margin: 1rem 0 1.5rem;
+  padding: 0.75rem;
+  border: 1px solid lightgray;
+  background: whitesmoke;
+}
+
+.status p {
+  margin: 0;
+}
+
+.status p + p {
+  margin-top: 0.5rem;
+}

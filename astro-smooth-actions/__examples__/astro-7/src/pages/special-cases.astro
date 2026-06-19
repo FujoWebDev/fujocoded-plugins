@@ -1,0 +1,194 @@
+---
+import { actions } from "astro:actions";
+import {
+  ACTION_INPUT_CONTROL,
+  getActionInput,
+} from "@fujocoded/astro-smooth-actions";
+import "../styles/example.css";
+
+const subscribeResult = Astro.getActionResult(actions.subscribe);
+const subscribeInput = await getActionInput({
+  locals: Astro.locals,
+  action: actions.subscribe,
+});
+const submittedFormId = subscribeInput?.formId;
+const subscribeMessage =
+  subscribeResult?.error?.message ?? subscribeResult?.data?.message;
+const hasSubscribeResult = Boolean(
+  subscribeResult?.data || subscribeResult?.error,
+);
+
+// A field can be "absent" from stored input in two separate ways:
+//   value null  -> submitted, but the value was held back
+//   key missing -> the field was never on the form at all
+// "Omit one field" shows both: privateNote (null) vs nickname (missing).
+const omitOneInput = submittedFormId === "omit-one" ? subscribeInput : null;
+const privateNoteValue = omitOneInput?.privateNote;
+const sawNicknameField = omitOneInput ? "nickname" in omitOneInput : false;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>astro-smooth-actions · Astro 7 special cases</title>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Input storage special cases</h1>
+      <p><a href="/">Back to the main demo</a></p>
+
+      <div class="status">
+        {
+          submittedFormId ? (
+            <p>Restored form: {submittedFormId}</p>
+          ) : hasSubscribeResult ? (
+            <p>Restored form: none</p>
+          ) : (
+            <p>Click a form and see what happens.</p>
+          )
+        }
+      </div>
+
+      <form method="POST" action={actions.subscribe} aria-label="Error case">
+        <input type="hidden" name="formId" value="error-case" />
+        <h2>Error case</h2>
+        <div class="row">
+          <label for="error-email">Email</label>
+          <input
+            id="error-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="blocked@blocked.test"
+          />
+        </div>
+        <div class="row">
+          <label for="error-handle">Handle</label>
+          <input
+            id="error-handle"
+            name="handle"
+            autocomplete="off"
+            value="blocked"
+          />
+        </div>
+        <button type="submit">Submit error</button>
+
+        {
+          submittedFormId === "error-case" && subscribeMessage && (
+            <p class="message error">{subscribeMessage}</p>
+          )
+        }
+      </form>
+
+      <form
+        method="POST"
+        action={actions.subscribe}
+        aria-label="Omit one field"
+      >
+        <input type="hidden" name={ACTION_INPUT_CONTROL} value="privateNote" />
+        <input type="hidden" name="formId" value="omit-one" />
+        <h2>Omit one field</h2>
+        <div class="row">
+          <label for="omit-one-email">Email</label>
+          <input
+            id="omit-one-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="bobatan@fujocoded.com"
+          />
+        </div>
+        <div class="row">
+          <label for="omit-one-handle">Handle</label>
+          <input
+            id="omit-one-handle"
+            name="handle"
+            autocomplete="off"
+            value="bobatan"
+          />
+        </div>
+        <div class="row">
+          <label for="private-note">Private note</label>
+          <input
+            id="private-note"
+            name="privateNote"
+            value="Do not store this"
+          />
+        </div>
+        <button type="submit">Submit without private note</button>
+
+        {
+          submittedFormId === "omit-one" && subscribeResult?.data?.ok && (
+            <p class="message success">
+              Confirmed for <strong>{subscribeResult.data.email}</strong> as{" "}
+              <strong>{subscribeResult.data.handle}</strong>.
+            </p>
+          )
+        }
+        {
+          submittedFormId === "omit-one" && (
+            <ul class="message note">
+              <li>
+                <code>privateNote</code> came back as{" "}
+                <code>{String(privateNoteValue)}</code>: it was submitted, but
+                its value was held back
+              </li>
+              <li>
+                <code>"nickname" in input</code> is{" "}
+                <code>{String(sawNicknameField)}</code>: that field was never on
+                the form, so it has no key at all
+              </li>
+            </ul>
+          )
+        }
+      </form>
+
+      <form
+        method="POST"
+        action={actions.subscribe}
+        aria-label="Omit all fields"
+      >
+        <input type="hidden" name={ACTION_INPUT_CONTROL} value="none" />
+        <h2>Omit all fields</h2>
+        <div class="row">
+          <label for="omit-all-email">Email</label>
+          <input
+            id="omit-all-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            value="bobatan@fujocoded.com"
+          />
+        </div>
+        <div class="row">
+          <label for="omit-all-handle">Handle</label>
+          <input
+            id="omit-all-handle"
+            name="handle"
+            autocomplete="off"
+            value="bobatan"
+          />
+        </div>
+        <button type="submit">Submit without restored input</button>
+
+        {
+          hasSubscribeResult &&
+            !subscribeInput &&
+            subscribeResult?.data?.ok && (
+              <p class="message success">
+                Confirmed for <strong>{subscribeResult.data.email}</strong> as{" "}
+                <strong>{subscribeResult.data.handle}</strong>.
+              </p>
+            )
+        }
+        {
+          hasSubscribeResult && !subscribeInput && (
+            <p class="message note">No input fields were restored.</p>
+          )
+        }
+      </form>
+    </main>
+  </body>
+</html>
