@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { capitalizeTitle } from "../index.ts";
+import { capitalizeTitle } from "../src/index.ts";
 
 describe("capitalizeTitle as standalone function export", () => {
   test("title-cases a standalone string", () => {

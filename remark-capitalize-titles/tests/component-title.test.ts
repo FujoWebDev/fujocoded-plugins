@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { remark } from "remark";
 import remarkMdx from "remark-mdx";
-import remarkCapitalizeTitles from "../index.ts";
+import remarkCapitalizeTitles from "../src/index.ts";
 
 const processComponent = async (
   value: string,

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { remark } from "remark";
 import type { Compatible } from "vfile";
-import remarkCapitalizeTitles from "../index.ts";
+import remarkCapitalizeTitles from "../src/index.ts";
 
 const processMarkdown = async (value: Compatible) => {
   const file = await remark().use(remarkCapitalizeTitles).process(value);

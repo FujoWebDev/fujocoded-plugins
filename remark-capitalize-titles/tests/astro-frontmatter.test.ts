@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { remark } from "remark";
 import { VFile } from "vfile";
-import remarkCapitalizeTitles from "../index.ts";
+import remarkCapitalizeTitles from "../src/index.ts";
 
 const processAstroFrontmatterTitle = async (
   title: unknown,
