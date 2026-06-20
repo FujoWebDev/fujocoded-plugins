@@ -49,10 +49,12 @@
   "scripts": {
     "build": "tsup index.ts middleware.ts --format cjs,esm --dts --clean --external 'fujocoded:dev-only-routes'",
     "validate": " npx publint",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "astro-types-v4": "npm:astro@^4.0.0",
-    "astro-types-v5": "npm:astro@^5.0.0"
+    "astro-types-v5": "npm:astro@^5.0.0",
+    "vitest": "^3.0.5"
   }
 }
