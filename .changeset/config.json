@@ -7,8 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@fujocoded/astro-smooth-action",
-    "@fujocoded/astro-alt-text-toolkit"
-  ]
+  "ignore": ["@fujocoded/astro-alt-text-toolkit"]
 }
