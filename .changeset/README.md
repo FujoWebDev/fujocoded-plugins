@@ -6,3 +6,89 @@ find the full documentation for it [in our repository](https://github.com/change
 
 We have a quick list of common questions to get you started engaging with this project in
 [our documentation](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
+
+## First package release
+
+We can only configure NPM Trusted Publishing after a package already exists,
+which means the first publication needs to be handled differently from the rest.
+In our case, the first publish uses `.github/workflows/first-release.yaml` with
+a short-lived NPM_TOKEN.
+
+The workflow by package. It requires `package_name` and refuses to publish
+anything except that exact package.
+
+### How TOs:
+
+1. Keep the package at `0.0.0` with a `patch` changeset. Changesets will turn
+   that into the first public version, `0.0.1`.
+2. Commit the release-prep state, including the changeset.
+3. Prepare a versioned first-release branch:
+
+   ```bash
+   npm --prefix .changeset run first-release:prepare -- --commit
+   ```
+
+   or with no side effects:
+
+   ```bash
+   npm --prefix .changeset run first-release:prepare -- --commit --dry-run
+   ```
+
+   If more than one public `0.0.0` package has a pending changeset, the helper
+   asks which package to release. To choose explicitly, pass the package name or
+   workspace directory:
+
+   ```bash
+   npm --prefix .changeset run first-release:prepare -- @fujocoded/astro-smooth-actions --commit
+   ```
+
+   This creates a temporary branch, removes unrelated pending changesets on that
+   branch, runs `changeset version`, refreshes lockfiles under the package, and
+   runs focused checks.
+
+4. Create a temporary npm granular access token with read/write access to the
+   `@fujocoded` scope, short expiration, and 2FA bypass for automation:
+
+   ```bash
+   npm token create \
+     --name "first-package-release" \
+     --expires 1 \
+     --scopes @fujocoded \
+     --packages-and-scopes-permission read-write \
+     --bypass-2fa
+   ```
+
+5. Dispatch the first-release workflow from the versioned branch:
+
+   ```bash
+   npm --prefix .changeset run first-release:dispatch -- @fujocoded/astro-smooth-actions
+   ```
+
+   For a full no-op rehearsal:
+
+   ```bash
+   npm --prefix .changeset run first-release:dispatch -- @fujocoded/astro-smooth-actions --dry-run
+   ```
+
+   The helper asks for confirmation before pushing, lets `gh secret set` collect
+   `NPM_TOKEN`, and dispatches the first-release workflow with
+   the selected `package_name`.
+
+6. After the package is published, configure Trusted Publishing for future
+   releases:
+
+   ```bash
+   npm trust github @fujocoded/astro-smooth-actions \
+     --repo FujoWebDev/fujocoded-plugins \
+     --file release.yaml \
+     --allow-publish
+   ```
+
+7. Delete the temporary GitHub secret and revoke the npm token:
+
+   ```bash
+   gh secret delete NPM_TOKEN --repo FujoWebDev/fujocoded-plugins
+   npm token revoke <token-id-or-token>
+   ```
+
+Future versions should then use the normal `.github/workflows/release.yaml` flow.
