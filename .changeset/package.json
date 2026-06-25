@@ -2,8 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "first-release": "node scripts/first-release.mjs",
-    "first-release:prepare": "node scripts/first-release.mjs prepare",
-    "first-release:dispatch": "node scripts/first-release.mjs dispatch"
+    "first-release": "node ../.github/scripts/.changeset/first-release.mjs",
+    "first-release:prepare": "node ../.github/scripts/.changeset/first-release.mjs prepare",
+    "first-release:dispatch": "node ../.github/scripts/.changeset/first-release.mjs dispatch"
   }
 }
