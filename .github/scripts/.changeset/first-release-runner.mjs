@@ -28,6 +28,28 @@ const capture = (cmd, args, options = {}) =>
 
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 
+const envWithGithubToken = (repoRoot) => {
+  if (process.env.GITHUB_TOKEN) {
+    return process.env;
+  }
+
+  const token = spawnSync("gh", ["auth", "token"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  });
+
+  const githubToken = token.status === 0 ? token.stdout.trim() : "";
+  if (!githubToken) {
+    return process.env;
+  }
+
+  return {
+    ...process.env,
+    GITHUB_TOKEN: githubToken,
+  };
+};
+
 export const findRepoRoot = (fromDir) => {
   let dir = fromDir;
 
@@ -181,6 +203,7 @@ export const prepareFirstRelease = async ({
   run("npx", ["changeset", "version"], {
     cwd: repoRoot,
     dryRun: options.dryRun,
+    env: envWithGithubToken(repoRoot),
   });
   if (!options.dryRun) {
     assertVersionedFirstReleasePackage(pkg, { repoRoot });
