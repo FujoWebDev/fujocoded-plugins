@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { resolveFirstReleasePackage } from "../../../.changeset/scripts/first-release-packages.mjs";
+import { resolveFirstReleasePackage } from "../../scripts/.changeset/first-release-packages.mjs";
 
 const npmToken = process.env.NODE_AUTH_TOKEN ?? process.env.NPM_TOKEN;
 const requestedPackage = process.env.FIRST_RELEASE_PACKAGE?.trim();

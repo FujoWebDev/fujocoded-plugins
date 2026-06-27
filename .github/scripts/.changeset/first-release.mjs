@@ -15,6 +15,7 @@ import {
   dispatchFirstRelease,
   findRepoRoot,
   prepareFirstRelease,
+  syncBackFirstRelease,
 } from "./first-release-runner.mjs";
 
 const repo = "FujoWebDev/fujocoded-plugins";
@@ -105,6 +106,8 @@ const dispatch = runCommand(dispatchFirstRelease, {
   workflow,
 });
 
+const syncBack = runCommand(syncBackFirstRelease);
+
 const program = new Command();
 
 program
@@ -127,8 +130,25 @@ program
   .description("Push and dispatch the first-release workflow for one package.")
   .argument("[package-name-or-dir]", "workspace package name or directory")
   .option("--branch <branch>", "branch name to require")
+  .option(
+    "--target <branch>",
+    "branch to sync release state back to after publish",
+  )
+  .option("--commit", "prompt for a local sync-back commit after publishing")
   .option("--dry-run", "show planned operations without applying changes")
   .action(dispatch);
+
+program
+  .command("sync-back")
+  .description(
+    "Apply only the published first-release package state back to another branch.",
+  )
+  .argument("[package-name-or-dir]", "workspace package name or directory")
+  .requiredOption("--target <branch>", "branch to update")
+  .option("--branch <branch>", "first-release branch name to require")
+  .option("--commit", "prompt for a local commit after syncing")
+  .option("--dry-run", "show planned operations without applying changes")
+  .action(syncBack);
 
 if (process.argv.length <= 2) {
   program.outputHelp();

@@ -4,6 +4,7 @@
   "scripts": {
     "first-release": "node ../.github/scripts/.changeset/first-release.mjs",
     "first-release:prepare": "node ../.github/scripts/.changeset/first-release.mjs prepare",
-    "first-release:dispatch": "node ../.github/scripts/.changeset/first-release.mjs dispatch"
+    "first-release:dispatch": "node ../.github/scripts/.changeset/first-release.mjs dispatch",
+    "first-release:sync-back": "node ../.github/scripts/.changeset/first-release.mjs sync-back"
   }
 }

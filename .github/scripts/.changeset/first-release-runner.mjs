@@ -6,6 +6,8 @@ import {
   getPendingChangesets,
   resolveFirstReleasePackage,
 } from "./first-release-packages.mjs";
+import { dispatchFirstRelease as runDispatchFirstRelease } from "./first-release-dispatch.mjs";
+import { syncBackFirstRelease as runSyncBackFirstRelease } from "./first-release-sync-back.mjs";
 
 const run = (cmd, args, options = {}) => {
   const { dryRun, ...execOptions } = options;
@@ -40,6 +42,7 @@ const envWithGithubToken = (repoRoot) => {
   });
 
   const githubToken = token.status === 0 ? token.stdout.trim() : "";
+
   if (!githubToken) {
     return process.env;
   }
@@ -84,7 +87,7 @@ const assertCleanTree = (repoRoot) => {
 const getBranchName = (pkg, options) =>
   options.branch ?? `first-release/${pkg.dir}-0.0.1`;
 
-const removeUnrelatedChangesets = ({ pkg, repoRoot, dryRun }) => {
+const removeUnrelatedChangesets = ({ dryRun, pkg, repoRoot }) => {
   const selectedChangesets = new Set(pkg.changesetFiles);
   const files = getPendingChangesets(repoRoot).filter(
     (file) => !selectedChangesets.has(file),
@@ -116,11 +119,11 @@ const findLockfilePackageDirs = (rootDir) => {
         continue;
       }
 
-      const path = join(dir, entry.name);
       if (!entry.isDirectory()) {
         continue;
       }
 
+      const path = join(dir, entry.name);
       if (
         existsSync(join(path, "package.json")) &&
         existsSync(join(path, "package-lock.json"))
@@ -136,7 +139,7 @@ const findLockfilePackageDirs = (rootDir) => {
   return [...packageDirs].sort((a, b) => a.localeCompare(b));
 };
 
-const refreshLockfiles = ({ pkg, repoRoot, dryRun }) => {
+const refreshLockfiles = ({ dryRun, pkg, repoRoot }) => {
   if (dryRun) {
     console.log("[dry-run] Would refresh package-lock files.");
     return;
@@ -161,7 +164,7 @@ const refreshLockfiles = ({ pkg, repoRoot, dryRun }) => {
   }
 };
 
-const runFocusedChecks = ({ pkg, repoRoot, dryRun }) => {
+const runFocusedChecks = ({ dryRun, pkg, repoRoot }) => {
   for (const scriptName of ["typecheck", "test", "build", "test:e2e"]) {
     if (pkg.scripts[scriptName]) {
       run("npm", ["run", scriptName, "-w", pkg.name], {
@@ -210,11 +213,7 @@ export const prepareFirstRelease = async ({
   }
 
   logStep(`Refreshing lockfiles for ${pkg.name}.`);
-  refreshLockfiles({
-    dryRun: options.dryRun,
-    pkg,
-    repoRoot,
-  });
+  refreshLockfiles({ dryRun: options.dryRun, pkg, repoRoot });
 
   logStep(`Running focused checks for ${pkg.name}.`);
   runFocusedChecks({ dryRun: options.dryRun, pkg, repoRoot });
@@ -240,112 +239,25 @@ export const prepareFirstRelease = async ({
   );
 };
 
-export const dispatchFirstRelease = async ({
-  choosePackage,
-  confirmYes,
-  logStep,
-  note,
-  options,
-  outro,
-  packageNameOrDir,
-  repo,
-  repoRoot,
-  workflow,
-}) => {
-  assertCleanTree(repoRoot);
-
-  const pkg = await resolveFirstReleasePackage({
-    choosePackage,
-    phase: "dispatch",
-    repoRoot,
-    requestedPackage: packageNameOrDir,
-  });
-  const branchName = getBranchName(pkg, options);
-
-  logStep(`Checking ${pkg.name} on ${branchName}.`);
-  assertVersionedFirstReleasePackage(pkg, { repoRoot });
-
-  const currentBranch = capture("git", ["branch", "--show-current"], {
-    cwd: repoRoot,
-  });
-  if (currentBranch !== branchName) {
-    throw new Error(
-      `Current branch is ${currentBranch}; expected ${branchName}.`,
-    );
-  }
-
-  if (
-    !(await confirmYes(
-      options.dryRun
-        ? `Dry run: validate ${branchName} and show dispatch commands for ${pkg.name}?`
-        : `Push ${branchName}, set the NPM_TOKEN GitHub secret, and dispatch ${workflow} for ${pkg.name}?`,
-    ))
-  ) {
-    throw new Error("Canceled.");
-  }
-
-  const scope = pkg.name.startsWith("@") ? pkg.name.split("/")[0] : pkg.name;
-
-  note(
-    `npm token create --name "first-package-release" --expires 1 --scopes ${scope} --packages-and-scopes-permission read-write --bypass-2fa`,
-    "Create a temporary npm token in another terminal if needed",
-  );
-
-  logStep(`Pushing ${branchName}.`);
-  run("git", ["push", "fujo", `${branchName}:${branchName}`], {
-    cwd: repoRoot,
-    dryRun: options.dryRun,
+export const dispatchFirstRelease = async (context) =>
+  runDispatchFirstRelease({
+    ...context,
+    helpers: {
+      assertCleanTree,
+      capture,
+      getBranchName,
+      run,
+    },
   });
 
-  logStep("Setting temporary NPM_TOKEN secret.");
-  const secretArgs = ["secret", "set", "NPM_TOKEN", "--repo", repo];
-  if (options.dryRun) {
-    run("gh", secretArgs, {
-      cwd: repoRoot,
-      dryRun: true,
-    });
-  } else {
-    const secret = spawnSync("gh", secretArgs, {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
-    if (secret.status !== 0) {
-      throw new Error("Could not set NPM_TOKEN secret.");
-    }
-  }
-
-  logStep(`Dispatching ${workflow} for ${pkg.name}.`);
-  const workflowDispatchArgs = [
-    "workflow",
-    "run",
-    workflow,
-    "--repo",
-    repo,
-    "--ref",
-    branchName,
-    "--field",
-    `package_name=${pkg.name}`,
-  ];
-  if (options.dryRun) {
-    run("gh", workflowDispatchArgs, { cwd: repoRoot, dryRun: true });
-  } else {
-    const workflowDispatch = spawnSync("gh", workflowDispatchArgs, {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
-    if (workflowDispatch.status !== 0) {
-      throw new Error("Could not dispatch workflow.");
-    }
-  }
-
-  outro(options.dryRun ? "Dry run complete." : "Workflow dispatched.");
-  note(`gh run list --repo ${repo} --workflow ${workflow}`, "Watch it with");
-  note(
-    [
-      `npm trust github ${pkg.name} --repo ${repo} --file release.yaml --allow-publish`,
-      `gh secret delete NPM_TOKEN --repo ${repo}`,
-      "npm token revoke <token-id-or-token>",
-    ].join("\n"),
-    "After a successful publish",
-  );
-};
+export const syncBackFirstRelease = async (context) =>
+  runSyncBackFirstRelease({
+    ...context,
+    helpers: {
+      assertCleanTree,
+      capture,
+      findLockfilePackageDirs,
+      getBranchName,
+      run,
+    },
+  });
