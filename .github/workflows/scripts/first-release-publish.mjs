@@ -1,4 +1,5 @@
 import { writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { resolveFirstReleasePackage } from "../../scripts/.changeset/first-release-packages.mjs";
@@ -71,7 +72,10 @@ if (dryRun) {
   process.exit(0);
 }
 
-const npmrcPath = join(selectedCandidate.absoluteDir, ".npmrc");
+const npmrcPath = join(
+  process.env.RUNNER_TEMP ?? tmpdir(),
+  "first-release.npmrc",
+);
 writeFileSync(
   npmrcPath,
   [
