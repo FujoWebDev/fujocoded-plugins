@@ -35,9 +35,17 @@ const createNpmToken = ({ pkg, repoRoot, scope }) => {
     {
       cwd: repoRoot,
       encoding: "utf8",
-      stdio: ["inherit", "pipe", "inherit"],
+      stdio: ["inherit", "pipe", "pipe"],
     },
   );
+
+  if (token.stdout) {
+    process.stdout.write(token.stdout);
+  }
+
+  if (token.stderr) {
+    process.stderr.write(token.stderr);
+  }
 
   if (token.status !== 0) {
     throw new Error("Could not create temporary npm token.");
