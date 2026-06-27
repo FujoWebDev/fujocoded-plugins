@@ -1,3 +1,5 @@
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { resolveFirstReleasePackage } from "../../scripts/.changeset/first-release-packages.mjs";
 
@@ -69,13 +71,30 @@ if (dryRun) {
   process.exit(0);
 }
 
+const npmrcPath = join(selectedCandidate.absoluteDir, ".npmrc");
+writeFileSync(
+  npmrcPath,
+  [
+    "registry=https://registry.npmjs.org/",
+    "@fujocoded:registry=https://registry.npmjs.org/",
+    `//registry.npmjs.org/:_authToken=${npmToken}`,
+    "",
+  ].join("\n"),
+  { mode: 0o600 },
+);
+
 const result = spawnSync(
   "npm",
   ["publish", "--provenance", "--access", "public"],
   {
     cwd: selectedCandidate.absoluteDir,
     encoding: "utf8",
-    env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
+    env: {
+      ...process.env,
+      NODE_AUTH_TOKEN: npmToken,
+      NPM_TOKEN: npmToken,
+      NPM_CONFIG_USERCONFIG: npmrcPath,
+    },
     stdio: ["inherit", "pipe", "pipe"],
   },
 );

@@ -68,6 +68,13 @@ jobs:
             exit 1
           fi
 
+      - name: Print npm publish environment
+        run: |
+          node --version
+          npm --version
+          npm config get registry
+          npm config get userconfig
+
       - name: Publish first-release package
         uses: changesets/action@v1
         with:
