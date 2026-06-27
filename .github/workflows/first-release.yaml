@@ -59,12 +59,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify npm token
+      - name: Verify npm token secret
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm whoami --registry https://registry.npmjs.org
-          npm access list packages @fujocoded --json
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is required."
+            exit 1
+          fi
 
       - name: Publish first-release package
         uses: changesets/action@v1

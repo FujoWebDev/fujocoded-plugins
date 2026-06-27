@@ -69,27 +69,6 @@ if (dryRun) {
   process.exit(0);
 }
 
-const whoami = spawnSync(
-  "npm",
-  ["whoami", "--registry", "https://registry.npmjs.org"],
-  {
-    cwd: selectedCandidate.absoluteDir,
-    encoding: "utf8",
-    env: { ...process.env, NODE_AUTH_TOKEN: npmToken, NPM_TOKEN: npmToken },
-    stdio: ["inherit", "pipe", "pipe"],
-  },
-);
-
-process.stdout.write(whoami.stdout);
-process.stderr.write(whoami.stderr);
-
-if (whoami.status !== 0) {
-  console.error(
-    `${selectedCandidate.name} could not authenticate to npm before publish.`,
-  );
-  process.exit(whoami.status ?? 1);
-}
-
 const result = spawnSync(
   "npm",
   ["publish", "--provenance", "--access", "public"],
