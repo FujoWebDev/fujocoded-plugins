@@ -132,6 +132,10 @@ program
   .option("--branch <branch>", "branch name to require")
   .option("--otp <otp>", "One-time password for npm token create")
   .option(
+    "--allow-dirty",
+    "allow running dispatch with an uncommitted working tree",
+  )
+  .option(
     "--target <branch>",
     "branch to sync release state back to after publish",
   )

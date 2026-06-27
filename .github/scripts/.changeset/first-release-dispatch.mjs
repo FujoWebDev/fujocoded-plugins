@@ -1,4 +1,5 @@
 import { execFileSync, spawn, spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import { isCancel, password } from "@clack/prompts";
 import {
   assertVersionedFirstReleasePackage,
@@ -6,8 +7,15 @@ import {
 } from "./first-release-packages.mjs";
 import { maybeSyncBackAfterDispatch } from "./first-release-sync-back.mjs";
 
+const require = createRequire(import.meta.url);
+const { webAuthOpener } = require("npm-profile");
+
 const packageUrl = (packageName) =>
   `https://www.npmjs.com/package/${packageName}`;
+
+const getWorkflowRunIdFromText = (text) =>
+  text.match(/https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/actions\/runs\/(\d+)/)
+    ?.[1] ?? null;
 
 const cleanupCommands = ({ repo }) =>
   [
@@ -21,8 +29,12 @@ const getOtpUrls = (text) => {
     return { authUrl: null, doneUrl: null };
   }
 
-  const authMatch = text.match(/https:\/\/www\.npmjs\.com\/auth\/cli\/[^\s\n\r"]+/);
-  const doneMatch = text.match(/https:\/\/registry\.npmjs\.org\/-\/v1\/done\?authId=[^\s\n\r"]+/);
+  const authMatch = text.match(
+    /https:\/\/www\.npmjs\.com\/auth\/cli\/[A-Za-z0-9-]+/i,
+  );
+  const doneMatch = text.match(
+    /https:\/\/registry\.npmjs\.org\/-\/v1\/done\?authId=[A-Za-z0-9-]+/i,
+  );
 
   return {
     authUrl: authMatch?.[0] ?? null,
@@ -44,6 +56,61 @@ const parseTokenCreateFailure = (text) => {
   return null;
 };
 
+const readNpmToken = (stdout) => {
+  const trimmed = stdout.trim();
+
+  if (trimmed) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (typeof parsed?.token === "string" && parsed.token.startsWith("npm_")) {
+        return parsed.token;
+      }
+    } catch {
+      // Fall back to scanning stdout below.
+    }
+  }
+
+  return stdout.match(/\bnpm_[A-Za-z0-9_-]+/)?.[0] ?? null;
+};
+
+const openAuthUrl = (authUrl) => {
+  if (!authUrl || process.platform !== "darwin") {
+    return false;
+  }
+
+  const opened = spawnSync("open", [authUrl], {
+    stdio: "ignore",
+  });
+
+  return opened.status === 0;
+};
+
+const waitForWebOtp = async ({ authUrl, doneUrl, note }) => {
+  if (!authUrl || !doneUrl) {
+    return null;
+  }
+
+  const opener = async (url, { signal } = {}) => {
+    signal?.throwIfAborted();
+    const opened = openAuthUrl(url);
+    note(
+      [
+        opened
+          ? `Opened npm browser authentication: ${url}`
+          : `Open npm browser authentication: ${url}`,
+        "Waiting for npm browser authentication to complete.",
+      ].join("\n"),
+      "npm browser authentication",
+    );
+  };
+
+  const { token } = await webAuthOpener(opener, authUrl, doneUrl, {
+    registry: "https://registry.npmjs.org",
+  });
+
+  return token;
+};
+
 const askOtp = async () => {
   const oneTimePassword = await password({
     message: "Enter npm one-time password (6 digits)",
@@ -56,14 +123,33 @@ const askOtp = async () => {
   return oneTimePassword;
 };
 
-const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
+const askPassword = async () => {
+  const npmPassword = await password({
+    message: "Enter npm password",
+  });
+
+  if (isCancel(npmPassword)) {
+    throw new Error("Token creation canceled.");
+  }
+
+  return npmPassword;
+};
+
+const createNpmToken = ({
+  pkg,
+  repoRoot,
+  scope,
+  otp,
+  password: providedPassword,
+}) =>
   new Promise((resolve, reject) => {
+    const tokenName = `first-release-${pkg.dir}-${Date.now()}`;
     const args = [
       "token",
       "create",
       "--json",
       "--name",
-      `first-release-${pkg.dir}`,
+      tokenName,
       "--expires",
       "1",
       "--scopes",
@@ -73,8 +159,21 @@ const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
       "--bypass-2fa",
     ];
 
+    if (scope.startsWith("@")) {
+      args.push(
+        "--orgs",
+        scope.slice(1),
+        "--orgs-permission",
+        "read-write",
+      );
+    }
+
     if (otp) {
       args.push("--otp", String(otp));
+    }
+
+    if (providedPassword) {
+      args.push("--password", String(providedPassword));
     }
 
     const token = spawn(
@@ -83,7 +182,7 @@ const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
       {
         cwd: repoRoot,
         encoding: "utf8",
-        stdio: ["inherit", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
       },
     );
 
@@ -102,9 +201,11 @@ const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
       process.stderr.write(text);
     });
 
-    token.on("error", reject);
+    token.on("error", (error) => {
+      reject(error);
+    });
 
-    token.on("close", (code) => {
+    token.on("close", async (code) => {
       if (code !== 0) {
         const parsed = parseTokenCreateFailure([stdout, stderr].join("\n"));
         if (parsed) {
@@ -120,13 +221,13 @@ const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
         return;
       }
 
-      const match = stdout.match(/\bnpm_[A-Za-z0-9]+/);
-      if (!match) {
+      const npmToken = readNpmToken(stdout);
+      if (!npmToken) {
         reject(new Error("Could not read npm token from npm token create output."));
         return;
       }
 
-      resolve(match[0]);
+      resolve(npmToken);
     });
   });
 
@@ -138,49 +239,89 @@ const createTokenWithRetryOnOtp = async ({
   scope,
   options,
 }) => {
-  const retryWithOtp = async (otp) => {
-    if (!otp) {
-      return createNpmToken({ pkg, repoRoot, scope });
-    }
+  let cachedPassword = options.password || process.env.NPM_PASSWORD;
+  let retriedAfterBrowserFlow = false;
 
-    return createNpmToken({ pkg, repoRoot, scope, otp });
+  if (!cachedPassword) {
+    if (!process.stdin.isTTY) {
+      throw new Error(
+        "Could not prompt for npm password in non-interactive mode.\nSet NPM_PASSWORD before running first-release:dispatch.",
+      );
+    }
+    cachedPassword = await askPassword();
+  }
+
+  const retryWithOtp = async (otp) => {
+    return createNpmToken({
+      pkg,
+      repoRoot,
+      scope,
+      otp,
+      password: cachedPassword,
+    });
   };
 
-  try {
-    return await retryWithOtp(options.otp || process.env.NPM_OTP);
-  } catch (error) {
-    const isEotp =
-      error?.code === "EOTP" ||
-      (typeof error?.message === "string" &&
-        error.message.includes("This operation requires a one-time password"));
+  let oneTimePassword = options.otp || process.env.NPM_OTP;
+  while (true) {
+    try {
+      return await retryWithOtp(oneTimePassword);
+    } catch (error) {
+      const isEotp =
+        error?.code === "EOTP" ||
+        (typeof error?.message === "string" &&
+          error.message.includes("This operation requires a one-time password"));
 
-    if (!isEotp) {
-      throw error;
-    }
-
-    const nextSteps = [
-      error.authUrl ? `Open this URL to authenticate: ${error.authUrl}` : null,
-      error.doneUrl ? `Or use this done URL: ${error.doneUrl}` : null,
-      "If authentication supports classic OTP, enter it below and retry automatically.",
-    ].filter(Boolean);
-
-    note(nextSteps.join("\n"), "npm requires one-time authentication");
-
-    if (!options.otp && !process.env.NPM_OTP) {
-      if (!(await confirmYes("Retry token create using an OTP?"))) {
+      if (!isEotp) {
         throw error;
       }
 
-      const oneTimePassword = await askOtp();
-      return createNpmToken({
-        pkg,
-        repoRoot,
-        scope,
-        otp: oneTimePassword,
-      });
-    }
+      const authHintLines = [
+        error.authUrl ? `Open this URL to authenticate: ${error.authUrl}` : null,
+        error.doneUrl
+          ? "The script will poll npm's done URL automatically after browser authentication."
+          : null,
+      ].filter(Boolean);
 
-    throw error;
+      const nextSteps = [
+        ...authHintLines,
+        "If authentication supports classic OTP, enter it below and retry automatically.",
+      ].filter(Boolean);
+
+      note(nextSteps.join("\n"), "npm requires one-time authentication");
+
+      if (
+        !options.otp &&
+        !process.env.NPM_OTP &&
+        authHintLines.length > 0 &&
+        !retriedAfterBrowserFlow
+      ) {
+        if (
+          await confirmYes(
+            "Open browser authentication and retry token create after it completes?",
+          )
+        ) {
+          const webOtp = await waitForWebOtp({
+            authUrl: error.authUrl,
+            doneUrl: error.doneUrl,
+            note,
+          });
+          oneTimePassword = webOtp ?? undefined;
+          retriedAfterBrowserFlow = true;
+          continue;
+        }
+      }
+
+      if (!options.otp && !process.env.NPM_OTP) {
+        if (!(await confirmYes("Retry token create using an OTP?"))) {
+          throw error;
+        }
+
+        oneTimePassword = await askOtp();
+        continue;
+      }
+
+      throw error;
+    }
   }
 };
 
@@ -217,7 +358,14 @@ const setGithubSecret = ({ repo, repoRoot, token }) => {
   }
 };
 
-const findWorkflowRun = ({ branchName, capture, repo, repoRoot, workflow }) => {
+const findWorkflowRun = ({
+  branchName,
+  capture,
+  ignoredRunIds = new Set(),
+  repo,
+  repoRoot,
+  workflow,
+}) => {
   const runJson = capture(
     "gh",
     [
@@ -232,21 +380,21 @@ const findWorkflowRun = ({ branchName, capture, repo, repoRoot, workflow }) => {
       "--event",
       "workflow_dispatch",
       "--limit",
-      "1",
+      "5",
       "--json",
       "databaseId,url,status,conclusion",
-      "--jq",
-      ".[0] // null",
     ],
     { cwd: repoRoot },
   );
 
-  return runJson === "null" ? null : JSON.parse(runJson);
+  const runs = JSON.parse(runJson);
+  return runs.find((run) => !ignoredRunIds.has(run.databaseId)) ?? null;
 };
 
 const waitForWorkflowRun = ({
   branchName,
   capture,
+  ignoredRunIds,
   repo,
   repoRoot,
   workflow,
@@ -255,6 +403,7 @@ const waitForWorkflowRun = ({
     const run = findWorkflowRun({
       branchName,
       capture,
+      ignoredRunIds,
       repo,
       repoRoot,
       workflow,
@@ -283,7 +432,15 @@ export const dispatchFirstRelease = async ({
   workflow,
 }) => {
   const { assertCleanTree, capture, getBranchName, run } = helpers;
-  assertCleanTree(repoRoot);
+
+  if (!options.allowDirty) {
+    assertCleanTree(repoRoot);
+  } else {
+    note(
+      "Skipping working-tree cleanliness check due --allow-dirty.",
+      "Dispatch note",
+    );
+  }
 
   const pkg = await resolveFirstReleasePackage({
     choosePackage,
@@ -370,6 +527,31 @@ export const dispatchFirstRelease = async ({
   }
 
   logStep(`Dispatching ${workflow} for ${pkg.name}.`);
+  const existingWorkflowRuns = JSON.parse(
+    capture(
+      "gh",
+      [
+        "run",
+        "list",
+        "--repo",
+        repo,
+        "--workflow",
+        workflow,
+        "--branch",
+        branchName,
+        "--event",
+        "workflow_dispatch",
+        "--limit",
+        "20",
+        "--json",
+        "databaseId",
+      ],
+      { cwd: repoRoot },
+    ),
+  );
+  const existingWorkflowRunIds = new Set(
+    existingWorkflowRuns.map((run) => run.databaseId),
+  );
   const workflowDispatchArgs = [
     "workflow",
     "run",
@@ -378,7 +560,7 @@ export const dispatchFirstRelease = async ({
     repo,
     "--ref",
     branchName,
-    "--field",
+    "--raw-field",
     `package_name=${pkg.name}`,
   ];
   if (options.dryRun) {
@@ -434,14 +616,38 @@ export const dispatchFirstRelease = async ({
     note(workflowDispatch.stdout.trim(), "Workflow run");
   }
 
-  logStep(`Finding ${workflow} run.`);
-  const workflowRun = waitForWorkflowRun({
-    branchName,
-    capture,
-    repo,
-    repoRoot,
-    workflow,
-  });
+  const dispatchedRunId = getWorkflowRunIdFromText(workflowDispatch.stdout);
+  let workflowRun;
+
+  if (dispatchedRunId) {
+    workflowRun = JSON.parse(
+      capture(
+        "gh",
+        [
+          "run",
+          "view",
+          dispatchedRunId,
+          "--repo",
+          repo,
+          "--json",
+          "databaseId,url,status,conclusion",
+        ],
+        { cwd: repoRoot },
+      ),
+    );
+  } else {
+    logStep(`Finding ${workflow} run.`);
+    workflowRun = waitForWorkflowRun({
+      branchName,
+      capture,
+      ignoredRunIds: existingWorkflowRunIds,
+      repo,
+      repoRoot,
+      workflow,
+    });
+  }
+
+  note(workflowRun.url, "GitHub Actions run");
 
   logStep(`Watching ${workflow} run.`);
   const watch = spawnSync(
