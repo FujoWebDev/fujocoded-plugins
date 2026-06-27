@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import {
   assertVersionedFirstReleasePackage,
   resolveFirstReleasePackage,
@@ -15,49 +15,63 @@ const cleanupCommands = ({ repo }) =>
     "npm token revoke <temporary-token-id>",
   ].join("\n");
 
-const createNpmToken = ({ pkg, repoRoot, scope }) => {
-  const token = spawnSync(
-    "npm",
-    [
-      "token",
-      "create",
-      "--json",
-      "--name",
-      `first-release-${pkg.dir}`,
-      "--expires",
-      "1",
-      "--scopes",
-      scope,
-      "--packages-and-scopes-permission",
-      "read-write",
-      "--bypass-2fa",
-    ],
-    {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["inherit", "pipe", "pipe"],
-    },
-  );
+const createNpmToken = ({ pkg, repoRoot, scope }) =>
+  new Promise((resolve, reject) => {
+    const token = spawn(
+      "npm",
+      [
+        "token",
+        "create",
+        "--json",
+        "--name",
+        `first-release-${pkg.dir}`,
+        "--expires",
+        "1",
+        "--scopes",
+        scope,
+        "--packages-and-scopes-permission",
+        "read-write",
+        "--bypass-2fa",
+      ],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["inherit", "pipe", "pipe"],
+      },
+    );
 
-  if (token.stdout) {
-    process.stdout.write(token.stdout);
-  }
+    let stdout = "";
+    let stderr = "";
 
-  if (token.stderr) {
-    process.stderr.write(token.stderr);
-  }
+    token.stdout.on("data", (chunk) => {
+      const text = chunk.toString();
+      stdout += text;
+      process.stdout.write(text);
+    });
 
-  if (token.status !== 0) {
-    throw new Error("Could not create temporary npm token.");
-  }
+    token.stderr.on("data", (chunk) => {
+      const text = chunk.toString();
+      stderr += text;
+      process.stderr.write(text);
+    });
 
-  const match = token.stdout.match(/\bnpm_[A-Za-z0-9]+/);
-  if (!match) {
-    throw new Error("Could not read npm token from npm token create output.");
-  }
+    token.on("error", reject);
 
-  return match[0];
-};
+    token.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`Could not create temporary npm token.\n${stderr}`));
+        return;
+      }
+
+      const match = stdout.match(/\bnpm_[A-Za-z0-9]+/);
+      if (!match) {
+        reject(new Error("Could not read npm token from npm token create output."));
+        return;
+      }
+
+      resolve(match[0]);
+    });
+  });
 
 const assertNpmLoggedIn = (repoRoot) => {
   const whoami = spawnSync("npm", ["whoami"], {
@@ -223,7 +237,7 @@ export const dispatchFirstRelease = async ({
     );
   } else {
     logStep("Creating temporary npm token.");
-    npmToken = createNpmToken({ pkg, repoRoot, scope });
+    npmToken = await createNpmToken({ pkg, repoRoot, scope });
   }
 
   logStep("Setting temporary NPM_TOKEN secret.");
