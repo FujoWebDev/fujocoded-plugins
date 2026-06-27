@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import parseChangeset from "@changesets/parse";
-import { resolveFirstReleasePackage } from "./first-release-packages.mjs";
+import { resolveReleasePackage } from "./release-packages.mjs";
 
 const gitPathExists = ({ repoRoot, ref, path }) => {
   const exists = spawnSync("git", ["cat-file", "-e", `${ref}:${path}`], {
@@ -134,7 +134,7 @@ const maybeCommitSyncBack = async ({
 
   if (
     !(await confirmYes(
-      `Commit ${pkg.name} first-release sync-back on ${options.target}? This runs git add and git commit locally.`,
+      `Commit ${pkg.name} release sync-back on ${options.target}? This runs git add and git commit locally.`,
     ))
   ) {
     return;
@@ -144,14 +144,14 @@ const maybeCommitSyncBack = async ({
     cwd: repoRoot,
     dryRun: options.dryRun,
   });
-  run("git", ["commit", "-m", `Record ${pkg.name} first release`], {
+  run("git", ["commit", "-m", `Record ${pkg.name} release`], {
     cwd: repoRoot,
     dryRun: options.dryRun,
   });
 };
 
 const syncBackLaterCommand = ({ branchName, pkg, target }) =>
-  `npm --prefix .changeset run first-release:sync-back -- ${pkg.name} --target=${target} --branch=${branchName} --commit`;
+  `npm --prefix .changeset run release:sync-back -- ${pkg.name} --target=${target} --branch=${branchName} --commit`;
 
 export const maybeSyncBackAfterDispatch = async ({
   confirmYes,
@@ -221,7 +221,7 @@ export const maybeSyncBackAfterDispatch = async ({
   await maybeCommitSyncBack({
     changesetFiles: applied.changesetFiles,
     confirmYes,
-    dryRunCommitMessage: `[dry-run] git add <release files and consumed changeset> && git commit -m "Record ${pkg.name} first release"`,
+    dryRunCommitMessage: `[dry-run] git add <release files and consumed changeset> && git commit -m "Record ${pkg.name} release"`,
     options,
     pkg,
     releaseFiles: applied.releaseFiles,
@@ -230,7 +230,7 @@ export const maybeSyncBackAfterDispatch = async ({
   });
 };
 
-export const syncBackFirstRelease = async ({
+export const syncBackRelease = async ({
   choosePackage,
   confirmYes,
   helpers,
@@ -255,7 +255,7 @@ export const syncBackFirstRelease = async ({
     throw new Error("Pass --target <branch> for the branch to update.");
   }
 
-  const pkg = await resolveFirstReleasePackage({
+  const pkg = await resolveReleasePackage({
     choosePackage,
     phase: "dispatch",
     repoRoot,
@@ -323,5 +323,5 @@ export const syncBackFirstRelease = async ({
     run,
   });
 
-  outro(`Synced ${pkg.name} first release back to ${options.target}.`);
+  outro(`Synced ${pkg.name} release back to ${options.target}.`);
 };

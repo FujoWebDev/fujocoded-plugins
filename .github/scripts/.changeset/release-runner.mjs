@@ -2,12 +2,12 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
-  assertVersionedFirstReleasePackage,
+  assertVersionedReleasePackage,
   getPendingChangesets,
-  resolveFirstReleasePackage,
-} from "./first-release-packages.mjs";
-import { dispatchFirstRelease as runDispatchFirstRelease } from "./first-release-dispatch.mjs";
-import { syncBackFirstRelease as runSyncBackFirstRelease } from "./first-release-sync-back.mjs";
+  resolveReleasePackage,
+} from "./release-packages.mjs";
+import { dispatchRelease as runDispatchRelease } from "./release-dispatch.mjs";
+import { syncBackRelease as runSyncBackRelease } from "./release-sync-back.mjs";
 
 const run = (cmd, args, options = {}) => {
   const { dryRun, ...execOptions } = options;
@@ -85,7 +85,7 @@ const assertCleanTree = (repoRoot) => {
 };
 
 const getBranchName = (pkg, options) =>
-  options.branch ?? `first-release/${pkg.dir}-0.0.1`;
+  options.branch ?? `release/${pkg.dir}-0.0.1`;
 
 const removeUnrelatedChangesets = ({ dryRun, pkg, repoRoot }) => {
   const selectedChangesets = new Set(pkg.changesetFiles);
@@ -175,7 +175,7 @@ const runFocusedChecks = ({ dryRun, pkg, repoRoot }) => {
   }
 };
 
-export const prepareFirstRelease = async ({
+export const prepareRelease = async ({
   choosePackage,
   confirmYes,
   logStep,
@@ -187,7 +187,7 @@ export const prepareFirstRelease = async ({
 }) => {
   assertCleanTree(repoRoot);
 
-  const pkg = await resolveFirstReleasePackage({
+  const pkg = await resolveReleasePackage({
     choosePackage,
     phase: "prepare",
     repoRoot,
@@ -209,7 +209,7 @@ export const prepareFirstRelease = async ({
     env: envWithGithubToken(repoRoot),
   });
   if (!options.dryRun) {
-    assertVersionedFirstReleasePackage(pkg, { repoRoot });
+    assertVersionedReleasePackage(pkg, { repoRoot });
   }
 
   logStep(`Refreshing lockfiles for ${pkg.name}.`);
@@ -222,11 +222,11 @@ export const prepareFirstRelease = async ({
   if (
     options.commit &&
     (await confirmYes(
-      `Commit the versioned first-release branch ${branchName} now? This runs git add and git commit locally.`,
+      `Commit the versioned release branch ${branchName} now? This runs git add and git commit locally.`,
     ))
   ) {
     run("git", ["add", "."], { cwd: repoRoot, dryRun: options.dryRun });
-    run("git", ["commit", "-m", `Prepare ${pkg.name} first release`], {
+    run("git", ["commit", "-m", `Prepare ${pkg.name} release`], {
       cwd: repoRoot,
       dryRun: options.dryRun,
     });
@@ -234,13 +234,13 @@ export const prepareFirstRelease = async ({
 
   outro(`Prepared ${branchName}.`);
   note(
-    `npm --prefix .changeset run first-release:dispatch -- ${pkg.name} --branch=${branchName}`,
+    `npm --prefix .changeset run release:dispatch -- ${pkg.name} --branch=${branchName}`,
     "When the branch is committed and clean, run",
   );
 };
 
-export const dispatchFirstRelease = async (context) =>
-  runDispatchFirstRelease({
+export const dispatchRelease = async (context) =>
+  runDispatchRelease({
     ...context,
     helpers: {
       assertCleanTree,
@@ -250,8 +250,8 @@ export const dispatchFirstRelease = async (context) =>
     },
   });
 
-export const syncBackFirstRelease = async (context) =>
-  runSyncBackFirstRelease({
+export const syncBackRelease = async (context) =>
+  runSyncBackRelease({
     ...context,
     helpers: {
       assertCleanTree,

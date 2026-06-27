@@ -2,9 +2,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "first-release": "node ../.github/scripts/.changeset/first-release.mjs",
-    "first-release:prepare": "node ../.github/scripts/.changeset/first-release.mjs prepare",
-    "first-release:dispatch": "node ../.github/scripts/.changeset/first-release.mjs dispatch",
-    "first-release:sync-back": "node ../.github/scripts/.changeset/first-release.mjs sync-back"
+    "release": "node ../.github/scripts/.changeset/release.mjs release",
+    "release:bootstrap": "node ../.github/scripts/.changeset/release.mjs bootstrap",
+    "release:prepare": "node ../.github/scripts/.changeset/release.mjs prepare",
+    "release:dispatch": "node ../.github/scripts/.changeset/release.mjs dispatch",
+    "release:sync-back": "node ../.github/scripts/.changeset/release.mjs sync-back"
   }
 }

@@ -4,7 +4,7 @@ import { join, relative } from "node:path";
 import { getPackagesSync } from "@manypkg/get-packages";
 import parseChangeset from "@changesets/parse";
 
-const firstReleaseVersion = "0.0.1";
+const releaseVersion = "0.0.1";
 
 const hasChangelogEntry = (changelog, version) =>
   changelog.split("\n").some((line) => {
@@ -59,7 +59,7 @@ const parseChangesetPackages = (repoRoot, file) => {
 const readPackageJson = (dir) =>
   JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
 
-const getFirstReleasePrepareCandidates = (repoRoot) => {
+const getReleasePrepareCandidates = (repoRoot) => {
   const packages = getPublicWorkspacePackages(repoRoot);
   const changesetFiles = getPendingChangesets(repoRoot);
   const changesetsByPackage = new Map();
@@ -81,9 +81,9 @@ const getFirstReleasePrepareCandidates = (repoRoot) => {
     }));
 };
 
-const getFirstReleaseDispatchCandidates = (repoRoot) =>
+const getReleaseDispatchCandidates = (repoRoot) =>
   getPublicWorkspacePackages(repoRoot).filter((pkg) => {
-    if (pkg.version !== firstReleaseVersion) {
+    if (pkg.version !== releaseVersion) {
       return false;
     }
 
@@ -93,14 +93,14 @@ const getFirstReleaseDispatchCandidates = (repoRoot) =>
     }
 
     const changelog = readFileSync(changelogPath, "utf8");
-    return hasChangelogEntry(changelog, firstReleaseVersion);
+    return hasChangelogEntry(changelog, releaseVersion);
   });
 
-export const assertVersionedFirstReleasePackage = (pkg, { repoRoot } = {}) => {
+export const assertVersionedReleasePackage = (pkg, { repoRoot } = {}) => {
   const manifest = readPackageJson(pkg.absoluteDir);
-  if (manifest.name !== pkg.name || manifest.version !== firstReleaseVersion) {
+  if (manifest.name !== pkg.name || manifest.version !== releaseVersion) {
     throw new Error(
-      `${pkg.name} must be versioned to ${firstReleaseVersion} before publishing.`,
+      `${pkg.name} must be versioned to ${releaseVersion} before publishing.`,
     );
   }
 
@@ -121,30 +121,26 @@ export const assertVersionedFirstReleasePackage = (pkg, { repoRoot } = {}) => {
   }
 
   const changelog = readFileSync(changelogPath, "utf8");
-  if (!hasChangelogEntry(changelog, firstReleaseVersion)) {
+  if (!hasChangelogEntry(changelog, releaseVersion)) {
     throw new Error(
-      `${pkg.dir}/CHANGELOG.md must contain a ${firstReleaseVersion} entry.`,
+      `${pkg.dir}/CHANGELOG.md must contain a ${releaseVersion} entry.`,
     );
   }
 };
 
-const getFirstReleaseCandidates = (phase, repoRoot) => {
+const getReleaseCandidates = (phase, repoRoot) => {
   if (phase === "prepare") {
-    return getFirstReleasePrepareCandidates(repoRoot);
+    return getReleasePrepareCandidates(repoRoot);
   }
 
   if (phase === "dispatch") {
-    return getFirstReleaseDispatchCandidates(repoRoot);
+    return getReleaseDispatchCandidates(repoRoot);
   }
 
-  throw new Error(`Unknown first-release phase: ${phase}`);
+  throw new Error(`Unknown release phase: ${phase}`);
 };
 
-const selectFirstReleaseCandidate = async ({
-  candidates,
-  choosePackage,
-  phase,
-}) => {
+const selectReleaseCandidate = async ({ candidates, choosePackage, phase }) => {
   if (candidates.length === 0) {
     throw new Error(`No first-release ${phase} candidates found.`);
   }
@@ -163,16 +159,16 @@ const selectFirstReleaseCandidate = async ({
   });
 };
 
-export const resolveFirstReleasePackage = async ({
+export const resolveReleasePackage = async ({
   choosePackage,
   phase,
   repoRoot,
   requestedPackage,
 }) => {
-  const candidates = getFirstReleaseCandidates(phase, repoRoot);
+  const candidates = getReleaseCandidates(phase, repoRoot);
 
   if (!requestedPackage) {
-    return await selectFirstReleaseCandidate({
+    return await selectReleaseCandidate({
       candidates,
       choosePackage,
       phase,
@@ -196,7 +192,7 @@ export const resolveFirstReleasePackage = async ({
   const requirement =
     phase === "prepare"
       ? "It must be public, version 0.0.0, and referenced by a pending changeset."
-      : `It must be public, version ${firstReleaseVersion}, and have a ${firstReleaseVersion} changelog entry.`;
+      : `It must be public, version ${releaseVersion}, and have a ${releaseVersion} changelog entry.`;
   throw new Error(
     `${requestedPublicPackage.name} is not a first-release ${phase} candidate. ${requirement}`,
   );

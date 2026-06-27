@@ -7,88 +7,136 @@ find the full documentation for it [in our repository](https://github.com/change
 We have a quick list of common questions to get you started engaging with this project in
 [our documentation](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
 
-## First package release
+## How releasing works
 
-We can only configure NPM Trusted Publishing after a package already exists,
-which means the first publication needs to be handled differently from the rest.
-In our case, the first publish uses `.github/workflows/first-release.yaml` with
-a short-lived NPM_TOKEN.
+There are two release flows in this repo. Both publish through GitHub Actions
+OIDC with provenance.
 
-The workflow by package. It requires `package_name` and refuses to publish
-anything except that exact package.
+### Regular flow: release everything at once
 
-### How TOs:
+Every push to `main` adds pending changesets to a single Release PR, which keeps
+accumulating changesets as they get merged. When the Release PR is merged, all
+accumulated versions go out to NPM at once.
 
-1. Keep the package at `0.0.0` with a `patch` changeset. Changesets will turn
-   that into the first public version, `0.0.1`.
-2. Commit the release-prep state, including the changeset.
-3. Prepare a versioned first-release branch:
+### Step by step
+
+1. Add a changeset describing what changed:
 
    ```bash
-   npm --prefix .changeset run first-release:prepare -- --commit
+   npx changeset
    ```
 
-   or with no side effects:
+2. Commit the changeset and merge your feature PR to `main`.
+3. `.github/workflows/release.yaml` runs on push and updates the Release PR with
+   any new versioned packages. The Release PR stays open and keeps accumulating
+   changesets every time new ones arrive on `main`.
+4. When you are ready to ship, merge the Release PR. The workflow then
+   publishes every versioned package to NPM with `--provenance`.
 
-   ```bash
-   npm --prefix .changeset run first-release:prepare -- --commit --dry-run
-   ```
+If you need to retry a failed publish, you can dispatch the `Release` workflow manually
+with the `publish_latest` input set to `true`.
 
-   If more than one public `0.0.0` package has a pending changeset, the helper
-   asks which package to release. To choose explicitly, pass the package name or
-   workspace directory:
+### Single-package flow: release one package now
 
-   ```bash
-   npm --prefix .changeset run first-release:prepare -- @fujocoded/astro-smooth-actions --commit
-   ```
+Use this when you want to ship one package without waiting for the others. These commands
+live in this folder and run from inside `.changeset`:
 
-   This creates a temporary branch, removes unrelated pending changesets on that
-   branch, runs `changeset version`, refreshes lockfiles under the package, and
-   runs focused checks.
+```bash
+cd .changeset
+npm run release -- @fujocoded/astro-smooth-actions
+```
 
-4. Create a temporary npm granular access token with read/write access to the
-   `@fujocoded` scope, short expiration, and 2FA bypass for automation:
+This will:
 
-   ```bash
-   npm token create \
-     --name "first-package-release" \
-     --expires 1 \
-     --scopes @fujocoded \
-     --packages-and-scopes-permission read-write \
-     --bypass-2fa
-   ```
+- Check whether the package is already on NPM
+- If it is not, bootstrap it: publish `0.0.0` locally, deprecate it, and run
+  `npm trust github` to configure Trusted Publishing (see next sections for
+  more details)
+- Ask whether to release the package right away, or leave it for the normal
+  flow
+- If yes, version the package on a temporary branch, remove other pending
+  changesets, push it, dispatch `.github/workflows/release-package.yaml`,
+  watch the run, and sync the versioned state back to your target branch
 
-5. Dispatch the first-release workflow from the versioned branch:
+To test it:
 
-   ```bash
-   npm --prefix .changeset run first-release:dispatch -- @fujocoded/astro-smooth-actions
-   ```
+```bash
+npm run release -- @fujocoded/astro-smooth-actions --dry-run
+```
 
-   For a full no-op rehearsal:
+### First publish: the `0.0.0` bootstrap
 
-   ```bash
-   npm --prefix .changeset run first-release:dispatch -- @fujocoded/astro-smooth-actions --dry-run
-   ```
+NPM Trusted Publishing cannot be configured until a package already exists on
+the registry, so we publish a `0.0.0` placeholder locally, deprecate it, and
+configure trust. After that, the package can safely publish through GitHub
+Actions OIDC, the same way as every other release.
 
-   The helper asks for confirmation before pushing, lets `gh secret set` collect
-   `NPM_TOKEN`, and dispatches the first-release workflow with
-   the selected `package_name`.
+This is handled automatically by the `release` command bootstraps when it
+detects the package is not on NPM.
 
-6. After the package is published, configure Trusted Publishing for future
-   releases:
+To run it manually:
 
-   ```bash
-   npm trust github @fujocoded/astro-smooth-actions \
-     --repo FujoWebDev/fujocoded-plugins \
-     --file release.yaml \
-     --allow-publish
-   ```
+```bash
+npm run release:bootstrap -- @fujocoded/astro-smooth-actions
+```
 
-7. Delete the temporary GitHub secret and revoke the npm token:
+> [!WARNING]
+> Make sure that:
+>
+> - you're logged in to NPM (check with `npm whoami`)
+> - the package is at version `0.0.0` in its `package.json` with a pending changeset.
 
-   ```bash
-   gh secret delete NPM_TOKEN --repo FujoWebDev/fujocoded-plugins
-   npm token revoke <token-id-or-token>
-   ```
+What this does:
 
-Future versions should then use the normal `.github/workflows/release.yaml` flow.
+- Builds the package and runs `npm publish --access public` at `0.0.0`
+- Deprecates `0.0.0` with a message pointing to `0.0.1` or later
+- Runs `npm trust github <package> --repo FujoWebDev/fujocoded-plugins --file release.yaml --allow-publish`
+
+The `0.0.0` placeholder is permanent on NPM but deprecated and hidden from default installs.
+It exists only so Trusted Publishing can be configured.
+
+### Other commands
+
+All steps that make up `release` are also available separately.
+
+#### Version the package on a branch
+
+```bash
+npm run release:prepare -- @fujocoded/astro-smooth-actions --commit
+```
+
+This creates a temporary branch, removes unrelated pending changesets on that branch, runs
+`changeset version` (turning `0.0.0` into `0.0.1`), refreshes lockfiles under the package,
+and runs tests.
+
+#### Dispatch the single-package workflow
+
+```bash
+npm run release:dispatch -- @fujocoded/astro-smooth-actions --target main
+```
+
+This pushes the versioned branch, dispatches `release-package.yaml` with the selected
+`package_name`, watches the run, and syncs the versioned state back to the target branch.
+
+> [!WARNING]
+> The workflow publishes through GitHub Actions OIDC (Trusted Publishing), so the
+> package must already exist on NPM with Trusted Publishing configured.
+
+#### Sync back later
+
+If you skipped `--target` during dispatch, sync the release state back to your branch
+afterwards:
+
+```bash
+npm run release:sync-back -- @fujocoded/astro-smooth-actions --target main --branch release/astro-smooth-actions-0.0.1 --commit
+```
+
+### Command summary
+
+| Command             | What it does                                                   |
+| ------------------- | -------------------------------------------------------------- |
+| `release`           | Bootstrap if needed, then version + dispatch + sync-back       |
+| `release:bootstrap` | Publish `0.0.0`, deprecate it, configure Trusted Publishing    |
+| `release:prepare`   | Version one package on a temporary branch                      |
+| `release:dispatch`  | Push branch, trigger `release-package.yaml`, watch, sync back  |
+| `release:sync-back` | Carry versioned state from a release branch to a target branch |
