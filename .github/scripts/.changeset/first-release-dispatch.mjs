@@ -1,4 +1,5 @@
 import { execFileSync, spawn, spawnSync } from "node:child_process";
+import { isCancel, password } from "@clack/prompts";
 import {
   assertVersionedFirstReleasePackage,
   resolveFirstReleasePackage,
@@ -15,24 +16,70 @@ const cleanupCommands = ({ repo }) =>
     "npm token revoke <temporary-token-id>",
   ].join("\n");
 
-const createNpmToken = ({ pkg, repoRoot, scope }) =>
+const getOtpUrls = (text) => {
+  if (!text) {
+    return { authUrl: null, doneUrl: null };
+  }
+
+  const authMatch = text.match(/https:\/\/www\.npmjs\.com\/auth\/cli\/[^\s\n\r"]+/);
+  const doneMatch = text.match(/https:\/\/registry\.npmjs\.org\/-\/v1\/done\?authId=[^\s\n\r"]+/);
+
+  return {
+    authUrl: authMatch?.[0] ?? null,
+    doneUrl: doneMatch?.[0] ?? null,
+  };
+};
+
+const parseTokenCreateFailure = (text) => {
+  const { authUrl, doneUrl } = getOtpUrls(text);
+
+  if (text.includes("EOTP") || text.includes("one-time password")) {
+    return {
+      message: "EOTP required",
+      authUrl,
+      doneUrl,
+    };
+  }
+
+  return null;
+};
+
+const askOtp = async () => {
+  const oneTimePassword = await password({
+    message: "Enter npm one-time password (6 digits)",
+  });
+
+  if (isCancel(oneTimePassword)) {
+    throw new Error("Token creation canceled.");
+  }
+
+  return oneTimePassword;
+};
+
+const createNpmToken = ({ pkg, repoRoot, scope, otp }) =>
   new Promise((resolve, reject) => {
+    const args = [
+      "token",
+      "create",
+      "--json",
+      "--name",
+      `first-release-${pkg.dir}`,
+      "--expires",
+      "1",
+      "--scopes",
+      scope,
+      "--packages-and-scopes-permission",
+      "read-write",
+      "--bypass-2fa",
+    ];
+
+    if (otp) {
+      args.push("--otp", String(otp));
+    }
+
     const token = spawn(
       "npm",
-      [
-        "token",
-        "create",
-        "--json",
-        "--name",
-        `first-release-${pkg.dir}`,
-        "--expires",
-        "1",
-        "--scopes",
-        scope,
-        "--packages-and-scopes-permission",
-        "read-write",
-        "--bypass-2fa",
-      ],
+      args,
       {
         cwd: repoRoot,
         encoding: "utf8",
@@ -59,6 +106,16 @@ const createNpmToken = ({ pkg, repoRoot, scope }) =>
 
     token.on("close", (code) => {
       if (code !== 0) {
+        const parsed = parseTokenCreateFailure([stdout, stderr].join("\n"));
+        if (parsed) {
+          const error = new Error(parsed.message);
+          error.code = "EOTP";
+          error.authUrl = parsed.authUrl;
+          error.doneUrl = parsed.doneUrl;
+          reject(error);
+          return;
+        }
+
         reject(new Error(`Could not create temporary npm token.\n${stderr}`));
         return;
       }
@@ -72,6 +129,60 @@ const createNpmToken = ({ pkg, repoRoot, scope }) =>
       resolve(match[0]);
     });
   });
+
+const createTokenWithRetryOnOtp = async ({
+  confirmYes,
+  note,
+  pkg,
+  repoRoot,
+  scope,
+  options,
+}) => {
+  const retryWithOtp = async (otp) => {
+    if (!otp) {
+      return createNpmToken({ pkg, repoRoot, scope });
+    }
+
+    return createNpmToken({ pkg, repoRoot, scope, otp });
+  };
+
+  try {
+    return await retryWithOtp(options.otp || process.env.NPM_OTP);
+  } catch (error) {
+    const isEotp =
+      error?.code === "EOTP" ||
+      (typeof error?.message === "string" &&
+        error.message.includes("This operation requires a one-time password"));
+
+    if (!isEotp) {
+      throw error;
+    }
+
+    const nextSteps = [
+      error.authUrl ? `Open this URL to authenticate: ${error.authUrl}` : null,
+      error.doneUrl ? `Or use this done URL: ${error.doneUrl}` : null,
+      "If authentication supports classic OTP, enter it below and retry automatically.",
+    ].filter(Boolean);
+
+    note(nextSteps.join("\n"), "npm requires one-time authentication");
+
+    if (!options.otp && !process.env.NPM_OTP) {
+      if (!(await confirmYes("Retry token create using an OTP?"))) {
+        throw error;
+      }
+
+      const oneTimePassword = await askOtp();
+      return createNpmToken({
+        pkg,
+        repoRoot,
+        scope,
+        otp: oneTimePassword,
+      });
+    }
+
+    throw error;
+  }
+};
 
 const assertNpmLoggedIn = (repoRoot) => {
   const whoami = spawnSync("npm", ["whoami"], {
@@ -237,7 +348,14 @@ export const dispatchFirstRelease = async ({
     );
   } else {
     logStep("Creating temporary npm token.");
-    npmToken = await createNpmToken({ pkg, repoRoot, scope });
+    npmToken = await createTokenWithRetryOnOtp({
+      confirmYes,
+      note,
+      pkg,
+      repoRoot,
+      scope,
+      options,
+    });
   }
 
   logStep("Setting temporary NPM_TOKEN secret.");

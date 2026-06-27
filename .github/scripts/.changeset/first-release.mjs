@@ -130,6 +130,7 @@ program
   .description("Push and dispatch the first-release workflow for one package.")
   .argument("[package-name-or-dir]", "workspace package name or directory")
   .option("--branch <branch>", "branch name to require")
+  .option("--otp <otp>", "One-time password for npm token create")
   .option(
     "--target <branch>",
     "branch to sync release state back to after publish",
