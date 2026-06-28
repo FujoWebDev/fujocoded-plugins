@@ -4,8 +4,6 @@ import { join, relative } from "node:path";
 import { getPackagesSync } from "@manypkg/get-packages";
 import parseChangeset from "@changesets/parse";
 
-const releaseVersion = "0.0.1";
-
 const hasChangelogEntry = (changelog, version) =>
   changelog.split("\n").some((line) => {
     const trimmed = line.trim();
@@ -73,7 +71,6 @@ const getReleasePrepareCandidates = (repoRoot) => {
   }
 
   return packages
-    .filter((pkg) => pkg.version === "0.0.0")
     .filter((pkg) => changesetsByPackage.has(pkg.name))
     .map((pkg) => ({
       ...pkg,
@@ -83,7 +80,7 @@ const getReleasePrepareCandidates = (repoRoot) => {
 
 const getReleaseDispatchCandidates = (repoRoot) =>
   getPublicWorkspacePackages(repoRoot).filter((pkg) => {
-    if (pkg.version !== releaseVersion) {
+    if (!pkg.version) {
       return false;
     }
 
@@ -93,14 +90,14 @@ const getReleaseDispatchCandidates = (repoRoot) =>
     }
 
     const changelog = readFileSync(changelogPath, "utf8");
-    return hasChangelogEntry(changelog, releaseVersion);
+    return hasChangelogEntry(changelog, pkg.version);
   });
 
 export const assertVersionedReleasePackage = (pkg, { repoRoot } = {}) => {
   const manifest = readPackageJson(pkg.absoluteDir);
-  if (manifest.name !== pkg.name || manifest.version !== releaseVersion) {
+  if (manifest.name !== pkg.name) {
     throw new Error(
-      `${pkg.name} must be versioned to ${releaseVersion} before publishing.`,
+      `${pkg.dir}/package.json name ${manifest.name} does not match expected ${pkg.name}.`,
     );
   }
 
@@ -121,9 +118,9 @@ export const assertVersionedReleasePackage = (pkg, { repoRoot } = {}) => {
   }
 
   const changelog = readFileSync(changelogPath, "utf8");
-  if (!hasChangelogEntry(changelog, releaseVersion)) {
+  if (!hasChangelogEntry(changelog, manifest.version)) {
     throw new Error(
-      `${pkg.dir}/CHANGELOG.md must contain a ${releaseVersion} entry.`,
+      `${pkg.dir}/CHANGELOG.md must contain a ${manifest.version} entry.`,
     );
   }
 };
@@ -142,7 +139,7 @@ const getReleaseCandidates = (phase, repoRoot) => {
 
 const selectReleaseCandidate = async ({ candidates, choosePackage, phase }) => {
   if (candidates.length === 0) {
-    throw new Error(`No first-release ${phase} candidates found.`);
+    throw new Error(`No release ${phase} candidates found.`);
   }
 
   if (candidates.length === 1) {
@@ -150,12 +147,12 @@ const selectReleaseCandidate = async ({ candidates, choosePackage, phase }) => {
   }
 
   if (!choosePackage) {
-    throw new Error(`Multiple first-release ${phase} candidates found.`);
+    throw new Error(`Multiple release ${phase} candidates found.`);
   }
 
   return await choosePackage({
     candidates,
-    message: `Multiple first-release ${phase} candidates found:`,
+    message: `Multiple release ${phase} candidates found:`,
   });
 };
 
@@ -191,9 +188,9 @@ export const resolveReleasePackage = async ({
 
   const requirement =
     phase === "prepare"
-      ? "It must be public, version 0.0.0, and referenced by a pending changeset."
-      : `It must be public, version ${releaseVersion}, and have a ${releaseVersion} changelog entry.`;
+      ? "It must be public and referenced by a pending changeset."
+      : "It must be public and have a CHANGELOG entry matching its current version.";
   throw new Error(
-    `${requestedPublicPackage.name} is not a first-release ${phase} candidate. ${requirement}`,
+    `${requestedPublicPackage.name} is not a release ${phase} candidate. ${requirement}`,
   );
 };

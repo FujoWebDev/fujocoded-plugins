@@ -1,16 +1,41 @@
 name: Release
 
+# Publishes NPM packages through GitHub Actions OIDC (Trusted Publishing) with
+# provenance. Updates on:
+#
+# 1. push to main — changesets/action creates/updates the Release PR, or
+#                   publishes all accumulated versioned packages when the
+#                   Release PR is merged.
+# 2. manual dispatch — publishes whatever is already versioned on the branch.
+#                      `mode` only selects validation rules and is not publish
+#                      data: scope (one vs all) comes from what is versioned on
+#                      the branch, and channel (latest vs prerelease) comes
+#                      from `.changeset/pre.json`.
+#   - prerelease      : requires changesets pre mode (pre.json present).
+#   - latest-retry    : forbids pre mode (pre.json absent); retries a failed
+#                       latest publish.
+#   - single-package  : publishes one pre-versioned package from a temp branch
+#                       prepared by `npm run release:dispatch` from .changeset.
+#                       (Also covers "prerelease single": dispatch single-package
+#                       on a branch that has pre.json + one versioned package.)
+#
+# See .changeset/README.md for the local prepare/dispatch flow and the 0.0.0
+# bootstrap.
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
     inputs:
-      publish_latest:
-        description: "Retry a failed latest publish (skips pre-mode check, publishes whatever's in package.json under the 'latest' tag). Leave off for normal prerelease dispatch."
-        required: false
-        default: false
-        type: boolean
+      mode:
+        description: "Dispatch mode (validation only)"
+        required: true
+        type: choice
+        options:
+          - prerelease
+          - latest-retry
+          - single-package
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -38,47 +63,74 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Mode 1: push to main — create/update Release PR, or publish all.
+      # createGithubReleases is the action default (true); declared explicitly
+      # so every action step in this workflow is uniform.
       - name: Create Release PR or Publish
         if: github.event_name == 'push'
         id: changesets
         uses: changesets/action@v1
         with:
           publish: npm run release
+          createGithubReleases: true
           title: "chore: release packages 📦"
           commit: "chore: release packages 📦"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate dispatch mode
+      # Shared guard for every dispatch mode: the branch must carry no pending
+      # changesets, otherwise changesets/action would open/update a Release PR
+      # instead of publishing. release:prepare enforces this for single-package;
+      # prerelease/latest-retry expect a fully versioned branch.
+      - name: Refuse pending changesets
         if: github.event_name == 'workflow_dispatch'
-        env:
-          PUBLISH_LATEST: ${{ inputs.publish_latest }}
         run: |
-          if [ "$PUBLISH_LATEST" = "true" ]; then
-            if [ -f .changeset/pre.json ]; then
-              echo "::error::publish_latest is true but .changeset/pre.json exists. Exit pre mode before publishing to latest."
-              exit 1
-            fi
-            echo "publish_latest=true: will publish under 'latest' (retry path)."
-            exit 0
-          fi
-          if [ ! -f .changeset/pre.json ]; then
-            echo "::error::Prerelease dispatch requires changesets pre mode. Run 'npx changeset pre enter <tag>' on the branch first, or re-dispatch with publish_latest=true to retry a latest publish."
+          if find .changeset -maxdepth 1 -type f -name '*.md' ! -name README.md | grep -q .; then
+            echo "::error::Dispatch must run on a versioned checkout with no pending changeset files."
             exit 1
           fi
 
-      - name: Build
+      # Per-mode validation. pre.json presence is branch state and selects the
+      # dist-tag at publish time; the mode input only asserts the expected state.
+      - name: Validate dispatch mode
         if: github.event_name == 'workflow_dispatch'
-        run: npm run build
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          case "$MODE" in
+            prerelease)
+              if [ ! -f .changeset/pre.json ]; then
+                echo "::error::prerelease mode requires changesets pre mode. Run 'npx changeset pre enter <tag>' on the branch first."
+                exit 1
+              fi
+              echo "prerelease: pre.json present, will publish under the pre dist-tag."
+              ;;
+            latest-retry)
+              if [ -f .changeset/pre.json ]; then
+                echo "::error::latest-retry mode forbids pre mode. Exit pre mode before retrying a latest publish."
+                exit 1
+              fi
+              echo "latest-retry: pre.json absent, will publish under 'latest'."
+              ;;
+            single-package)
+              echo "single-package: no pre.json check (channel comes from the branch)."
+              ;;
+            *)
+              echo "::error::Unknown mode: $MODE"
+              exit 1
+              ;;
+          esac
 
-      # Manual dispatch publishes whatever's already versioned on the branch.
-      # In pre mode, the dist-tag comes from .changeset/pre.json.
-      # With publish_latest=true, it retries a failed latest publish (--provenance
-      # mirrors the push-trigger path).
-      - name: Publish (prerelease)
-        if: github.event_name == 'workflow_dispatch' && inputs.publish_latest != true
-        run: ./node_modules/.bin/changeset publish
-
-      - name: Publish (latest retry)
-        if: github.event_name == 'workflow_dispatch' && inputs.publish_latest == true
-        run: ./node_modules/.bin/changeset publish --provenance
+      # Single publish path for all dispatch modes. Build runs inside
+      # `npm run release`; there is no separate Build step. In pre mode the
+      # dist-tag comes from .changeset/pre.json; changeset publish no-ops
+      # already-published versions, so latest-retry and single-package share
+      # the same path safely.
+      - name: Publish
+        if: github.event_name == 'workflow_dispatch'
+        uses: changesets/action@v1
+        with:
+          publish: npm run release
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

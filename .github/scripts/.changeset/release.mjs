@@ -20,7 +20,7 @@ import {
 } from "./release-runner.mjs";
 
 const repo = "FujoWebDev/fujocoded-plugins";
-const workflow = "release-package.yaml";
+const workflow = "release.yaml";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 
 const getErrorMessage = (error) =>
@@ -213,7 +213,7 @@ program
 program
   .command("dispatch")
   .description(
-    "Push and dispatch the release-package workflow for one package.",
+    "Push and dispatch the release workflow for one package.",
   )
   .argument("[package-name-or-dir]", "workspace package name or directory")
   .option("--branch <branch>", "branch name to require")

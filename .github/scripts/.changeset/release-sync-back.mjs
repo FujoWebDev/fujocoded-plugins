@@ -82,7 +82,7 @@ const getSyncBackPlan = ({
   return { changesetFiles, releaseFiles };
 };
 
-const applyFirstReleaseSyncBack = ({
+const applyReleaseSyncBack = ({
   dryRun,
   logStep,
   releaseFiles,
@@ -202,7 +202,7 @@ export const maybeSyncBackAfterDispatch = async ({
     target: options.target,
   });
 
-  const applied = applyFirstReleaseSyncBack({
+  const applied = applyReleaseSyncBack({
     dryRun: options.dryRun,
     logStep,
     releaseFiles: plan.releaseFiles,
@@ -299,7 +299,7 @@ export const syncBackRelease = async ({
     throw new Error("Canceled.");
   }
 
-  const applied = applyFirstReleaseSyncBack({
+  const applied = applyReleaseSyncBack({
     dryRun: options.dryRun,
     logStep,
     releaseFiles: plan.releaseFiles,

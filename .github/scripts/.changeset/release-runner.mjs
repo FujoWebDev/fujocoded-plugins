@@ -6,7 +6,10 @@ import {
   getPendingChangesets,
   resolveReleasePackage,
 } from "./release-packages.mjs";
-import { dispatchRelease as runDispatchRelease } from "./release-dispatch.mjs";
+import {
+  bootstrapRelease as runBootstrapRelease,
+  dispatchRelease as runDispatchRelease,
+} from "./release-dispatch.mjs";
 import { syncBackRelease as runSyncBackRelease } from "./release-sync-back.mjs";
 
 const run = (cmd, args, options = {}) => {
@@ -85,7 +88,25 @@ const assertCleanTree = (repoRoot) => {
 };
 
 const getBranchName = (pkg, options) =>
-  options.branch ?? `release/${pkg.dir}-0.0.1`;
+  options.branch ?? `release/${pkg.dir}-${pkg.version}`;
+
+const validateSinglePackagePrepare = ({ pkg, repoRoot }) => {
+  if (!existsSync(join(repoRoot, ".changeset/pre.json"))) {
+    return;
+  }
+
+  const selectedChangesets = new Set(pkg.changesetFiles);
+  const siblingChangesets = getPendingChangesets(repoRoot).filter(
+    (file) => !selectedChangesets.has(file),
+  );
+
+  if (siblingChangesets.length > 0) {
+    throw new Error(
+      `Single-package prepare is not allowed in pre mode with sibling pending changesets: ${siblingChangesets.join(", ")}. ` +
+        `Either convert to a full prerelease (version all packages) or exit pre mode first.`,
+    );
+  }
+};
 
 const removeUnrelatedChangesets = ({ dryRun, pkg, repoRoot }) => {
   const selectedChangesets = new Set(pkg.changesetFiles);
@@ -193,10 +214,19 @@ export const prepareRelease = async ({
     repoRoot,
     requestedPackage: packageNameOrDir,
   });
-  const branchName = getBranchName(pkg, options);
 
-  logStep(`Creating ${branchName}.`);
-  run("git", ["switch", "-c", branchName], {
+  // Guard before branch creation so a throw never leaves a half-created
+  // branch. After this point removeUnrelatedChangesets can delete freely.
+  validateSinglePackagePrepare({ pkg, repoRoot });
+
+  // If --branch is explicit, use it as-is and skip the temp-branch/rename
+  // dance. Otherwise create a temp branch, version, then rename to the
+  // final release/<pkg>-<version> name once we know the post-version value.
+  const explicitBranch = options.branch;
+  const tempBranchName = explicitBranch ?? `release/${pkg.dir}`;
+
+  logStep(`Creating ${tempBranchName}.`);
+  run("git", ["switch", "-c", tempBranchName], {
     cwd: repoRoot,
     dryRun: options.dryRun,
   });
@@ -208,6 +238,22 @@ export const prepareRelease = async ({
     dryRun: options.dryRun,
     env: envWithGithubToken(repoRoot),
   });
+  // Re-read the manifest to get the post-version version, then rename the
+  // temp branch to release/<pkg>-<version>. Skip the rename for --dry-run
+  // (no branch exists) or when --branch was explicit (no temp branch).
+  let branchName = tempBranchName;
+  if (!options.dryRun && !explicitBranch) {
+    const versionedPkg = {
+      ...pkg,
+      version: readJson(join(pkg.absoluteDir, "package.json")).version,
+    };
+    branchName = getBranchName(versionedPkg, options);
+    if (branchName !== tempBranchName) {
+      logStep(`Renaming ${tempBranchName} → ${branchName}.`);
+      run("git", ["branch", "-m", branchName], { cwd: repoRoot });
+    }
+  }
+
   if (!options.dryRun) {
     assertVersionedReleasePackage(pkg, { repoRoot });
   }
@@ -248,6 +294,12 @@ export const dispatchRelease = async (context) =>
       getBranchName,
       run,
     },
+  });
+
+export const bootstrapRelease = async (context) =>
+  runBootstrapRelease({
+    ...context,
+    run,
   });
 
 export const syncBackRelease = async (context) =>

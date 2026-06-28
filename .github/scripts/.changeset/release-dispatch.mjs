@@ -13,10 +13,12 @@ const getWorkflowRunIdFromText = (text) =>
     /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/actions\/runs\/(\d+)/,
   )?.[1] ?? null;
 
-// Returns the published version string, or null when the package is not on npm.
-// Throws on any other npm failure so callers can distinguish 404 from a real
-// registry problem.
-const getPublishedVersion = (packageName) => {
+// Returns the latest version currently published on npm for the package, or
+// null when the package is not on npm at all. Used only for existence checks
+// (bootstrap decides whether to publish the 0.0.0 placeholder; dispatch
+// refuses to run before bootstrap). Throws on any other npm failure so callers
+// can distinguish a clean 404 from a real registry problem.
+const getLatestPublishedVersion = (packageName) => {
   const result = spawnSync("npm", ["view", packageName, "version"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
@@ -70,6 +72,7 @@ export const bootstrapRelease = async ({
   repo,
   repoRoot,
   run,
+  workflow,
 }) => {
   const pkg = await resolveReleasePackage({
     phase: "prepare",
@@ -83,7 +86,7 @@ export const bootstrapRelease = async ({
     );
   }
 
-  const published = getPublishedVersion(pkg.name);
+  const published = getLatestPublishedVersion(pkg.name);
   if (published) {
     note(
       `${pkg.name} is already on npm at ${published}. Bootstrap is not needed.`,
@@ -99,7 +102,7 @@ export const bootstrapRelease = async ({
     !(await confirmYes(
       options.dryRun
         ? `Dry run: publish 0.0.0 for ${pkg.name}, deprecate it, and configure Trusted Publishing?`
-        : `Publish 0.0.0 for ${pkg.name} on npm, deprecate it, and configure Trusted Publishing?\n\nThis publishes a permanent but deprecated placeholder version so npm Trusted Publishing can be configured. The real release happens afterwards through the release-package workflow.`,
+        : `Publish 0.0.0 for ${pkg.name} on npm, deprecate it, and configure Trusted Publishing?\n\nThis publishes a permanent but deprecated placeholder version so npm Trusted Publishing can be configured. The real release happens afterwards through the release workflow.`,
     ))
   ) {
     throw new Error("Canceled.");
@@ -151,14 +154,14 @@ export const bootstrapRelease = async ({
         "--repo",
         repo,
         "--file",
-        "release.yaml",
+        workflow,
         "--allow-publish",
       ],
       { stdio: "inherit" },
     );
     if (trust.status !== 0) {
       note(
-        `npm trust failed. Run manually:\nnpm trust github ${pkg.name} --repo ${repo} --file release.yaml --allow-publish`,
+        `npm trust failed. Run manually:\nnpm trust github ${pkg.name} --repo ${repo} --file ${workflow} --allow-publish`,
         "Trust failed",
       );
     }
@@ -186,7 +189,7 @@ export const bootstrapRelease = async ({
         "--repo",
         repo,
         "--file",
-        "release.yaml",
+        workflow,
         "--allow-publish",
       ],
       { dryRun: true },
@@ -262,7 +265,7 @@ const waitForWorkflowRun = ({
   throw new Error(`Could not find a ${workflow} run for ${branchName}.`);
 };
 
-// Dispatch the release-package workflow for a single pre-versioned package.
+// Dispatch the release workflow for a single pre-versioned package.
 // The workflow publishes through GitHub Actions OIDC (Trusted Publishing), so
 // no npm token or NPM_TOKEN secret is touched. Requires the package to already
 // exist on npm with Trusted Publishing configured (run bootstrap first for a
@@ -311,7 +314,7 @@ export const dispatchRelease = async ({
     );
   }
 
-  const published = getPublishedVersion(pkg.name);
+  const published = getLatestPublishedVersion(pkg.name);
   if (!published) {
     throw new Error(
       `${pkg.name} is not on npm yet. Run the bootstrap command first to publish 0.0.0 and configure Trusted Publishing.`,
@@ -369,7 +372,7 @@ export const dispatchRelease = async ({
     "--ref",
     branchName,
     "--raw-field",
-    `package_name=${pkg.name}`,
+    `mode=single-package`,
   ];
   if (options.dryRun) {
     run("gh", workflowDispatchArgs, { cwd: repoRoot, dryRun: true });
