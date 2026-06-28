@@ -195,3 +195,30 @@ export const resolveReleasePackage = async ({
     `${requestedPublicPackage.name} is not a release ${phase} candidate. ${requirement}`,
   );
 };
+
+// npm provenance verification requires the package.json repository.url to
+// resolve to the same GitHub repo that the workflow runs in. npm normalizes
+// `git+https://github.com/Owner/Repo.git` → `https://github.com/Owner/Repo`
+// for comparison, but the owner/repo casing must match exactly. A mismatch
+// causes publish to fail with E422 after the workflow already ran.
+const normalizeRepositoryUrl = (url) =>
+  url.replace(/^git\+/, "").replace(/\.git$/, "");
+
+export const validateRepositoryUrl = ({ pkg, repo }) => {
+  const expected = `https://github.com/${repo}`;
+  const raw =
+    typeof pkg.repository === "string" ? pkg.repository : pkg.repository?.url;
+
+  if (!raw) {
+    throw new Error(
+      `${pkg.name} has no repository field in package.json. Provenance publishing requires it to be "${expected}".`,
+    );
+  }
+
+  const normalized = normalizeRepositoryUrl(raw);
+  if (normalized !== expected) {
+    throw new Error(
+      `${pkg.name} repository.url is "${raw}" (normalized: "${normalized}"), but provenance expects "${expected}". Fix the repository.url in package.json before releasing.`,
+    );
+  }
+};

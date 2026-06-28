@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import {
   assertVersionedReleasePackage,
   resolveReleasePackage,
+  validateRepositoryUrl,
 } from "./release-packages.mjs";
 import { maybeSyncBackAfterDispatch } from "./release-sync-back.mjs";
 
@@ -393,6 +394,7 @@ export const dispatchRelease = async ({
 
   logStep(`Checking ${pkg.name} on ${branchName}.`);
   assertVersionedReleasePackage(pkg, { repoRoot });
+  validateRepositoryUrl({ pkg, repo });
 
   const currentBranch = capture("git", ["branch", "--show-current"], {
     cwd: repoRoot,
