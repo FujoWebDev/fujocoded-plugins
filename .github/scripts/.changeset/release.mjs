@@ -212,9 +212,7 @@ program
 
 program
   .command("dispatch")
-  .description(
-    "Push and dispatch the release workflow for one package.",
-  )
+  .description("Push and dispatch the release workflow for one package.")
   .argument("[package-name-or-dir]", "workspace package name or directory")
   .option("--branch <branch>", "branch name to require")
   .option(

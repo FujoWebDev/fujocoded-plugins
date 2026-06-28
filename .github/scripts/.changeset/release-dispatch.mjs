@@ -38,6 +38,19 @@ const getLatestPublishedVersion = (packageName) => {
   );
 };
 
+// Returns true when a specific published version is deprecated on npm.
+// Uses `npm view` (read-only, no auth). A non-deprecated version returns
+// an empty string; a deprecated version returns the deprecation message.
+const isVersionDeprecated = (packageName, version) => {
+  const result = spawnSync(
+    "npm",
+    ["view", `${packageName}@${version}`, "deprecated"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  );
+
+  return result.status === 0 && result.stdout.trim().length > 0;
+};
+
 const assertNpmLoggedIn = (repoRoot) => {
   const whoami = spawnSync("npm", ["whoami"], {
     cwd: repoRoot,
@@ -54,6 +67,42 @@ const assertNpmLoggedIn = (repoRoot) => {
   return whoami.stdout.trim();
 };
 
+const trustGithubArgs = (pkg, repo, workflow) => [
+  "trust",
+  "github",
+  pkg.name,
+  "--repo",
+  repo,
+  "--file",
+  workflow,
+  "--allow-publish",
+];
+
+// Configure npm Trusted Publishing for a package. Runs `npm trust github`
+// interactively: stdin/stdout are inherited so the OTP/browser-auth prompts
+// work, but stderr is piped so we can inspect the error code. A 409 Conflict
+// means trust is already configured for this package — treat it as success.
+// Any other failure throws with the manual recovery command.
+const configureTrustedPublishing = (pkg, repo, workflow) => {
+  const trust = spawnSync("npm", trustGithubArgs(pkg, repo, workflow), {
+    stdio: ["inherit", "inherit", "pipe"],
+    encoding: "utf8",
+  });
+
+  if (trust.status === 0) {
+    return;
+  }
+
+  if (/E409|409 Conflict/i.test(trust.stderr ?? "")) {
+    console.log(`Trusted Publishing for ${pkg.name} is already configured.`);
+    return;
+  }
+
+  throw new Error(
+    `npm trust failed for ${pkg.name}. Run manually, then re-run the release command:\n\nnpm trust github ${pkg.name} --repo ${repo} --file ${workflow} --allow-publish`,
+  );
+};
+
 // Publish a placeholder 0.0.0 for a brand-new package, deprecate it, and
 // configure npm Trusted Publishing so future publishes go through GitHub
 // Actions OIDC with provenance. This is the one-time bootstrap that makes the
@@ -63,6 +112,7 @@ const assertNpmLoggedIn = (repoRoot) => {
 // the real dist (the build output), not an empty package, so the placeholder is
 // a usable if throwaway version rather than a broken stub.
 export const bootstrapRelease = async ({
+  choosePackage,
   confirmYes,
   logStep,
   note,
@@ -75,6 +125,7 @@ export const bootstrapRelease = async ({
   workflow,
 }) => {
   const pkg = await resolveReleasePackage({
+    choosePackage,
     phase: "prepare",
     repoRoot,
     requestedPackage: packageNameOrDir,
@@ -88,11 +139,81 @@ export const bootstrapRelease = async ({
 
   const published = getLatestPublishedVersion(pkg.name);
   if (published) {
+    // A version greater than 0.0.0 can only have been published through the
+    // release workflow (GitHub Actions OIDC), which requires Trusted
+    // Publishing. The 0.0.0 placeholder is published locally, so it doesn't
+    // count.
+    if (published !== "0.0.0") {
+      note(
+        `${pkg.name} is already on npm at ${published}. Trusted Publishing is configured (a real version was published through the workflow). Bootstrap is not needed.`,
+        "Skip bootstrap",
+      );
+      return { pkg, skipped: true };
+    }
+
+    // Recovery: 0.0.0 is published but Trusted Publishing is not configured
+    // (e.g. a prior bootstrap died after publish). Don't re-publish — just
+    // deprecate (if not already) and configure trust.
     note(
-      `${pkg.name} is already on npm at ${published}. Bootstrap is not needed.`,
-      "Skip bootstrap",
+      `${pkg.name} is on npm at 0.0.0 but Trusted Publishing is not configured. The deprecation and trust steps will run.`,
+      "Bootstrap recovery",
     );
-    return { pkg, skipped: true };
+
+    logStep("Checking npm login.");
+    note(assertNpmLoggedIn(repoRoot), "npm user");
+
+    if (
+      !(await confirmYes(
+        options.dryRun
+          ? `Dry run: configure Trusted Publishing for ${pkg.name}?`
+          : `Configure npm Trusted Publishing for ${pkg.name} now?\n\nThis completes the bootstrap without re-publishing 0.0.0.`,
+      ))
+    ) {
+      throw new Error("Canceled.");
+    }
+
+    if (options.dryRun) {
+      if (!isVersionDeprecated(pkg.name, "0.0.0")) {
+        run(
+          "npm",
+          [
+            "deprecate",
+            `${pkg.name}@0.0.0`,
+            "Bootstrap placeholder release; use 0.0.1 or later.",
+          ],
+          { dryRun: true },
+        );
+      }
+      run("npm", trustGithubArgs(pkg, repo, workflow), { dryRun: true });
+    } else {
+      if (!isVersionDeprecated(pkg.name, "0.0.0")) {
+        logStep(`Deprecating 0.0.0 for ${pkg.name}.`);
+        const deprecate = spawnSync(
+          "npm",
+          [
+            "deprecate",
+            `${pkg.name}@0.0.0`,
+            "Bootstrap placeholder release; use 0.0.1 or later.",
+          ],
+          { stdio: "inherit" },
+        );
+        if (deprecate.status !== 0) {
+          note(
+            `npm deprecate failed. Run manually:\nnpm deprecate ${pkg.name}@0.0.0 "Bootstrap placeholder release; use 0.0.1 or later."`,
+            "Deprecate failed",
+          );
+        }
+      }
+      logStep("Configuring npm Trusted Publishing.");
+      configureTrustedPublishing(pkg, repo, workflow);
+    }
+
+    note(
+      [`${packageUrl(pkg.name)}`, `npm trust list ${pkg.name}`].join("\n"),
+      "Verify on npm",
+    );
+    outro(`Configured Trusted Publishing for ${pkg.name}.`);
+    return { pkg, skipped: false };
   }
 
   logStep("Checking npm login.");
@@ -108,7 +229,23 @@ export const bootstrapRelease = async ({
     throw new Error("Canceled.");
   }
 
-  if (!options.dryRun) {
+  if (options.dryRun) {
+    run("npm", ["run", "build"], { cwd: pkg.absoluteDir, dryRun: true });
+    run("npm", ["publish", "--access", "public"], {
+      cwd: pkg.absoluteDir,
+      dryRun: true,
+    });
+    run(
+      "npm",
+      [
+        "deprecate",
+        `${pkg.name}@0.0.0`,
+        "Bootstrap placeholder release; use 0.0.1 or later.",
+      ],
+      { dryRun: true },
+    );
+    run("npm", trustGithubArgs(pkg, repo, workflow), { dryRun: true });
+  } else {
     logStep(`Building ${pkg.name}.`);
     const build = spawnSync("npm", ["run", "build"], {
       cwd: pkg.absoluteDir,
@@ -145,55 +282,7 @@ export const bootstrapRelease = async ({
     }
 
     logStep("Configuring npm Trusted Publishing.");
-    const trust = spawnSync(
-      "npm",
-      [
-        "trust",
-        "github",
-        pkg.name,
-        "--repo",
-        repo,
-        "--file",
-        workflow,
-        "--allow-publish",
-      ],
-      { stdio: "inherit" },
-    );
-    if (trust.status !== 0) {
-      note(
-        `npm trust failed. Run manually:\nnpm trust github ${pkg.name} --repo ${repo} --file ${workflow} --allow-publish`,
-        "Trust failed",
-      );
-    }
-  } else {
-    run("npm", ["run", "build"], { cwd: pkg.absoluteDir, dryRun: true });
-    run("npm", ["publish", "--access", "public"], {
-      cwd: pkg.absoluteDir,
-      dryRun: true,
-    });
-    run(
-      "npm",
-      [
-        "deprecate",
-        `${pkg.name}@0.0.0`,
-        "Bootstrap placeholder release; use 0.0.1 or later.",
-      ],
-      { dryRun: true },
-    );
-    run(
-      "npm",
-      [
-        "trust",
-        "github",
-        pkg.name,
-        "--repo",
-        repo,
-        "--file",
-        workflow,
-        "--allow-publish",
-      ],
-      { dryRun: true },
-    );
+    configureTrustedPublishing(pkg, repo, workflow);
   }
 
   note(

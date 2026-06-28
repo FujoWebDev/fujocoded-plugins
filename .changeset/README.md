@@ -109,6 +109,9 @@ This command:
 - Checks whether the package is already on the npm registry
 - If it is not, bootstraps it: publishes `0.0.0` locally, deprecates it, and
   runs `npm trust github` to configure Trusted Publishing
+- If it is on npm at `0.0.0` but Trusted Publishing isn't configured (e.g. a
+  previous bootstrap failed at the trust step), deprecates `0.0.0` if needed
+  and runs just the trust step without re-publishing
 - Asks whether to release the package immediately or leave it for the regular
   main-merge flow
 
