@@ -37,6 +37,7 @@ const getPublicWorkspacePackages = (repoRoot) =>
       name: packageJson.name,
       version: packageJson.version,
       scripts: packageJson.scripts ?? {},
+      repository: packageJson.repository,
     }));
 
 export const getPendingChangesets = (repoRoot) =>

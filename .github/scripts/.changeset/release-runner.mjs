@@ -108,6 +108,33 @@ const validateSinglePackagePrepare = ({ pkg, repoRoot }) => {
   }
 };
 
+// npm provenance verification requires the package.json repository.url to
+// resolve to the same GitHub repo that the workflow runs in. npm normalizes
+// `git+https://github.com/Owner/Repo.git` → `https://github.com/Owner/Repo`
+// for comparison, but the owner/repo casing must match exactly. A mismatch
+// causes publish to fail with E422 after the workflow already ran.
+const normalizeRepositoryUrl = (url) =>
+  url.replace(/^git\+/, "").replace(/\.git$/, "");
+
+const validateRepositoryUrl = ({ pkg, repo }) => {
+  const expected = `https://github.com/${repo}`;
+  const raw =
+    typeof pkg.repository === "string" ? pkg.repository : pkg.repository?.url;
+
+  if (!raw) {
+    throw new Error(
+      `${pkg.name} has no repository field in package.json. Provenance publishing requires it to be "${expected}".`,
+    );
+  }
+
+  const normalized = normalizeRepositoryUrl(raw);
+  if (normalized !== expected) {
+    throw new Error(
+      `${pkg.name} repository.url is "${raw}" (normalized: "${normalized}"), but provenance expects "${expected}". Fix the repository.url in package.json before releasing.`,
+    );
+  }
+};
+
 const removeUnrelatedChangesets = ({ dryRun, pkg, repoRoot }) => {
   const selectedChangesets = new Set(pkg.changesetFiles);
   const files = getPendingChangesets(repoRoot).filter(
@@ -204,6 +231,7 @@ export const prepareRelease = async ({
   options,
   outro,
   packageNameOrDir,
+  repo,
   repoRoot,
 }) => {
   assertCleanTree(repoRoot);
@@ -218,6 +246,10 @@ export const prepareRelease = async ({
   // Guard before branch creation so a throw never leaves a half-created
   // branch. After this point removeUnrelatedChangesets can delete freely.
   validateSinglePackagePrepare({ pkg, repoRoot });
+
+  if (repo) {
+    validateRepositoryUrl({ pkg, repo });
+  }
 
   // If --branch is explicit, use it as-is and skip the temp-branch/rename
   // dance. Otherwise create a temp branch, version, then rename to the

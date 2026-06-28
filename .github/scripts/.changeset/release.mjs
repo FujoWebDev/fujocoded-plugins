@@ -100,7 +100,7 @@ const runCommand =
     }
   };
 
-const prepare = runCommand(prepareRelease);
+const prepare = runCommand(prepareRelease, { repo });
 
 const dispatch = runCommand(dispatchRelease, {
   repo,
@@ -150,7 +150,8 @@ const release = async (packageNameOrDir, options) => {
     await prepareRelease({
       ...commandContext,
       options: { ...options, commit: true },
-      packageNameOrDir,
+      packageNameOrDir: pkg.name,
+      repo,
     });
 
     await dispatchRelease({
@@ -158,7 +159,7 @@ const release = async (packageNameOrDir, options) => {
       repo,
       workflow,
       options,
-      packageNameOrDir,
+      packageNameOrDir: pkg.name,
     });
   } catch (error) {
     fail(error);
