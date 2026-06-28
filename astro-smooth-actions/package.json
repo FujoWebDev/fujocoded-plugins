@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/astro-smooth-actions",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "An Astro integration for smooth action handling",
   "keywords": [
     "astro-integration",
@@ -10,7 +10,7 @@
   "author": "FujoCoded LLC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fujowebdev/fujocoded-plugins.git"
+    "url": "git+https://github.com/FujoWebDev/fujocoded-plugins.git"
   },
   "files": [
     "dist",

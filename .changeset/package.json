@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "release": "node ../.github/scripts/.changeset/release.mjs release",
+    "release:bootstrap": "node ../.github/scripts/.changeset/release.mjs bootstrap",
+    "release:prepare": "node ../.github/scripts/.changeset/release.mjs prepare",
+    "release:dispatch": "node ../.github/scripts/.changeset/release.mjs dispatch",
+    "release:sync-back": "node ../.github/scripts/.changeset/release.mjs sync-back"
+  }
+}
