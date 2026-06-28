@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/astro-smooth-actions",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "An Astro integration for smooth action handling",
   "keywords": [
     "astro-integration",
