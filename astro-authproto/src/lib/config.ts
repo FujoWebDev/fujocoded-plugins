@@ -91,16 +91,13 @@ export interface ConfigOptions {
    * Omit this for one scope policy across every account.
    */
   resolveScopesEntrypoint?: string;
+  /**
+   * Redirect settings after login/logout.
+   */
   redirects?: {
     afterLogin?: string;
     afterLogout?: string;
   };
-  /*
-  dev: {
-      defaultUser?: string;
-      devDriver?: AllDriverOptions | AstroDriverOption;
-  }
-  */
 }
 
 export const getHooksImport = (resolveScopesEntrypoint?: string) => {
@@ -197,7 +194,7 @@ export const getConfig = ({
     ${exportConst("redirectAfterLogout", options.redirects?.afterLogout ?? "{referer}")}
     ${exportConst("externalDomain", externalDomain)}
     export const clientMetadataDomain = process.env.AUTHPROTO_EXTERNAL_DOMAIN ?? ${JSON.stringify(externalDomain)} ?? ${JSON.stringify(options.applicationDomain)};
-    ${exportConst("isDev", isDev)}
     ${exportConst("isDevServerHostSet", isDevServerHostSet)}
+    ${exportConst("isDev", isDev)}
     `;
 };

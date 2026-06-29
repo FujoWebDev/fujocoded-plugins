@@ -33,9 +33,7 @@ describe("capitalizeTitle as standalone function export", () => {
   });
 
   test("treats a suffix attached to a code span as a continuation", () => {
-    expect(capitalizeTitle("the `head`ing story")).toBe(
-      "The `head`ing Story",
-    );
+    expect(capitalizeTitle("the `head`ing story")).toBe("The `head`ing Story");
   });
 
   test("does not treat text after a leading code span as the title start", () => {

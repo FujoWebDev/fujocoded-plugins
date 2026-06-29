@@ -307,7 +307,9 @@ test("should ignore missing files when missingFile is ignore", async () => {
 });
 
 const processFile = async (value: Compatible, options?: PluginArgs) =>
-  await remark().use(remarkAltTextFiles, options ?? {}).process(value);
+  await remark()
+    .use(remarkAltTextFiles, options ?? {})
+    .process(value);
 
 const processMarkdown = async (value: Compatible, options?: PluginArgs) => {
   const processedTree = await processFile(value, options);

@@ -44,7 +44,7 @@ You can change the following options:
 ## Writing alt source metadata (optional)
 
 This plugin can be configured to add the original alt text source path to each
-image it resolves using `targetAttribute`. 
+image it resolves using `targetAttribute`.
 
 This defaults to `false`. Set it to `true` to write `data-alt-source`, or pass
 another attribute name to customize the output.
@@ -88,7 +88,6 @@ The plugin loads the alt text as usual and adds:
   data-alt-source="src/assets/cover.alt.txt"
 />
 ```
-
 
 ### Point source metadata at GitHub
 

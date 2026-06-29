@@ -113,4 +113,3 @@ The wrapper options are:
   drawing `alt`, `fileName`, `imageUrl`, `markdownPath`, or `sourcePath`
 - **`exportPadding`** => Optional. Sets how many pixels of padding are added to
   each side of the inferred drawing bounds. When omitted, the plugin uses `10`
-

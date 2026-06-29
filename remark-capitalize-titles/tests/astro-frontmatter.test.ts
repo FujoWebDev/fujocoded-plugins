@@ -14,9 +14,8 @@ const processAstroFrontmatterTitle = async (
   const result = await remark()
     .use(remarkCapitalizeTitles, options)
     .process(file);
-  return (
-    result.data.astro as { frontmatter: Record<string, unknown> }
-  ).frontmatter.title;
+  return (result.data.astro as { frontmatter: Record<string, unknown> })
+    .frontmatter.title;
 };
 
 describe("Handles Astro frontmatter titles", () => {
