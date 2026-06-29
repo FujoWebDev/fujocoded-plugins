@@ -1,5 +1,25 @@
 # @fujocoded/remark-capitalize-titles
 
+## 0.2.0
+
+### Minor Changes
+
+- [`41f6902`](https://github.com/FujoWebDev/fujocoded-plugins/commit/41f690219a272eb70e544cda713ce8f0e565f1e6) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Capitalize Astro frontmatter `title` fields by default, with a `frontmatterTitle: false` option for callers that only want Markdown heading capitalization. Also preserve `NodeJS` as a default capitalization.
+
+### Patch Changes
+
+- Export `capitalizeTitle` for title-casing a standalone string outside a Markdown
+  tree: pass the title, an optional `{ special }` override, and have your Markdown
+  string capitalized while preserving inline code, emphasis, and escapes.
+
+  Component `title` props now run through this same Markdown path, so inline
+  code spans inside a title keep their exact casing instead of being lowercased.
+
+  Also extends the default capitalization list with `JavaScript`, `HTML`, and
+  `CSS`.
+
 ## 0.1.0
 
 ### Minor Changes
