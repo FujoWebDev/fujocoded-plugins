@@ -1,5 +1,28 @@
 # @fujocoded/authproto
 
+## 0.4.0
+
+### Minor Changes
+
+- [#46](https://github.com/FujoWebDev/fujocoded-plugins/pull/46) [`4c266d6`](https://github.com/FujoWebDev/fujocoded-plugins/commit/4c266d66fbe990c6ccbec9a0aeaec67fe92ed375) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Add scoped login controls, an Authorize component for requesting extra
+  permissions after login, and helpers for building ATProto permission scopes.
+
+  ## Breaking changes
+  - Login and logout now default to returning users to the referring page instead
+    of `/`. Set `redirects.afterLogin` and `redirects.afterLogout` to `/` to keep
+    the old behavior.
+  - `<Login />` no longer defaults the input placeholder to `handle.bsky.social`;
+    pass `placeholder="handle.bsky.social"` if you want that exact prompt.
+  - `Astro.locals.loggedInUser` now includes a required `scopes` array. Update
+    tests, mocks, and custom local assignments to include `scopes: []` when no
+    grants are needed.
+
+### Patch Changes
+
+- bump @atproto/oauth-client @atproto/oauth-client-node et al.
+
 ## 0.3.1
 
 ### Patch Changes

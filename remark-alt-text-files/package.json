@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/remark-alt-text-files",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Add alt text to your images directly from your filesystem",
   "keywords": [
     "accessibility",
