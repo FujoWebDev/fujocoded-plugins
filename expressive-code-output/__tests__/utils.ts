@@ -1,4 +1,5 @@
-import { ExpressiveCodeEngine, pluginFrames } from "astro-expressive-code";
+import { ExpressiveCodeEngine } from "@expressive-code/core";
+import { pluginFrames } from "@expressive-code/plugin-frames";
 import type { Element, ElementContent } from "hast";
 import { toHtml } from "hast-util-to-html";
 import { pluginCodeOutput } from "../index.ts";
