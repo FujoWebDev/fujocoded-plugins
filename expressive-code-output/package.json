@@ -36,7 +36,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts --clean",
+    "build": "tsup index.ts --format cjs,esm --dts --clean --external @expressive-code/core --external @expressive-code/plugin-frames",
     "validate": " npx publint",
     "test": "vitest --no-watch",
     "typecheck": "tsc --noEmit"
