@@ -3,6 +3,7 @@ import {
   listRecordsPage,
   toRecordContext,
 } from "../client/records.ts";
+import type { AtProtoCache } from "../cache/index.ts";
 import type {
   ArgsUnion,
   AtProtoLoaderSource,
@@ -72,6 +73,7 @@ export const fetchFromSource = async <
   source: AtProtoLoaderSource<unknown>,
   callbacks: AtProtoRecordFilterOptions<Sources>,
   fetchRecord: FetchRecord,
+  caches: AtProtoCache,
 ): Promise<AtProtoRecordCallbackArgs<unknown>[]> => {
   const window = resolveRecordsFetchWindow(source);
   const collected: AtProtoRecordCallbackArgs<unknown>[] = [];
@@ -95,16 +97,17 @@ export const fetchFromSource = async <
         ? Math.min(remaining, window.pageSize)
         : window.pageSize;
 
-    const data = await listRecordsPage(source, {
-      limit: thisPageSize,
-      cursor,
-    });
+    const data = await listRecordsPage(
+      source,
+      { limit: thisPageSize, cursor },
+      caches,
+    );
     pageCount++;
 
     for (const record of data.records) {
       if (!isRecordValue(record.value)) continue;
 
-      const context = await toRecordContext(source, record);
+      const context = await toRecordContext(source, record, caches);
 
       let value: unknown = record.value;
       if (source.parseRecord) {

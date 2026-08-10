@@ -1,50 +1,14 @@
+import type { AtProtoCache } from "../cache/index.ts";
 import type {
-  ArgsUnion,
   AtProtoLoaderSource,
   AtProtoRecordCallbackArgs,
   AtProtoRecordCallbacks,
-  AtProtoRecordGroupBy,
-  AtProtoRecordGroupTransformArgs,
   OnSourceError,
 } from "../types.ts";
 import { getErrorMessage } from "../utils.ts";
 import { createFetchRecord } from "./fetch-record.ts";
+import { joinSourceRecords } from "./join.ts";
 import { fetchFromSource } from "./source.ts";
-
-const dedupeEntries = <Entry extends { id: string }>(
-  entries: Entry[],
-): Entry[] => {
-  const byId = new Map<string, Entry>();
-  for (const entry of entries) {
-    byId.set(entry.id, entry);
-  }
-  return [...byId.values()];
-};
-
-const groupRecords = async <
-  Sources extends readonly AtProtoLoaderSource<unknown>[],
->(
-  records: AtProtoRecordCallbackArgs<unknown>[],
-  groupBy: AtProtoRecordGroupBy<Sources>,
-): Promise<Map<string, ArgsUnion<Sources>[]>> => {
-  const byKey = new Map<string, ArgsUnion<Sources>[]>();
-
-  for (const args of records) {
-    const recordArgs = args as ArgsUnion<Sources>;
-    const key = await groupBy(recordArgs);
-    if (typeof key !== "string") {
-      throw new Error(
-        `AtProto loader groupBy must return a string key for ${args.repo.handle ?? args.repo.did}/${args.collection}/${args.rkey}`,
-      );
-    }
-
-    const group = byKey.get(key) ?? [];
-    group.push(recordArgs);
-    byKey.set(key, group);
-  }
-
-  return byKey;
-};
 
 export interface RunPipelineArgs<
   Sources extends readonly AtProtoLoaderSource<unknown>[],
@@ -53,10 +17,11 @@ export interface RunPipelineArgs<
   sources: Sources;
   callbacks: AtProtoRecordCallbacks<Sources, Entry>;
   onSourceError?: OnSourceError;
+  caches: AtProtoCache;
 }
 
 /**
- * Run a full read cycle across every source:
+ * Run the static loader's full read cycle across every source:
  *
  * - For each source: fetch, validate, parse, filter records
  * - Merge survivors in source declaration order
@@ -64,14 +29,17 @@ export interface RunPipelineArgs<
  * - Run `transform` per record or per group => nullish returns drop the entry
  * - Dedupe entries by `id`
  *
- * Error handling depends on `onSourceError`:
+ * All source reads are started concurrently and allowed to complete before their
+ * results are evaluated. Error handling then depends on `onSourceError`:
  *
- * - `'throw'` => the first source error rethrows immediately and the rest of
- *   is abandoned
+ * - `'throw'` => rethrow the first failed source in declaration order after
+ *   every source read has settled
  * - `'skip'` (or a function returning `'skip'`) => failing sources drop their
- *   contribution. If every source fails, it will still throws an `AggregateError` so
- *   the live loader's SWR cache can keep serving its last good snapshot and
- *   the static loader can fail the build
+ *   contribution. If every source fails, throw an `AggregateError` containing
+ *   every source failure so the static build fails with the full cause set
+ *
+ * The live loader does not use this path. It acquires records through its
+ * per-source stale-while-revalidate cache, then joins the resulting records.
  */
 export const runPipeline = async <
   Sources extends readonly AtProtoLoaderSource<unknown>[],
@@ -80,23 +48,26 @@ export const runPipeline = async <
   sources,
   callbacks,
   onSourceError = "skip",
+  caches,
 }: RunPipelineArgs<Sources, Entry>): Promise<Entry[]> => {
-  const fetchRecord = createFetchRecord();
+  const fetchRecord = createFetchRecord(caches);
 
   // Ask every source for records.
   const results = await Promise.allSettled(
-    sources.map((source) => fetchFromSource(source, callbacks, fetchRecord)),
+    sources.map((source) =>
+      fetchFromSource(source, callbacks, fetchRecord, caches),
+    ),
   );
 
   // Keep successful sources and report failed ones.
-  const buckets: AtProtoRecordCallbackArgs<unknown>[][] = [];
+  const sourceRecords: AtProtoRecordCallbackArgs<unknown>[][] = [];
   const errors: unknown[] = [];
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i]!;
     const source = sources[i]!;
     if (result.status === "fulfilled") {
-      buckets.push(result.value);
+      sourceRecords.push(result.value);
       continue;
     }
 
@@ -116,53 +87,5 @@ export const runPipeline = async <
     throw new AggregateError(errors, "All AtProto sources failed");
   }
 
-  // Put all records in source order.
-  const merged = buckets.flat();
-  const entries: Entry[] = [];
-
-  if (!callbacks.groupBy) {
-    // Turn each record into an entry.
-    let dropped = 0;
-    for (const args of merged) {
-      const entry = await callbacks.transform(args as ArgsUnion<Sources>);
-      if (entry === null || entry === undefined) {
-        dropped++;
-        continue;
-      }
-      entries.push(entry);
-    }
-    if (dropped > 0) {
-      console.debug(
-        `[atproto-loader] transform dropped ${dropped}/${merged.length} entries`,
-      );
-    }
-
-    // Keep the last entry for each id.
-    return dedupeEntries(entries);
-  }
-
-  // Gather related records before transforming.
-  const byKey = await groupRecords(merged, callbacks.groupBy);
-  let dropped = 0;
-  for (const [key, records] of byKey) {
-    const groupArgs: AtProtoRecordGroupTransformArgs<Sources> = {
-      key,
-      records,
-      fetchRecord,
-    };
-    const entry = await callbacks.transform(groupArgs);
-    if (entry === null || entry === undefined) {
-      dropped++;
-      continue;
-    }
-    entries.push(entry);
-  }
-  if (dropped > 0) {
-    console.debug(
-      `[atproto-loader] transform dropped ${dropped}/${byKey.size} groups`,
-    );
-  }
-
-  // Keep the last entry for each id.
-  return dedupeEntries(entries);
+  return joinSourceRecords({ sourceRecords, callbacks, fetchRecord });
 };

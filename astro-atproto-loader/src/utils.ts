@@ -1,8 +1,12 @@
-import { BlobRef } from "@atproto/api";
+import { BlobRef, ComAtprotoRepoGetRecord } from "@atproto/api";
 
 import type {
   AtProtoLoaderSource,
   AtProtoRecordCallbackArgs,
+  AtProtoRecordCallbacks,
+  AtProtoRecordFilterOptions,
+  AtProtoRecordTransform,
+  AtProtoTransformOptions,
 } from "./types.ts";
 
 export type AtProtoSourceOptions<
@@ -82,6 +86,18 @@ export const toError = (error: unknown, message: string) =>
 export const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/**
+ * A record fetch failure that retrying won't fix: the fetch itself worked,
+ * but what came back can never become a usable record (e.g. its value isn't
+ * an object). Caches hold these as long as successes instead of applying
+ * their short retry floor.
+ */
+export class DefinitiveRecordError extends Error {}
+
+export const isDefinitiveRecordFailure = (error: unknown): boolean =>
+  error instanceof DefinitiveRecordError ||
+  error instanceof ComAtprotoRepoGetRecord.RecordNotFoundError;
+
 export const normalizeSources = <
   Sources extends readonly AtProtoLoaderSource<unknown>[],
 >(
@@ -133,3 +149,36 @@ export const toNamespacedEntry = <Data extends Record<string, unknown>>({
   id: `${repo.did}/${collection}/${rkey}`,
   data: value as Data,
 });
+
+/**
+ * Resolve a loader's `filter`/`groupBy`/`transform` options into the
+ * `AtProtoRecordCallbacks` used by the pipeline.
+ */
+export const resolveRecordCallbacks = <
+  Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Data extends Record<string, unknown>,
+  Entry extends { id: string; data: Data },
+>(
+  sources: readonly AtProtoLoaderSource<unknown>[],
+  options: AtProtoRecordFilterOptions<Sources> &
+    AtProtoTransformOptions<Sources, Entry>,
+): AtProtoRecordCallbacks<Sources, Entry> => {
+  if (options.groupBy) {
+    return {
+      filter: options.filter,
+      groupBy: options.groupBy,
+      transform: options.transform,
+    };
+  }
+
+  // The fallback only runs when no custom `transform` was provided, which
+  // means `Entry` is just `{ id: string; data: Data }`. TS can't narrow the
+  // generic per branch, hence the cast.
+  const fallbackTransform = (sources.length > 1
+    ? toNamespacedEntry<Data>
+    : toRkeyEntry<Data>) as unknown as AtProtoRecordTransform<Sources, Entry>;
+  return {
+    filter: options.filter,
+    transform: options.transform ?? fallbackTransform,
+  };
+};

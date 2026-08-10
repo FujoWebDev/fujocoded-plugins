@@ -280,8 +280,21 @@ defineAtProtoLiveCollection({
 Every `filter` and `transform` callback receives `fetchRecord({ atUri, parse?
 })`, which fetches a single record from any public PDS by its `AtUri` (the
 `at://...` address that uniquely identifies a record on the network). When more
-than one callback asks for the _same_ URI in the same cycle (for example a
-`subject` URI shared across many records), they share a single network call.
+than one callback asks for the _same_ URI (for example a `subject` URI shared
+across many records or loader instances), they share the default process-wide
+cache and any concurrent request shares a single network call.
+
+> [!NOTE]
+>
+> Hydrated records have a fixed **cache policy:**
+>
+> - Successful records remain cached for a five minutes
+> - Transient failures (network errors, 5xx) can retry after five seconds
+> - Definitive failures (the record doesn't exist, or its value can never parse)
+>   are held the full five minutes like successes (since retrying can't change
+>   the answer in the short term)
+> - The cache retains at most 20,000 records: since records are small this isn't
+>   a "huge" cache, but the limit still keeps it from growing forever
 
 A successful call resolves to `{ value, repo }`. `value` is the record body
 (or whatever your `parse` callback returned). `repo` is the fetched record's
@@ -379,7 +392,8 @@ The defaults are picked so each loader behaves sensibly out of the box:
 
 - **Live loader:** `sources: [...]` defaults to `"skip"` so one flaky PDS
   doesn't take down your whole live collection. `source: {...}` defaults to
-  `"throw"`, because there's no alternate source to fall back to
+  `"throw"`, since skipping the only source you have wouldn't leave much of a
+  collection. The error handling on cold start falls back to [`onInitialLoadError`](#live-only-options).
 - **Static loader:** defaults to `"throw"` everywhere, so a broken source
   fails the build instead of quietly publishing partial content. Pass
   `onSourceError: "skip"` if you'd rather ship the rest of the data anyway
@@ -391,14 +405,18 @@ onSourceError: (error, source) =>
   source.repo === "critical.test" ? "throw" : "skip",
 ```
 
-> [!NOTE]
+> [!IMPORTANT]
 >
-> When `onSourceError` is `"throw"`, the first source error fails the whole
-> load right away. When you're skipping errors and _every_ source ends up
-> failing, the pipeline throws an `AggregateError` so the failure isn't
-> swallowed silently. In a live loader, the cache holds onto its last good
-> snapshot when a refresh throws, so a transient outage won't blank out
-> your page.
+> **In the live loader, source errors only surface while a source is cold.**
+> Each source (including a single `source: {...}`) keeps a
+> stale-while-revalidate cache of its records: once it has fetched
+> successfully at least once, a failed refresh serves its last good records
+> instead of erroring. The failure is still logged. This also applies to
+> `"skip"`: when _every_ source fails, cold sources throw an `AggregateError`
+> so the failure isn't swallowed silently, but warm ones serve stale data.
+>
+> The static loader has no record cache, so `"throw"` always fails the build,
+> and `"skip"` with all sources failing always raises the `AggregateError`.
 
 ## `groupBy`: merging records from multiple sources
 
@@ -475,8 +493,29 @@ yourself.
 - `queryFilter`, optional. A request-time filter for
   `getLiveCollection("collection", filter)`. It receives `{ entry, filter }`.
   (This was `loadCollectionFilter` in v0.1)
-- `cacheTtl`, optional. Cache lifetime in milliseconds. Defaults to `300000`
-  (5 minutes)
+- `onInitialLoadError`, optional. What to do if a cold source read fails before
+  that source has any successfully cached records. The read includes `filter`.
+  Defaults to `"empty"`, which treats that failure as an empty collection /
+  missing entry. Pass `"throw"` to surface it to Astro as a loader error
+  instead. `groupBy` and `transform` run after the source read and their
+  failures always return loader errors; this option does not suppress them.
+
+  > [!NOTE]
+  >
+  > With `"empty"`, a page can't currently tell a genuinely empty
+  > collection from a failed cold fetch. If that distinction matters to you
+  > right now, use `"throw"` and handle the error.
+
+  > [!WARNING]
+  >
+  > The default is `"empty"` because that matches the behavior of earlier
+  > versions, but it may become `"throw"` in a future release. If you're relying
+  > on `"empty"`, set it explicitly.
+
+- `cacheTtl`, optional. How long each source's cached records stay fresh before a
+  background refresh begins. Defaults to `300000` (5 minutes). This does not
+  control hydrated records fetched through `fetchRecord`; those use the
+  independent fixed policy described above.
 
 # Support Us
 

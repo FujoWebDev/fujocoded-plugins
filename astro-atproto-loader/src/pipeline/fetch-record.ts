@@ -3,29 +3,68 @@ import type { DidString } from "@atproto/syntax";
 
 import { getPds } from "../client/identity.ts";
 import { getSingleRecord, isRecordValue } from "../client/records.ts";
+import type { AtProtoCache } from "../cache/index.ts";
 import type { AtProtoRecordRepo, FetchRecord, RecordValue } from "../types.ts";
-import { getErrorMessage } from "../utils.ts";
-
-type FetchedRecord = { value: RecordValue; repo: AtProtoRecordRepo };
+import { DefinitiveRecordError, getErrorMessage } from "../utils.ts";
 
 /**
- * Build a per-cycle `fetchRecord` helper.
+ * Build a `fetchRecord` helper.
  *
- * Each instance keeps an in-memory cache that maps AT-URIs to in-flight
- * fetch promises. Concurrent callers asking for the same URI within one
- * pipeline cycle share a single network request.
+ * Each helper reads through a shared cache that maps AT-URIs to fetched
+ * records and in-flight fetch promises. Concurrent callers asking for the
+ * same URI share a single network request, and completed records are
+ * reused across pipeline cycles and collections.
  *
  * Each successful resolution carries the fetched record's owning DID and
  * PDS alongside its `value`, so callers can build blob URLs for the
  * hydrated record without re-resolving identity.
  *
  * All failures simply return `null`, but each one prints a distinct
- * `console.warn` for debugging.
+ * `console.warn` for debugging. Internally the cache sees them as
+ * rejections so it can apply a shorter retry floor.
  */
-export const createFetchRecord = (): FetchRecord => {
-  const cache = new Map<string, Promise<FetchedRecord | null>>();
+export const createFetchRecord = (caches: AtProtoCache): FetchRecord => {
+  const fetchBase = async (
+    atUri: string,
+    parsed: AtUri,
+  ): Promise<{ value: RecordValue; repo: AtProtoRecordRepo }> => {
+    const [data, pds] = await Promise.all([
+      getSingleRecord(
+        { repo: parsed.host, collection: parsed.collection },
+        parsed.rkey,
+        caches,
+      ),
+      getPds(parsed.host, caches),
+    ]).catch((error: unknown) => {
+      console.warn(
+        `[atproto-loader] fetchRecord: getRecord failed for ${atUri}: ${getErrorMessage(error)}`,
+      );
+      throw error;
+    });
 
-  const fetchBase = async (atUri: string): Promise<FetchedRecord | null> => {
+    if (!isRecordValue(data.value)) {
+      const error = new DefinitiveRecordError(
+        `Record value is not an object at ${atUri}`,
+      );
+      console.warn(
+        `[atproto-loader] fetchRecord: record value is not an object at ${atUri}`,
+      );
+      throw error;
+    }
+
+    return {
+      value: data.value,
+      repo: { did: parsed.host as DidString, pds },
+    };
+  };
+
+  return async <ParsedValue = RecordValue>({
+    atUri,
+    parse,
+  }: {
+    atUri: string;
+    parse?: (value: unknown) => ParsedValue;
+  }): Promise<{ value: ParsedValue; repo: AtProtoRecordRepo } | null> => {
     let parsed: AtUri;
     try {
       parsed = new AtUri(atUri);
@@ -43,47 +82,17 @@ export const createFetchRecord = (): FetchRecord => {
       return null;
     }
 
+    let fetched: { value: RecordValue; repo: AtProtoRecordRepo };
     try {
-      const [data, pds] = await Promise.all([
-        getSingleRecord(
-          { repo: parsed.host, collection: parsed.collection },
-          parsed.rkey,
-        ),
-        getPds(parsed.host),
-      ]);
-      if (!isRecordValue(data.value)) {
-        console.warn(
-          `[atproto-loader] fetchRecord: record value is not an object at ${atUri}`,
-        );
-        return null;
-      }
-      return {
-        value: data.value,
-        repo: { did: parsed.host as DidString, pds },
-      };
-    } catch (error) {
-      console.warn(
-        `[atproto-loader] fetchRecord: getRecord failed for ${atUri}: ${getErrorMessage(error)}`,
+      fetched = await caches.hydratedRecords.get(atUri, () =>
+        fetchBase(atUri, parsed),
       );
+    } catch {
       return null;
     }
-  };
 
-  return async <Parsed = RecordValue>({
-    atUri,
-    parse,
-  }: {
-    atUri: string;
-    parse?: (value: unknown) => Parsed;
-  }): Promise<{ value: Parsed; repo: AtProtoRecordRepo } | null> => {
-    let pending = cache.get(atUri);
-    if (!pending) {
-      pending = fetchBase(atUri);
-      cache.set(atUri, pending);
-    }
-    const fetched = await pending;
-    if (fetched === null) return null;
-    if (!parse) return fetched as { value: Parsed; repo: AtProtoRecordRepo };
+    if (!parse)
+      return fetched as { value: ParsedValue; repo: AtProtoRecordRepo };
     try {
       return { value: parse(fetched.value), repo: fetched.repo };
     } catch (error) {

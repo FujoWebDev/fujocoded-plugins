@@ -4,6 +4,7 @@ export { defineAtProtoLiveCollection } from "./loaders/live.ts";
 export type {
   AtProtoLiveLoaderEntryFilter,
   AtProtoQueryFilterArgs,
+  OnInitialLoadError,
 } from "./loaders/live.ts";
 export { defineAtProtoCollection } from "./loaders/static.ts";
 
