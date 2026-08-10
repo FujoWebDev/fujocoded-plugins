@@ -1,71 +1,16 @@
-import { P256Keypair } from "@atproto/crypto";
+import { FAKE_CID } from "@fujocoded/msw-atproto";
 import { http, HttpResponse, type HttpHandler } from "msw";
 
-// Valid CIDv1 that passes `multiformats/cid`'s `CID.parse`. The lexicon
-// validator rejects responses that lack a parseable cid, so every fake
-// record we serve needs one.
-export const FAKE_CID =
-  "bafyreidfayvfuwqa7qlnopdjiqrxzs6blmoeu4rujcjtnci5beludirz2a";
-
-// `@atproto/identity` insists on a well-formed DID document — signingKey +
-// handle + pds all required — even though the loader only cares about pds.
-// Generate one real P-256 multibase key at module load and reuse it.
-const keypair = await P256Keypair.create();
-const SIGNING_KEY_MULTIBASE = keypair.did().slice("did:key:".length);
-
+// Don't replace these with msw-atproto's stateful repo mock. That mock manages
+// pagination internally, but tests here assert the wire protocol itself: which
+// cursor each request carries, how many pages get fetched, what limit is sent.
+// Scripting exact pages/cursors locally is the point. Identity mocking has no
+// such needs, so it uses @fujocoded/msw-atproto directly.
 export type FakeRecord = {
   did: string;
   rkey: string;
   value: Record<string, unknown>;
   cid?: string;
-};
-
-export type RepoIdentity = {
-  did: string;
-  pds: string;
-  handle?: string;
-};
-
-export const mockRepoIdentity = ({
-  did,
-  pds,
-  handle,
-}: RepoIdentity): HttpHandler[] => {
-  const advertisedHandle = handle ?? `${did.split(":").pop()}.example.test`;
-
-  const handlers: HttpHandler[] = [
-    http.get(`https://plc.directory/${encodeURIComponent(did)}`, () =>
-      HttpResponse.json({
-        id: did,
-        alsoKnownAs: [`at://${advertisedHandle}`],
-        verificationMethod: [
-          {
-            id: `${did}#atproto`,
-            type: "Multikey",
-            controller: did,
-            publicKeyMultibase: SIGNING_KEY_MULTIBASE,
-          },
-        ],
-        service: [
-          {
-            id: "#atproto_pds",
-            type: "AtprotoPersonalDataServer",
-            serviceEndpoint: pds,
-          },
-        ],
-      }),
-    ),
-  ];
-
-  if (handle) {
-    handlers.push(
-      http.get(`https://${handle}/.well-known/atproto-did`, () =>
-        HttpResponse.text(did),
-      ),
-    );
-  }
-
-  return handlers;
 };
 
 export type MockListRecordsConfig = {

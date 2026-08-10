@@ -5,6 +5,7 @@ import {
 } from "@atproto/api";
 import type { DidString, HandleString } from "@atproto/syntax";
 
+import type { AtProtoCache } from "../cache/index.ts";
 import type {
   AtProtoLoaderSource,
   AtProtoRecordContext,
@@ -18,6 +19,7 @@ export const isRecordValue = (value: unknown): value is RecordValue =>
 export const toRecordContext = async (
   source: AtProtoLoaderSource<unknown>,
   record: { uri: string; cid?: string },
+  caches: AtProtoCache,
 ): Promise<AtProtoRecordContext> => {
   const aturi = new AtUri(record.uri);
   if (!aturi.rkey) {
@@ -30,7 +32,7 @@ export const toRecordContext = async (
   const handle = source.repo.startsWith("did:")
     ? undefined
     : (source.repo as HandleString);
-  const pds = await getPds(source.repo);
+  const pds = await getPds(source.repo, caches);
 
   return {
     repo: { did: aturi.host as DidString, handle, pds },
@@ -44,8 +46,9 @@ export const toRecordContext = async (
 export const listRecordsPage = async (
   source: AtProtoLoaderSource<unknown>,
   opts: { limit: number; cursor?: string },
+  caches: AtProtoCache,
 ): Promise<ComAtprotoRepoListRecords.Response["data"]> => {
-  const client = await getClient(source.repo);
+  const client = await getClient(source.repo, caches);
   const { data } = await client.com.atproto.repo.listRecords({
     repo: source.repo,
     collection: source.collection,
@@ -58,8 +61,9 @@ export const listRecordsPage = async (
 export const getSingleRecord = async (
   source: AtProtoLoaderSource<unknown>,
   rkey: string,
+  caches: AtProtoCache,
 ): Promise<ComAtprotoRepoGetRecord.Response["data"]> => {
-  const client = await getClient(source.repo);
+  const client = await getClient(source.repo, caches);
   const { data } = await client.com.atproto.repo.getRecord({
     repo: source.repo,
     collection: source.collection,

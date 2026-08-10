@@ -49,15 +49,15 @@ export interface AtProtoLoaderSource<Raw = RecordValue> {
 }
 
 /**
- * Identifier for the repo this record lives in.
+ * The resolved identity of the repo this record lives in:
  *
- * `did` is always set (resolved from the record's AT-URI).
- * `pds` is the resolved Personal Data Server URL for that DID. Useful for
- * building blob URLs (`com.atproto.sync.getBlob`) or hitting any other PDS
- * endpoint without re-resolving identity.
- * `handle` is set only when the source config provided a handle for this
- * repo. The loader never resolves a DID back to its handle, so callers that
- * passed `repo: "did:..."` will see `handle: undefined`.
+ * - `did` is the repo's DID
+ * - `pds` is the resolved Personal Data Server URL for that DID. Useful for
+ *   building blob URLs (`com.atproto.sync.getBlob`) or hitting any other PDS
+ *   endpoint without re-resolving identity.
+ * - `handle` is set only when the source config provided a handle for this
+ *   repo. The loader never resolves a DID back to its handle, so callers that
+ *   passed `repo: "did:..."` will see `handle: undefined`.
  */
 export interface AtProtoRecordRepo {
   did: DidString;
@@ -76,9 +76,13 @@ export interface AtProtoRecordContext {
 /**
  * Fetch a single record by AT-URI from any public PDS.
  *
- * Concurrent callers for the same URI within one pipeline cycle share a
- * single network hop. Calling `fetchRecord({ atUri })` from many `transform`
- * or `filter` callbacks for the same target only hits the network once.
+ * Concurrent callers asking for the same URI share a single network request.
+ * Cached time depends on the outcome:
+ * - Successes stay cached for five minutes.
+ * - Transient failures (network errors, 5xx) retry after five seconds.
+ * - Definitive failures (e.g. record doesn't exist) are held for five minutes
+ *   like successes.
+ * - The cache holds at most 20,000 records.
  *
  * Resolves to `{ value, repo }` on success. `repo` carries the fetched
  * record's owning DID and PDS, so callers can hand it straight to
@@ -97,10 +101,10 @@ export interface AtProtoRecordContext {
  * Each failure mode logs a distinct warning, so callers can tell which thing
  * went wrong from the console.
  */
-export type FetchRecord = <Parsed = RecordValue>(args: {
+export type FetchRecord = <ParsedValue = RecordValue>(args: {
   atUri: string;
-  parse?: (value: unknown) => Parsed;
-}) => Promise<{ value: Parsed; repo: AtProtoRecordRepo } | null>;
+  parse?: (value: unknown) => ParsedValue;
+}) => Promise<{ value: ParsedValue; repo: AtProtoRecordRepo } | null>;
 
 /**
  * The bundle of args passed to each `filter` and `transform` callback for a
@@ -179,7 +183,12 @@ export interface AtProtoRecordGroupTransformArgs<
   key: string;
   /** All filtered records that returned this key, in source declaration order. */
   records: ArgsUnion<Sources>[];
-  /** Shared per-cycle record hydrator, same as the per-record callback helper. */
+  /**
+   * Cached record hydrator, shared with every per-record callback. It reads
+   * through the process-wide caches context, using the fixed five-minute
+   * success TTL, five-second failure retry floor, and 20,000-record bound
+   * documented by `FetchRecord`.
+   */
   fetchRecord: FetchRecord;
 }
 
@@ -206,20 +215,39 @@ export type AtProtoRecordCallbacks<
   );
 
 /**
+ * The `groupBy`/`transform` pairing loader options accept: either an ungrouped
+ * (and optional) per-record `transform`, or a `groupBy` with its required
+ * grouped `transform`. `resolveRecordCallbacks` turns this into
+ * `AtProtoRecordCallbacks` by filling in the default ungrouped transform.
+ */
+export type AtProtoTransformOptions<
+  Sources extends readonly AtProtoLoaderSource<unknown>[],
+  Entry,
+> =
+  | {
+      groupBy?: never;
+      transform?: AtProtoRecordTransform<Sources, Entry>;
+    }
+  | {
+      groupBy: AtProtoRecordGroupBy<Sources>;
+      transform: AtProtoRecordGroupTransform<Sources, Entry>;
+    };
+
+/**
  * What the pipeline should do when one source in a multi-source load fails.
  *
  * - `'skip'` warns and drops that source's contribution, letting the rest of
  *   the load continue.
- * - `'throw'` rethrows immediately so the static loader can fail the build,
- *   or so the live loader's stale-while-revalidate cache holds onto the last
- *   good snapshot until the next refresh.
+ * - `'throw'` rethrows, so the static loader fails the build and the live
+ *   loader hands the error up to its collection-level handling.
  * - A function gets the error and source and returns one of the two, for
  *   case-by-case decisions.
  *
- * Once the pipeline starts skipping errors, if _every_ remaining source ends
- * up failing it throws an `AggregateError` so the failure isn't swallowed
- * silently. (When the policy is `'throw'`, the first error fails the load
- * right away, so the aggregate path doesn't apply.)
+ * If every source ends up skipped, the pipeline throws an `AggregateError`
+ * rather than silently returning nothing. In the live loader, `'throw'` only
+ * applies while a source is still cold: once it has succeeded once, a failed
+ * refresh serves that source's cached records instead. See the README's
+ * "Multi-source reads and `onSourceError`" section for the full behavior.
  */
 export type OnSourceError =
   | "throw"

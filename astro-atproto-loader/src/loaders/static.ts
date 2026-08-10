@@ -1,14 +1,15 @@
 import { defineCollection } from "astro/content/config";
 import type { Loader, LoaderContext } from "astro/loaders";
 
+import { defaultAtProtoCache, type AtProtoCache } from "../cache/index.ts";
 import { runPipeline } from "../pipeline/run.ts";
 import type {
   AtProtoLoaderSource,
-  AtProtoRecordCallbacks,
   AtProtoRecordFilterOptions,
   AtProtoRecordGroupBy,
   AtProtoRecordGroupTransform,
   AtProtoRecordTransform,
+  AtProtoTransformOptions,
   OnSourceError,
   SchemaInput,
   SchemaLike,
@@ -16,9 +17,8 @@ import type {
 import {
   type AtProtoSourceOptions,
   normalizeSources,
-  toNamespacedEntry,
+  resolveRecordCallbacks,
   toSafePojo,
-  toRkeyEntry,
 } from "../utils.ts";
 
 export interface AtProtoStaticDataEntry<Data extends Record<string, unknown>> {
@@ -28,26 +28,17 @@ export interface AtProtoStaticDataEntry<Data extends Record<string, unknown>> {
   filePath?: string;
 }
 
-type AtProtoStaticTransformOptions<
-  Sources extends readonly AtProtoLoaderSource<unknown>[],
-  Data extends Record<string, unknown>,
-> =
-  | {
-      groupBy?: never;
-      transform?: AtProtoRecordTransform<Sources, AtProtoStaticDataEntry<Data>>;
-    }
-  | {
-      groupBy: AtProtoRecordGroupBy<Sources>;
-      transform: AtProtoRecordGroupTransform<
-        Sources,
-        AtProtoStaticDataEntry<Data>
-      >;
-    };
-
 export type AtProtoStaticLoaderOptions<
   Sources extends readonly AtProtoLoaderSource<unknown>[],
   Data extends Record<string, unknown>,
 > = AtProtoRecordFilterOptions<Sources> & {
+  /**
+   * Cache shared by this loader. Pass the same cache to several loaders to
+   * share identity and hydrated record results between them.
+   *
+   *  Omit it to use the default.
+   */
+  cache?: AtProtoCache;
   /**
    * What to do when a single source fails. Defaults to `'throw'` everywhere,
    * so a broken source fails the build instead of quietly publishing partial
@@ -56,7 +47,7 @@ export type AtProtoStaticLoaderOptions<
    */
   onSourceError?: OnSourceError;
 } & AtProtoSourceOptions<Sources> &
-  AtProtoStaticTransformOptions<Sources, Data>;
+  AtProtoTransformOptions<Sources, AtProtoStaticDataEntry<Data>>;
 
 export const atProtoStaticLoader = <
   const Sources extends readonly AtProtoLoaderSource<unknown>[],
@@ -65,28 +56,14 @@ export const atProtoStaticLoader = <
   options: AtProtoStaticLoaderOptions<Sources, Data>,
 ): Loader => {
   const sources = normalizeSources<Sources>(options);
-  const fallbackTransform =
-    sources.length > 1 ? toNamespacedEntry<Data> : toRkeyEntry<Data>;
-  const callbacks: AtProtoRecordCallbacks<
+  const callbacks = resolveRecordCallbacks<
     Sources,
+    Data,
     AtProtoStaticDataEntry<Data>
-  > = "groupBy" in options && options.groupBy
-    ? {
-        filter: options.filter,
-        groupBy: options.groupBy,
-        transform: options.transform,
-      }
-    : {
-        filter: options.filter,
-        transform:
-          options.transform ??
-          (fallbackTransform as AtProtoRecordTransform<
-            Sources,
-            AtProtoStaticDataEntry<Data>
-          >),
-      };
+  >(sources, options);
 
   const onSourceError: OnSourceError = options.onSourceError ?? "throw";
+  const caches = options.cache ?? defaultAtProtoCache;
 
   return {
     name: "atproto-loader",
@@ -96,6 +73,7 @@ export const atProtoStaticLoader = <
         sources,
         callbacks,
         onSourceError,
+        caches,
       });
 
       context.store.clear();
@@ -123,6 +101,11 @@ type StaticBaseConfig<
   Schema extends SchemaLike,
 > = {
   outputSchema: Schema;
+  /**
+   * Cache shared by this collection's loader. Omit it to use the
+   * process-wide default.
+   */
+  cache?: AtProtoCache;
   onSourceError?: OnSourceError;
 } & AtProtoRecordFilterOptions<Sources>;
 
