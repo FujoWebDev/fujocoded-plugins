@@ -1,5 +1,34 @@
 # @fujocoded/zod-transform-socials
 
+## 0.1.1
+
+### Patch Changes
+
+- [`9ffed2b`](https://github.com/FujoWebDev/fujocoded-plugins/commit/9ffed2b03770b4e7da60fcc74f2af35e6991e41b) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Tighten and extend Bluesky profile URL matching. The `bsky.app`/`bsky.social`
+  profile form now validates the handle as a real domain and additionally
+  recognizes DID handles such as `did:plc:…` and `did:web:…`.
+
+  Also escapes the literal dots in every platform's match pattern so lookalike
+  hosts no longer match by accident.
+
+- [`9ffed2b`](https://github.com/FujoWebDev/fujocoded-plugins/commit/9ffed2b03770b4e7da60fcc74f2af35e6991e41b) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Recognize unscoped npm packages. The npm match previously required a scope, so
+  URLs like `npmjs.com/package/social-links` fell through to `custom`; they now
+  resolve to the `npm` platform. Underscores are also accepted in package names.
+
+- [#48](https://github.com/FujoWebDev/fujocoded-plugins/pull/48) [`f1d01c7`](https://github.com/FujoWebDev/fujocoded-plugins/commit/f1d01c724952543c0d6d3d111cce48ab4405f7bf) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Exports `SocialLinkObjectSchema` so projects can extend the object form of a
+  social link without rebuilding the whole schema. `SocialLinkInputSchema` is also
+  available as the clearer name for the default one-item input schema, with
+  matching `SocialLinkObject` and `SocialLinkInput` types.
+
+  Adds standalone examples for preserving custom fields like `label` through
+  the transform.
+
 ## 0.1.0
 
 ### Minor Changes

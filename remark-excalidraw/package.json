@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/remark-excalidraw",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Load excalidraw diagrams via remark",
   "keywords": [
     "excalidraw",

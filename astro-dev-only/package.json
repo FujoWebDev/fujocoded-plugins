@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/astro-dev-only",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "An Astro integration for development-only pages",
   "keywords": [
     "astro-integration",
