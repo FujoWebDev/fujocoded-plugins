@@ -26,7 +26,7 @@ const hasChangelogEntry = (changelog, version) =>
     return headingText === version;
   });
 
-const getPublicWorkspacePackages = (repoRoot) =>
+export const getPublicWorkspacePackages = (repoRoot) =>
   getPackagesSync(repoRoot)
     .packages.filter(
       ({ packageJson }) => !packageJson.private && packageJson.name,
@@ -126,6 +126,10 @@ export const assertVersionedReleasePackage = (pkg, { repoRoot } = {}) => {
 };
 
 const getReleaseCandidates = (phase, repoRoot) => {
+  if (phase === "trust") {
+    return getPublicWorkspacePackages(repoRoot);
+  }
+
   if (phase === "prepare") {
     return getReleasePrepareCandidates(repoRoot);
   }
@@ -189,7 +193,9 @@ export const resolveReleasePackage = async ({
   const requirement =
     phase === "prepare"
       ? "It must be public and referenced by a pending changeset."
-      : "It must be public and have a CHANGELOG entry matching its current version.";
+      : phase === "trust"
+        ? "It must be a public workspace package."
+        : "It must be public and have a CHANGELOG entry matching its current version.";
   throw new Error(
     `${requestedPublicPackage.name} is not a release ${phase} candidate. ${requirement}`,
   );

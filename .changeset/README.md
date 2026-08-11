@@ -9,12 +9,14 @@ need to understand the release modes or debug an unexpected failure.
 
 ## Quick reference
 
-| I want to...                                          | Section                                                             | Command                                                                                              |
-| ----------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Ship a changeset through the normal main-merge flow   | [Regular flow](#regular-flow-release-everything-at-once)            | `npx changeset`; merge PR; merge the Release PR                                                      |
-| Ship one package immediately                          | [Single-package flow](#single-package-flow-release-one-package-now) | `cd .changeset && npm run release -- @fujocoded/<pkg>`                                               |
-| Publish a beta/prerelease of all packages             | [Prerelease flow](#prerelease-flow-ship-betas-of-everything)        | `npx changeset pre enter <tag>` + `npx changeset version`, then dispatch workflow `mode: prerelease` |
-| Set up a brand-new package for NPM Trusted Publishing | [New-package bootstrap](#new-package-bootstrap)                     | `cd .changeset && npm run release:bootstrap -- @fujocoded/<pkg>`                                     |
+| I want to...                                           | Section                                                             | Command                                                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Ship a changeset through the normal main-merge flow    | [Regular flow](#regular-flow-release-everything-at-once)            | `npx changeset`; merge PR; merge the Release PR                                                      |
+| Ship one package immediately                           | [Single-package flow](#single-package-flow-release-one-package-now) | `cd .changeset && npm run release -- @fujocoded/<pkg>`                                               |
+| Publish a beta/prerelease of all packages              | [Prerelease flow](#prerelease-flow-ship-betas-of-everything)        | `npx changeset pre enter <tag>` + `npx changeset version`, then dispatch workflow `mode: prerelease` |
+| Set up a brand-new package for NPM Trusted Publishing  | [New-package setup](#new-package-setup)                             | `cd .changeset && npm run release:trust -- @fujocoded/<pkg>`                                         |
+| See which packages lack Trusted Publishing (read-only) | [Every package at once](#every-package-at-once)                     | `cd .changeset && npm run release:trust -- --all --dry-run`                                          |
+| Configure Trusted Publishing everywhere it is missing  | [Every package at once](#every-package-at-once)                     | `cd .changeset && npm run release:trust -- --all`                                                    |
 
 ## Regular flow
 
@@ -107,11 +109,12 @@ npm run release -- @fujocoded/astro-smooth-actions
 This command:
 
 - Checks whether the package is already on the npm registry
-- If it is not, bootstraps it: publishes `0.0.0` locally, deprecates it, and
+- If it is not, sets it up: publishes `0.0.0` locally, deprecates it, and
   runs `npm trust github` to configure Trusted Publishing
-- If it is on npm at `0.0.0` but Trusted Publishing isn't configured (e.g. a
-  previous bootstrap failed at the trust step), deprecates `0.0.0` if needed
-  and runs just the trust step without re-publishing
+- If it is on npm but Trusted Publishing isn't configured, either because a previous
+  attempt failed at the trust step, or the package predates Trusted Publishing
+  and was published with a classic token: runs just the trust step without
+  re-publishing. Never deprecates a real release.
 - Asks whether to release the package immediately or leave it for the regular
   main-merge flow
 
@@ -137,7 +140,7 @@ npm run release -- @fujocoded/astro-smooth-actions --dry-run
 > accumulated prerelease state across the whole branch. Release everything
 > together (the [prerelease flow](#prerelease-flow)) or exit pre mode first.
 
-### New-package bootstrap
+### New-package setup
 
 NPM Trusted Publishing cannot be configured until a package already exists on
 the registry. For a brand-new package we therefore publish a `0.0.0` placeholder
@@ -145,28 +148,79 @@ locally, deprecate it, and configure trust. After that, the package can publish
 through GitHub Actions OIDC like every other package.
 
 The top-level `release` command detects an unpublished package and runs the
-bootstrap automatically. To run the bootstrap step by itself:
+trust setup automatically. To run it by itself:
 
 ```bash
 cd .changeset
-npm run release:bootstrap -- @fujocoded/astro-smooth-actions
+npm run release:trust -- @fujocoded/astro-smooth-actions
 ```
 
 > [!WARNING]
-> Before bootstrapping, confirm that:
+> Before running it, confirm that:
 >
 > - You are logged in to npm (check with `npm whoami`)
-> - The package is at version `0.0.0` in its `package.json` and has a pending
->   changeset
+> - If the package has never been published, it is at version `0.0.0` in its
+>   `package.json`
 
-This step:
+`release:trust` asks npm whether Trusted Publishing is already configured, and does
+whichever of these applies:
 
-- Builds the package and runs `npm publish --access public` at `0.0.0`
-- Deprecates `0.0.0` with a message pointing to `0.0.1` or later
-- Runs `npm trust github <package> --repo FujoWebDev/fujocoded-plugins --file release.yaml --allow-publish`
+| On npm                   | What runs                                          |
+| ------------------------ | -------------------------------------------------- |
+| Not published            | build → publish `0.0.0` → deprecate it → trust     |
+| Published at `0.0.0`     | deprecate `0.0.0` if it isn't already → trust      |
+| Published above `0.0.0`  | trust only — nothing published, nothing deprecated |
+| Published, trust present | nothing                                            |
+
+The trust step is:
+
+```bash
+npm trust github <package> --repo FujoWebDev/fujocoded-plugins --file release.yaml --allow-publish
+```
+
+Only the `0.0.0` placeholder is ever deprecated; a real release never is. Row 2
+is a partly-finished setup — a previous run published `0.0.0` and then died
+before configuring trust. Row 3 is a package that predates Trusted Publishing in
+this repo and was published with a classic token; it needs trust attached but
+must not be touched otherwise.
+
+The first row is the only one that publishes, and it is the only one that
+requires the manifest to be at `0.0.0` — otherwise the command refuses rather
+than publishing a placeholder over a real version number.
+
+None of this requires a pending changeset: configuring trust is independent of
+releasing.
 
 The `0.0.0` placeholder remains on npm but is deprecated and hidden from default
 installs. It exists only so Trusted Publishing can be configured.
+
+#### Every package at once
+
+To see which packages are missing Trusted Publishing, without changing anything:
+
+```bash
+cd .changeset
+npm run release:trust -- --all --dry-run
+```
+
+This is read-only. It prints the trust commands it would run and a per-package
+summary, and touches neither npm nor the repo.
+
+To actually configure the ones that are missing it:
+
+```bash
+cd .changeset
+npm run release:trust -- --all
+```
+
+This **writes to npm**: every package without Trusted Publishing gets it
+configured. Packages that already have it are left untouched, and nothing is
+published or deprecated for a package that is already on npm at a real version.
+
+Each package is independent: if one fails — an expired npm session is the usual
+cause, since the OTP challenge can reappear part way through — it is recorded
+and the run continues, then the command exits non-zero with a per-package
+summary. Re-running is safe and only retries what is still missing.
 
 ### Other single-package commands
 
@@ -188,9 +242,9 @@ under the package and runs focused checks.
 
 > [!WARNING]
 > `release:prepare` assumes the package already exists on npm with Trusted
-> Publishing configured. It will prepare a release for an unbootstrapped
-> package, but the dispatch step will then fail. Use `release:bootstrap` (or the
-> top-level `release` command, which bootstraps first) for new packages.
+> Publishing configured. It will prepare a release for a package without trust
+> configured, but the dispatch step will then fail. Use `release:trust` (or the
+> top-level `release` command, which runs it first) for such packages.
 
 #### Dispatch the single-package workflow
 
@@ -243,13 +297,13 @@ a branch that has `pre.json` plus exactly one versioned package.
 
 ## Command summary
 
-| Command             | What it does                                                   |
-| ------------------- | -------------------------------------------------------------- |
-| `release`           | Bootstrap if needed, then version + dispatch + sync-back       |
-| `release:bootstrap` | Publish `0.0.0`, deprecate it, configure Trusted Publishing    |
-| `release:prepare`   | Version one package on a temporary branch                      |
-| `release:dispatch`  | Push branch, trigger `release.yaml`, watch, sync back          |
-| `release:sync-back` | Carry versioned state from a release branch to a target branch |
+| Command             | What it does                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `release`           | Configure trust if needed, then version + dispatch + sync-back                             |
+| `release:trust`     | Configure Trusted Publishing, publishing a `0.0.0` placeholder first if the package is new |
+| `release:prepare`   | Version one package on a temporary branch                                                  |
+| `release:dispatch`  | Push branch, trigger `release.yaml`, watch, sync back                                      |
+| `release:sync-back` | Carry versioned state from a release branch to a target branch                             |
 
 ## Common flags
 
@@ -260,7 +314,7 @@ If you don't pass a package name, you get an interactive prompt to pick one.
 
 ### `release`
 
-`release` combines bootstrap, prepare, and dispatch, so it accepts flags that
+`release` combines trust setup, prepare, and dispatch, so it accepts flags that
 affect the prepare and dispatch phases.
 
 - `--branch <name>` — use this branch name in `release:prepare`, skipping the
@@ -270,8 +324,10 @@ affect the prepare and dispatch phases.
 - `--allow-dirty` — allow dispatch when the working tree is not clean
 - `--dry-run` — show planned operations
 
-### `release:bootstrap`
+### `release:trust`
 
+- `--all` — check every public package and configure the ones missing Trusted
+  Publishing; takes no package name
 - `--dry-run` — show planned operations
 
 ### `release:prepare`
