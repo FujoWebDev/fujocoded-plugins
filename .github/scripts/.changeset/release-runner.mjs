@@ -6,10 +6,11 @@ import {
   getPendingChangesets,
   resolveReleasePackage,
 } from "./release-packages.mjs";
+import { dispatchRelease as runDispatchRelease } from "./release-dispatch.mjs";
 import {
-  bootstrapRelease as runBootstrapRelease,
-  dispatchRelease as runDispatchRelease,
-} from "./release-dispatch.mjs";
+  ensureTrustAll as runEnsureTrustAll,
+  ensureTrust as runEnsureTrust,
+} from "./release-trust.mjs";
 import { syncBackRelease as runSyncBackRelease } from "./release-sync-back.mjs";
 
 const run = (cmd, args, options = {}) => {
@@ -291,13 +292,20 @@ export const dispatchRelease = async (context) =>
     helpers: {
       assertCleanTree,
       capture,
+      findLockfilePackageDirs,
       getBranchName,
       run,
     },
   });
 
-export const bootstrapRelease = async (context) =>
-  runBootstrapRelease({
+export const ensureTrust = async (context) =>
+  runEnsureTrust({
+    ...context,
+    run,
+  });
+
+export const ensureTrustAll = async (context) =>
+  runEnsureTrustAll({
     ...context,
     run,
   });
