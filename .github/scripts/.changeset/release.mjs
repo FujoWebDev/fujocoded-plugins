@@ -208,7 +208,11 @@ program
     "--allow-dirty",
     "allow running dispatch with an uncommitted working tree",
   )
-  .option("--remote <remote>", "git remote to push the release branch to", defaultRemote)
+  .option(
+    "--remote <remote>",
+    "git remote to push the release branch to",
+    defaultRemote,
+  )
   .option("--dry-run", "show planned operations without applying changes")
   .action(release);
 
@@ -256,7 +260,11 @@ program
     "branch to sync release state back to after publish",
   )
   .option("--commit", "prompt for a local sync-back commit after publishing")
-  .option("--remote <remote>", "git remote to push the release branch to", defaultRemote)
+  .option(
+    "--remote <remote>",
+    "git remote to push the release branch to",
+    defaultRemote,
+  )
   .option("--dry-run", "show planned operations without applying changes")
   .action(dispatch);
 

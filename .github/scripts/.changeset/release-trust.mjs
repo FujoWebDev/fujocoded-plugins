@@ -379,8 +379,17 @@ export const ensureTrust = async ({
 // hide the state of the others. The summary at the end is the point of the
 // command; re-running it is safe and only touches whatever is still missing.
 export const ensureTrustAll = async (context) => {
-  const { confirmYes, logStep, note, options, outro, repo, repoRoot, run, workflow } =
-    context;
+  const {
+    confirmYes,
+    logStep,
+    note,
+    options,
+    outro,
+    repo,
+    repoRoot,
+    run,
+    workflow,
+  } = context;
   const packages = getPublicWorkspacePackages(repoRoot);
 
   if (packages.length === 0) {
