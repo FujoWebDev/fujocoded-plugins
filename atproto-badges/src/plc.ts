@@ -1,4 +1,4 @@
-import type { AtpAgent } from "@atproto/api";
+import type { AtpBaseClient } from "@atproto/api";
 
 /**
  * Publish your public signing key to your DID document, so others can
@@ -21,7 +21,7 @@ export async function addAttestationVerificationMethod({
   token,
   plcDirectoryUrl,
 }: {
-  agent: AtpAgent;
+  agent: AtpBaseClient;
   did: string;
   publicDidKey: string;
   token: string;

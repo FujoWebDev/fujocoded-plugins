@@ -32,34 +32,6 @@ Under the hood, it handles the cryptographic attestation (DAG-CBOR hashing,
 P-256 signing, PLC document updates) so you can focus on when and why to award
 badges, not how the signatures work.
 
-## What's included in `@fujocoded/atproto-badges`?
-
-In this package, you'll find utilities to manage:
-
-- **Key management**
-  - `generateSigningKeys` creates a new key pair for signing badges
-  - `loadSigningKey` loads a previously saved key so you can sign with it again
-- **Badge definitions**
-  - `createBadgeDefinition` creates a new badge type on your PDS
-  - `findExistingBadgeDefinition` checks if a badge type already exists, so you
-    don't create duplicates
-- **Badge awards**
-  - `createBadgeAwardRecord` builds a signed badge award, ready to write to a
-    recipient's PDS
-  - `getExistingBadgeAward` checks if someone already has a particular badge
-  - `getBadgeRkey` gives you a deterministic record key, so concurrent requests
-    don't create duplicate awards
-- **PLC updates**
-  - `addAttestationVerificationMethod` publishes your public key to your DID
-    document, so others can verify your signatures
-- **Verification**
-  - `verifyBadgeAward` checks whether a badge award's signature is legit — looks
-    up the issuer's DID document and verifies the cryptographic signature
-- **Lower-level signing** (if you're building something custom)
-  - `createRecordSignature` signs any ATProto record, not just badges
-  - `getRecordHash` computes the hash that gets signed — useful for verification
-    or multi-signer workflows
-
 ## What can you do with `@fujocoded/atproto-badges`?
 
 - **Award participation badges for events & exchanges:** give artists, writers,
@@ -73,6 +45,34 @@ In this package, you'll find utilities to manage:
 - **Build tools to mint and manage badges:** these bad ~~boy~~badges can fit so
   many use cases within them!
 
+## What's included in `@fujocoded/atproto-badges`?
+
+In this package, you'll find utilities for:
+
+- **Handling Keys**
+  - `generateSigningKeys` creates a new key pair for signing badges
+  - `loadSigningKey` loads a previously saved key so you can sign with it again
+- **Defining Badge**
+  - `createBadgeDefinition` creates a new badge type on your PDS
+  - `findExistingBadgeDefinition` checks if a badge type already exists, so you
+    don't create duplicates
+- **Awarding Badge**
+  - `createBadgeAwardRecord` builds a signed badge award, ready to write to a
+    recipient's PDS
+  - `getExistingBadgeAward` checks if someone already has a particular badge
+  - `getBadgeRkey` gives you a deterministic record key, so concurrent requests
+    don't create duplicate awards
+- **Updating your DID Document**
+  - `addAttestationVerificationMethod` publishes your public key to your DID
+    document, so others can verify your signatures
+- **Badge Awards Verification**
+  - `verifyBadgeAward` checks whether a badge award's signature is "real" by looking
+    up the issuer's DID document and matching their cryptographic signature
+- **Lower-level signing** (if you're building your own)
+  - `createRecordSignature` signs any ATProto record, not just badges
+  - `getRecordHash` computes the hash that gets signed — useful for verification
+    or multi-signer workflows
+
 ## Installation
 
 ```bash
@@ -81,9 +81,7 @@ npm add @fujocoded/atproto-badges
 
 ## Getting started
 
-Here's the typical flow, from setup to awarding your first badge.
-
-At high level:
+The typical flow, from setup to awarding your first badge:
 
 1. Generate your secret key to sign badges with <u>and store them safely!</u>
 2. Publish your public key on your Identity Document™
@@ -92,8 +90,8 @@ At high level:
 
 ### 1. Generate your signing key
 
-This generates your super ultra mega secret credentials that allow you to sign
-badges, pinkie-promising it is indeed you. <u>You only need to do this once!</u>
+Create your super ultra mega secret credentials that allow you to sign
+badges...and prove you did! <u>You only need to do this once!</u>
 
 ```ts
 import fs from "node:fs";
@@ -102,6 +100,8 @@ import { generateSigningKeys } from "@fujocoded/atproto-badges";
 const keys = await generateSigningKeys();
 
 // If you want, you can save them to files
+// This is not the only way to store these, just make sure
+// no one gets your private key!
 
 // This will be BADGE_PRIVATE_KEY in your secrets
 fs.writeFileSync("./private.key", keys.privateKeyBase64url);
@@ -253,7 +253,7 @@ await agent.com.atproto.repo.putRecord({
 - `getBadgeRkey` derives the record key from the badge definition URI. This
   means awarding the same badge definition to the same person always targets the
   same record (easier to avoid duplicates!).
-- This package handles signing and data — you bring your own `AtpAgent`,
+- This package handles signing and data — you bring your own `AtpBaseClient`,
   authentication, and app logic around it.
 
 > [!WARNING]

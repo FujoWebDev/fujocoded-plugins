@@ -1,4 +1,4 @@
-import type { AtpAgent } from "@atproto/api";
+import type { AtpBaseClient } from "@atproto/api";
 import { XRPCError } from "@atproto/xrpc";
 import { createHash } from "node:crypto";
 
@@ -47,7 +47,7 @@ export async function getExistingBadgeAward({
   did,
   badgeDefinitionUri,
 }: {
-  agent: AtpAgent;
+  agent: AtpBaseClient;
   did: string;
   badgeDefinitionUri: string;
 }): Promise<{ uri: string; value: Record<string, unknown> } | null> {
@@ -85,7 +85,7 @@ export async function findExistingBadgeDefinition({
   did,
   name,
 }: {
-  agent: AtpAgent;
+  agent: AtpBaseClient;
   did: string;
   name: string;
 }): Promise<{ uri: string; cid: string } | null> {
@@ -129,7 +129,7 @@ export async function createBadgeDefinition({
   name,
   description,
 }: {
-  agent: AtpAgent;
+  agent: AtpBaseClient;
   did: string;
   name: string;
   description?: string;
