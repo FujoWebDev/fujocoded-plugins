@@ -34,10 +34,8 @@ export type CreateSocialLinksConfig = {
   domains?: DomainShortcuts;
 };
 
-export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
-  const socialLinks = new SocialLinksLib();
-
-  const tumblrMatches: ProfileMatch[] = [
+const CUSTOM_PROFILE_MATCHES = {
+  tumblr: [
     {
       match: "https?://www\\.tumblr\\.com/([a-z0-9-]+)/?.*",
       // TODO: more may be necessary for things like extracting usernames
@@ -49,33 +47,26 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
       // TODO: more may be necessary for things like extracting usernames
       group: 1,
     },
-  ];
-  socialLinks.addProfile("tumblr", tumblrMatches);
-  const kofiMatches: ProfileMatch[] = [
+  ],
+  "ko-fi": [
     {
       match: "https?://ko-fi\\.com/([a-z0-9-_]+)",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("ko-fi", kofiMatches);
-
-  const inprntMatches: ProfileMatch[] = [
+  ],
+  inprnt: [
     {
       match: "https?://(?:www\\.)?inprnt\\.com/gallery/([a-z0-9-]+)/?",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("inprnt", inprntMatches);
-
-  const neocitiesMatches: ProfileMatch[] = [
+  ],
+  neocities: [
     {
       match: "https?://([a-z0-9-]+)\\.neocities\\.org",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("neocities", neocitiesMatches);
-
-  const blueSkyMatches: ProfileMatch[] = [
+  ],
+  bsky: [
     {
       match: "https?://([a-z0-9-]+)\\.bsky\\.(?:app|social)/?.*",
       group: 1,
@@ -84,52 +75,40 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
       match: `https?://bsky\\.(?:app|social)/profile/(${HANDLE}|${DID})/?.*`,
       group: 1,
     },
-  ];
-  replaceMatches(socialLinks, "bsky", blueSkyMatches);
-
-  const ao3Matches: ProfileMatch[] = [
+  ],
+  archiveofourown: [
     {
       match: "https?://archiveofourown\\.org/users/([a-z0-9-]+)",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("archiveofourown", ao3Matches);
-
-  const dreamwidthMatches: ProfileMatch[] = [
+  ],
+  dreamwidth: [
     {
       match: "https?://([a-z0-9-]+)\\.dreamwidth\\.org",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("dreamwidth", dreamwidthMatches);
-
-  const furaffinityMatches: ProfileMatch[] = [
+  ],
+  furaffinity: [
     {
       match: "https?://www\\.furaffinity\\.net/user/([a-z0-9-]+)",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("furaffinity", furaffinityMatches);
-
-  const carrdMatches: ProfileMatch[] = [
+  ],
+  carrd: [
     {
       match: "https?://([a-z0-9-]+)\\.carrd\\.co/?",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("carrd", carrdMatches);
-
-  const kickstarterMatches: ProfileMatch[] = [
+  ],
+  kickstarter: [
     {
       // https://www.kickstarter.com/projects/essential-randomness/the-fujoshi-guide-to-web-development
       match:
         "https?://www\\.kickstarter\\.com/projects/[a-z0-9-]+/([a-z0-9-]+)/?",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("kickstarter", kickstarterMatches);
-
-  const npmMatches: ProfileMatch[] = [
+  ],
+  npm: [
     {
       // Scoped and unscoped packages, e.g.
       // `npmjs.com/package/@bobaboard/ao3.js` or `npmjs.com/package/social-links`.
@@ -137,8 +116,19 @@ export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
         "https?://www\\.npmjs\\.com/package/((?:@[a-z0-9-._]+/)?[a-z0-9-._]+)/?",
       group: 1,
     },
-  ];
-  socialLinks.addProfile("npm", npmMatches);
+  ],
+} satisfies Record<string, ProfileMatch[]>;
+
+type CUSTOM_TYPES = keyof typeof CUSTOM_PROFILE_MATCHES;
+
+export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
+  const socialLinks = new SocialLinksLib();
+
+  for (const [platform, matches] of Object.entries(
+    CUSTOM_PROFILE_MATCHES,
+  ) as [CUSTOM_TYPES, ProfileMatch[]][]) {
+    socialLinks.addProfile(platform, matches);
+  }
 
   // Social Links does not give us a way to add extra matches
   // but we chose to make it happen anyway.
@@ -187,15 +177,6 @@ const appendMatches = (
   socialLinks.profiles.set(platform, [...existing, ...matches]);
 };
 
-const replaceMatches = (
-  socialLinks: SocialLinksLib,
-  platform: string,
-  matches: ProfileMatch[],
-) => {
-  // @ts-expect-error profiles is private on SocialLinks
-  socialLinks.profiles.set(platform, matches);
-};
-
 // This top-level call is safe even under `"sideEffects": false` in package.json
 // because the logic in `createSocialLinks` only mutates the returned
 //  object, and doesn't touch anything observable from outside the package.
@@ -209,7 +190,6 @@ type LIBRARY_TYPES =
   | "exercism"
   | "facebook"
   | "github"
-  | "index"
   | "instagram"
   | "keybase"
   | "lemmy_world"
@@ -229,16 +209,5 @@ type LIBRARY_TYPES =
   | "twitter"
   | "vk"
   | "youtube";
-
-type CUSTOM_TYPES =
-  | "archiveofourown"
-  | "bsky"
-  | "dreamwidth"
-  | "inprnt"
-  | "kickstarter"
-  | "ko-fi"
-  | "neocities"
-  | "npm"
-  | "tumblr";
 
 export type SOCIAL_TYPES = LIBRARY_TYPES | CUSTOM_TYPES | "custom";
