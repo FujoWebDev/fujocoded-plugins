@@ -1,5 +1,14 @@
 # @fujocoded/astro-atproto-loader
 
+## 0.2.3
+
+### Patch Changes
+
+- [`524ddcf`](https://github.com/FujoWebDev/fujocoded-plugins/commit/524ddcf0bb5c97eae1f5872cd7ba03af591a7b3c) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Declare Astro 7 support, update the AtProto client dependencies, and add the
+  ability to override fetch in the cache. Deprecates Node < 22.
+
 ## 0.2.2
 
 ### Patch Changes
