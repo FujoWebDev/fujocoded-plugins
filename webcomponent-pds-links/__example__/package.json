@@ -1,0 +1,20 @@
+{
+  "name": "example",
+  "type": "module",
+  "version": "0.0.1",
+  "private": "true",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@atproto/identity": "^0.4.9",
+    "@fujocoded/zod-transform-socials": "^0.0.12",
+    "astro": "^5.12.9"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

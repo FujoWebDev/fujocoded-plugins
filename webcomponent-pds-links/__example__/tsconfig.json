@@ -1,0 +1,12 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["DOM", "ES2024"],
+    "module": "esnext",
+    "sourceMap": true,
+    "allowJs": true,
+    "moduleResolution": "node"
+  },
+  "exclude": ["dist"]
+}
