@@ -6,13 +6,13 @@ import { afterEach, expect, test, vi } from "vitest";
 import { server } from "../msw/server.ts";
 import { trackXrpcRequests } from "../msw/track-requests.ts";
 import {
-  createAtProtoCache,
   HYDRATED_RECORD_CACHE_TTL,
   HYDRATED_RECORD_NOT_FOUND_TTL,
   HYDRATED_RECORD_RETRY_TTL,
   type AtProtoCache,
 } from "../../src/cache/index.ts";
 import { defineAtProtoLiveCollection } from "../../src/index.ts";
+import { createTestAtProtoCache } from "../msw/install.ts";
 
 vi.mock("astro/content/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("astro/content/config")>();
@@ -64,12 +64,13 @@ test("shares public fetchRecord results across loaders", async () => {
   installSource();
   const calls = trackXrpcRequests(server);
 
-  const firstLoader = createPublicLoader();
-  const secondLoader = createPublicLoader();
+  const cache = createTestAtProtoCache();
+  const firstLoader = createPublicLoader(cache);
+  const secondLoader = createPublicLoader(cache);
 
-  const first = await firstLoader.loadCollection({});
+  const first = await firstLoader.loadCollection({ collection: "test" });
   now = HYDRATED_RECORD_CACHE_TTL - 1;
-  const shared = await secondLoader.loadCollection({});
+  const shared = await secondLoader.loadCollection({ collection: "test" });
 
   expect(first).toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 1 } } } }],
@@ -81,26 +82,30 @@ test("shares public fetchRecord results across loaders", async () => {
 });
 
 test("expires hydrated records after five minutes", async () => {
-  const cache = createAtProtoCache();
+  const cache = createTestAtProtoCache();
   let now = 0;
   vi.spyOn(Date, "now").mockImplementation(() => now);
   const repo = installSource();
   const calls = trackXrpcRequests(server);
   const loader = createPublicLoader(cache);
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 1 } } } }],
   });
 
   repo.seed(HYDRATED_COLLECTION, [{ rkey: "shared", value: { version: 2 } }]);
   now = HYDRATED_RECORD_CACHE_TTL - 1;
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 1 } } } }],
   });
   expect(calls.count(PDS, GET_RECORD)).toBe(1);
 
   now = HYDRATED_RECORD_CACHE_TTL;
-  const expired = await loader.loadCollection({});
+  const expired = await loader.loadCollection({ collection: "test" });
 
   expect(expired).toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 2 } } } }],
@@ -113,23 +118,27 @@ test("keeps explicitly separate loader caches isolated", async () => {
   vi.spyOn(Date, "now").mockImplementation(() => now);
   const repo = installSource();
 
-  const firstLoader = createPublicLoader(createAtProtoCache());
-  const secondLoader = createPublicLoader(createAtProtoCache());
+  const firstLoader = createPublicLoader(createTestAtProtoCache());
+  const secondLoader = createPublicLoader(createTestAtProtoCache());
 
-  await expect(firstLoader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    firstLoader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 1 } } } }],
   });
 
   repo.seed(HYDRATED_COLLECTION, [{ rkey: "shared", value: { version: 2 } }]);
   now = 1;
 
-  await expect(secondLoader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    secondLoader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: { value: { version: 2 } } } }],
   });
 });
 
 test("retries public fetchRecord failures after the fixed five-second floor", async () => {
-  const cache = createAtProtoCache();
+  const cache = createTestAtProtoCache();
   let now = 0;
   vi.spyOn(Date, "now").mockImplementation(() => now);
   vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -146,22 +155,28 @@ test("retries public fetchRecord failures after the fixed five-second floor", as
   const firstLoader = createPublicLoader(cache);
   const secondLoader = createPublicLoader(cache);
 
-  await expect(firstLoader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    firstLoader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
   now = HYDRATED_RECORD_RETRY_TTL - 1;
-  await expect(secondLoader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    secondLoader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
 
   now = HYDRATED_RECORD_RETRY_TTL;
-  await expect(secondLoader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    secondLoader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: { value: { recovered: true } } } }],
   });
 });
 
 test("holds record-not-found failures for the full five-minute TTL", async () => {
-  const cache = createAtProtoCache();
+  const cache = createTestAtProtoCache();
   let now = 0;
   vi.spyOn(Date, "now").mockImplementation(() => now);
   vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -180,27 +195,33 @@ test("holds record-not-found failures for the full five-minute TTL", async () =>
 
   const loader = createPublicLoader(cache);
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
   expect(getRecordCalls).toBe(1);
 
   // Past the transient retry floor: a missing record must stay cached.
   now = HYDRATED_RECORD_RETRY_TTL;
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
   expect(getRecordCalls).toBe(1);
 
   now = HYDRATED_RECORD_NOT_FOUND_TTL;
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
   expect(getRecordCalls).toBe(2);
 });
 
 test("holds non-object record values for the full five-minute TTL", async () => {
-  const cache = createAtProtoCache();
+  const cache = createTestAtProtoCache();
   let now = 0;
   vi.spyOn(Date, "now").mockImplementation(() => now);
   vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -224,19 +245,23 @@ test("holds non-object record values for the full five-minute TTL", async () => 
 
   const loader = createPublicLoader(cache);
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
 
   now = HYDRATED_RECORD_RETRY_TTL;
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ data: { hydrated: null } }],
   });
   expect(getRecordCalls).toBe(1);
 });
 
 test("deduplicates concurrent same-URI hydration through public loaders", async () => {
-  const cache = createAtProtoCache();
+  const cache = createTestAtProtoCache();
   let getRecordCalls = 0;
   let releaseHydration: (() => void) | undefined;
   installSource();
@@ -257,8 +282,8 @@ test("deduplicates concurrent same-URI hydration through public loaders", async 
   const firstLoader = createPublicLoader(cache);
   const secondLoader = createPublicLoader(cache);
   const pending = Promise.all([
-    firstLoader.loadCollection({}),
-    secondLoader.loadCollection({}),
+    firstLoader.loadCollection({ collection: "test" }),
+    secondLoader.loadCollection({ collection: "test" }),
   ]);
 
   await vi.waitFor(() => expect(getRecordCalls).toBe(1));

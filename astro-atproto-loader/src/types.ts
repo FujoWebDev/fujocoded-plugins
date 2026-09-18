@@ -1,5 +1,6 @@
 import type { ComAtprotoRepoListRecords } from "@atproto/api";
 import type { DidString, HandleString } from "@atproto/syntax";
+import type { BaseSchema } from "astro/content/config";
 
 export type RecordValue = ComAtprotoRepoListRecords.Record["value"];
 export type MaybePromise<Value> = Value | Promise<Value>;
@@ -267,4 +268,6 @@ export type SchemaInput<S> = S extends { readonly _input: infer Input }
     : never
   : never;
 
-export type SchemaLike = { readonly _input: Record<string, unknown> };
+export type SchemaLike = BaseSchema & {
+  readonly _input: Record<string, unknown>;
+};

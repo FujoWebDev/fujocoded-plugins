@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createAtProtoCache } from "../../src/cache/index.ts";
 import { atProtoLiveLoader } from "../../src/loaders/live.ts";
-import { installScriptedRepo, PDS } from "../msw/install.ts";
+import {
+  createTestAtProtoCache,
+  installScriptedRepo,
+  PDS,
+} from "../msw/install.ts";
 
 // Unwraps a loadCollection result so a loader error fails the test with the
 // actual error instead of an `expected false to equal [...]` diff.
@@ -23,7 +26,7 @@ describe("atProtoLiveLoader", () => {
   test("loads a collection, applies the object callback signature, and resolves handles", async () => {
     installScriptedRepo({
       did: "did:plc:resolved-handle",
-      handle: "events.example.com",
+      handle: "events.example.test",
       collection: "community.lexicon.calendar.event",
       pages: [
         [
@@ -56,16 +59,16 @@ describe("atProtoLiveLoader", () => {
     );
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "events.example.com",
+        repo: "events.example.test",
         collection: "community.lexicon.calendar.event",
       },
       filter: filterSpy,
       transform: transformSpy,
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
@@ -82,7 +85,7 @@ describe("atProtoLiveLoader", () => {
         value: { title: "Opening", published: true },
         repo: {
           did: "did:plc:resolved-handle",
-          handle: "events.example.com",
+          handle: "events.example.test",
           pds: PDS,
         },
         collection: "community.lexicon.calendar.event",
@@ -111,7 +114,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -122,7 +125,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
@@ -152,6 +155,7 @@ describe("atProtoLiveLoader", () => {
       { title: string; track: string },
       { track: string }
     >({
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -167,6 +171,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const result = await loader.loadCollection({
+      collection: "test",
       filter: { track: "hallway" },
     });
 
@@ -181,15 +186,15 @@ describe("atProtoLiveLoader", () => {
   test("supports a dedicated single-source `source` option", async () => {
     installScriptedRepo({
       did: "did:plc:source-option",
-      handle: "source.example.com",
+      handle: "source.example.test",
       collection: "site.standard.document",
       pages: [[{ rkey: "doc-1", value: { title: "From source" } }]],
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "source.example.com",
+        repo: "source.example.test",
         collection: "site.standard.document",
       },
       transform: ({ value, rkey, repo, collection }) => ({
@@ -202,14 +207,14 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
         id: "did:plc:source-option/doc-1",
         data: {
           title: "From source",
-          repo: "source.example.com",
+          repo: "source.example.test",
           collection: "site.standard.document",
         },
       },
@@ -219,7 +224,7 @@ describe("atProtoLiveLoader", () => {
   test("defaults to passthrough entries for a single source when transform is omitted", async () => {
     installScriptedRepo({
       did: "did:plc:passthrough-live",
-      handle: "passthrough.example.com",
+      handle: "passthrough.example.test",
       collection: "place.stream.livestream",
       pages: [
         [
@@ -241,13 +246,14 @@ describe("atProtoLiveLoader", () => {
         createdAt: string;
       }
     >({
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "passthrough.example.com",
+        repo: "passthrough.example.test",
         collection: "place.stream.livestream",
       },
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
@@ -280,7 +286,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "bobatan.fujocoded.dev", collection: "site.standard.document" },
         {
@@ -297,7 +303,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
@@ -331,7 +337,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "bobatan.fujocoded.dev", collection: "site.standard.document" },
         {
@@ -341,7 +347,7 @@ describe("atProtoLiveLoader", () => {
       ],
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       {
@@ -378,7 +384,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "did:plc:bobatan", collection: "site.standard.document" },
         { repo: "did:plc:bobatan-alt", collection: "site.standard.document" },
@@ -392,7 +398,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       { id: "shared", data: { titles: ["Bobatan version", "Alt version"] } },

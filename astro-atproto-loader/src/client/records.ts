@@ -11,6 +11,7 @@ import type {
   AtProtoRecordContext,
   RecordValue,
 } from "../types.ts";
+import { getErrorMessage } from "../utils.ts";
 import { getClient, getPds } from "./identity.ts";
 
 export const isRecordValue = (value: unknown): value is RecordValue =>
@@ -41,6 +42,33 @@ export const toRecordContext = async (
     uri: record.uri,
     cid: record.cid,
   };
+};
+
+/**
+ * Run a source's optional `parseRecord` over a record value. It it throws, 
+ * leave the expected resolution to the parent cller.
+ */
+export const parseRecordValue = ({
+  source,
+  context,
+  value,
+}: {
+  source: AtProtoLoaderSource<unknown>;
+  context: AtProtoRecordContext;
+  value: unknown;
+}): { ok: true; value: unknown } | { ok: false } => {
+  if (!source.parseRecord) {
+    return { ok: true, value };
+  }
+
+  try {
+    return { ok: true, value: source.parseRecord(value) };
+  } catch (error) {
+    console.warn(
+      `[atproto-loader] parseRecord threw for ${source.repo}/${source.collection}/${context.rkey}: ${getErrorMessage(error)}`,
+    );
+    return { ok: false };
+  }
 };
 
 export const listRecordsPage = async (

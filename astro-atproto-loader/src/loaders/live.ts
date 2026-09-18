@@ -37,7 +37,6 @@ export interface AtProtoLiveLoaderEntryFilter {
   repo?: string;
   collection?: string;
 }
-
 export interface AtProtoQueryFilterArgs<
   Data extends Record<string, unknown>,
   QueryFilter extends Record<string, unknown>,
@@ -342,9 +341,7 @@ export function defineAtProtoLiveCollection(config: any): any {
     [key: string]: unknown;
   };
   return defineLiveCollection({
-    schema: outputSchema as Parameters<
-      typeof defineLiveCollection
-    >[0]["schema"],
+    schema: outputSchema,
     loader: atProtoLiveLoader(
       loaderOptions as unknown as Parameters<typeof atProtoLiveLoader>[0],
     ),

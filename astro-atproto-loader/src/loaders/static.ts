@@ -2,7 +2,7 @@ import { defineCollection } from "astro/content/config";
 import type { Loader, LoaderContext } from "astro/loaders";
 
 import { defaultAtProtoCache, type AtProtoCache } from "../cache/index.ts";
-import { runPipeline } from "../pipeline/run.ts";
+import { ingestRecords } from "../pipeline/ingestion.ts";
 import type {
   AtProtoLoaderSource,
   AtProtoRecordFilterOptions,
@@ -27,7 +27,6 @@ export interface AtProtoStaticDataEntry<Data extends Record<string, unknown>> {
   body?: string;
   filePath?: string;
 }
-
 export type AtProtoStaticLoaderOptions<
   Sources extends readonly AtProtoLoaderSource<unknown>[],
   Data extends Record<string, unknown>,
@@ -69,7 +68,7 @@ export const atProtoStaticLoader = <
     name: "atproto-loader",
 
     async load(context: LoaderContext) {
-      const entries = await runPipeline({
+      const entries = await ingestRecords({
         sources,
         callbacks,
         onSourceError,
@@ -196,7 +195,7 @@ export function defineAtProtoCollection(config: any): any {
     [key: string]: unknown;
   };
   return defineCollection({
-    schema: outputSchema as Parameters<typeof defineCollection>[0]["schema"],
+    schema: outputSchema,
     loader: atProtoStaticLoader(
       loaderOptions as unknown as Parameters<typeof atProtoStaticLoader>[0],
     ),

@@ -1,6 +1,7 @@
 import {
   isRecordValue,
   listRecordsPage,
+  parseRecordValue,
   toRecordContext,
 } from "../client/records.ts";
 import type { AtProtoCache } from "../cache/index.ts";
@@ -11,7 +12,6 @@ import type {
   AtProtoRecordFilterOptions,
   FetchRecord,
 } from "../types.ts";
-import { getErrorMessage } from "../utils.ts";
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -51,7 +51,6 @@ const resolveRecordsFetchWindow = (
     maxPages: maxPages ?? 1,
   };
 };
-
 /**
  * Fetch, parse, and filter one source into a flat list of callback args.
  *
@@ -109,21 +108,16 @@ export const fetchFromSource = async <
 
       const context = await toRecordContext(source, record, caches);
 
-      let value: unknown = record.value;
-      if (source.parseRecord) {
-        try {
-          value = source.parseRecord(record.value);
-        } catch (error) {
-          console.warn(
-            `[atproto-loader] parseRecord threw for ${source.repo}/${source.collection}/${context.rkey}: ${getErrorMessage(error)}`,
-          );
-          continue;
-        }
-      }
+      const parsed = parseRecordValue({
+        source,
+        context,
+        value: record.value,
+      });
+      if (!parsed.ok) continue;
 
       const args: AtProtoRecordCallbackArgs<unknown> = {
         ...context,
-        value,
+        value: parsed.value,
         fetchRecord,
       };
 

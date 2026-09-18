@@ -1,6 +1,7 @@
 import {
   getSingleRecord,
   isRecordValue,
+  parseRecordValue,
   toRecordContext,
 } from "../client/records.ts";
 import type { AtProtoCache } from "../cache/index.ts";
@@ -10,7 +11,6 @@ import type {
   AtProtoRecordCallbackArgs,
   AtProtoRecordCallbacks,
 } from "../types.ts";
-import { getErrorMessage } from "../utils.ts";
 import { createFetchRecord } from "./fetch-record.ts";
 
 /**
@@ -43,21 +43,12 @@ export const runSingleFetch = async <
 
   const context = await toRecordContext(source, data, caches);
 
-  let value: unknown = data.value;
-  if (source.parseRecord) {
-    try {
-      value = source.parseRecord(data.value);
-    } catch (error) {
-      console.warn(
-        `[atproto-loader] parseRecord threw for ${source.repo}/${source.collection}/${context.rkey}: ${getErrorMessage(error)}`,
-      );
-      return undefined;
-    }
-  }
+  const parsed = parseRecordValue({ source, context, value: data.value });
+  if (!parsed.ok) return undefined;
 
   const args: AtProtoRecordCallbackArgs<unknown> = {
     ...context,
-    value,
+    value: parsed.value,
     fetchRecord,
   };
 
@@ -94,7 +85,6 @@ export const runSingleFetch = async <
   }
   return entry;
 };
-
 /** A single-entry request, as resolved from a loader's entry filter. */
 export interface EntryLookup {
   requestedId: string | undefined;

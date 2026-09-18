@@ -1,4 +1,4 @@
-import { IdResolver } from "@atproto/identity";
+import { IdResolver, type Fetch } from "@atproto/identity";
 
 import { TtlCache } from "./ttl.ts";
 import type { AtProtoRecordRepo, RecordValue } from "../types.ts";
@@ -61,7 +61,7 @@ export interface AtProtoCache {
   whenIdle: () => Promise<void>;
 }
 
-export const createAtProtoCache = (): AtProtoCache => {
+export const createAtProtoCache = (fetch?: Fetch): AtProtoCache => {
   const pendingRefreshes = new Set<Promise<unknown>>();
 
   return {
@@ -77,13 +77,13 @@ export const createAtProtoCache = (): AtProtoCache => {
           : HYDRATED_RECORD_RETRY_TTL,
       maxEntries: HYDRATED_RECORD_CACHE_MAX_ENTRIES,
     }),
-    resolver: new IdResolver({}),
+    resolver: new IdResolver(fetch ? { fetch } : {}),
     onRefresh: (refresh) => {
       // A refresh's failure is already reported through its own onError
       // handling before the promise reaches us, so all we track here is *when*
       // it settles. Without the catch, we'd have an unhandled rejection if the
       // refresh fails, which is not what we want.
-      const settled = refresh.catch(() => {});
+      const settled = refresh.catch(() => { });
       pendingRefreshes.add(settled);
       void settled.finally(() => pendingRefreshes.delete(settled));
     },

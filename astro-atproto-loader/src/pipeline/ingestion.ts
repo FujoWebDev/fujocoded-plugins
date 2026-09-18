@@ -10,7 +10,7 @@ import { createFetchRecord } from "./fetch-record.ts";
 import { joinSourceRecords } from "./join.ts";
 import { fetchFromSource } from "./source.ts";
 
-export interface RunPipelineArgs<
+export interface IngestRecordsArgs<
   Sources extends readonly AtProtoLoaderSource<unknown>[],
   Entry extends { id: string },
 > {
@@ -21,7 +21,7 @@ export interface RunPipelineArgs<
 }
 
 /**
- * Run the static loader's full read cycle across every source:
+ * Run the static loader's full ingestion cycle across every source:
  *
  * - For each source: fetch, validate, parse, filter records
  * - Merge survivors in source declaration order
@@ -41,7 +41,7 @@ export interface RunPipelineArgs<
  * The live loader does not use this path. It acquires records through its
  * per-source stale-while-revalidate cache, then joins the resulting records.
  */
-export const runPipeline = async <
+export const ingestRecords = async <
   Sources extends readonly AtProtoLoaderSource<unknown>[],
   Entry extends { id: string },
 >({
@@ -49,7 +49,7 @@ export const runPipeline = async <
   callbacks,
   onSourceError = "skip",
   caches,
-}: RunPipelineArgs<Sources, Entry>): Promise<Entry[]> => {
+}: IngestRecordsArgs<Sources, Entry>): Promise<Entry[]> => {
   const fetchRecord = createFetchRecord(caches);
 
   // Ask every source for records.

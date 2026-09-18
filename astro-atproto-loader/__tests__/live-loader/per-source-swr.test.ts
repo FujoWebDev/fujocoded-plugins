@@ -2,12 +2,10 @@ import { useMockAtprotoRepo } from "@fujocoded/msw-atproto";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { SOURCE_RETRY_TTL_MS } from "../../src/cache/source-caches.ts";
-import {
-  createAtProtoCache,
-  type AtProtoCache,
-} from "../../src/cache/index.ts";
+import { type AtProtoCache } from "../../src/cache/index.ts";
 import { atProtoLiveLoader } from "../../src/loaders/live.ts";
 import { server } from "../msw/server.ts";
+import { createTestAtProtoCache } from "../msw/install.ts";
 import { trackXrpcRequests } from "../msw/track-requests.ts";
 
 const COLLECTION = "site.standard.document";
@@ -54,7 +52,7 @@ const byDidAndRkey = ({
 let cache: AtProtoCache;
 
 beforeEach(() => {
-  cache = createAtProtoCache();
+  cache = createTestAtProtoCache();
 });
 
 afterEach(async () => {
@@ -82,7 +80,9 @@ test("keeps a failed source's warm records beside a healthy source's refresh", a
     transform: byDidAndRkey,
   });
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [
       { id: `${MAIN_DID}/main`, data: { title: "Main warm" } },
       { id: `${ALT_DID}/alt`, data: { title: "Alt warm" } },
@@ -92,10 +92,12 @@ test("keeps a failed source's warm records beside a healthy source's refresh", a
   main.failOnce.listRecords(UNAVAILABLE);
   alt.seed(COLLECTION, titled("alt", "Alt fresh"));
   now = 1_002;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
 
   await vi.waitFor(async () => {
-    await expect(loader.loadCollection({})).resolves.toMatchObject({
+    await expect(
+      loader.loadCollection({ collection: "test" }),
+    ).resolves.toMatchObject({
       entries: [
         { id: `${MAIN_DID}/main`, data: { title: "Main warm" } },
         { id: `${ALT_DID}/alt`, data: { title: "Alt fresh" } },
@@ -127,10 +129,10 @@ test("reports one underlying error through the real source-reader handler", asyn
     cacheTtl: 1,
   });
 
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   main.failOnce.listRecords(UNAVAILABLE);
   now = 1_002;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
 
   await vi.waitFor(() => {
     expect(warn).toHaveBeenCalledWith(
@@ -164,7 +166,9 @@ test("omits only a source that fails before it has warm records", async () => {
     transform: byDidAndRkey,
   });
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ id: `${ALT_DID}/alt`, data: { title: "Alt warm" } }],
   });
   expect(calls.count(MAIN_PDS, LIST_RECORDS)).toBe(1);
@@ -187,7 +191,9 @@ test("passes each source failure to an onSourceError callback with its source", 
     transform: byDidAndRkey,
   });
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [{ id: `${ALT_DID}/alt`, data: { title: "Alt warm" } }],
   });
   expect(onSourceError).toHaveBeenCalledTimes(1);
@@ -217,7 +223,7 @@ test("keeps each source on its own refresh schedule", async () => {
     transform: byDidAndRkey,
   });
 
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
 
   // Past both TTLs: main refreshes; alt's refresh fails, starting its
   // private retry floor. Wait for both outcomes to land before touching the
@@ -226,9 +232,11 @@ test("keeps each source on its own refresh schedule", async () => {
   main.seed(COLLECTION, titled("main", "Main refreshed"));
   alt.failOnce.listRecords(UNAVAILABLE);
   now = 1_011;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   await vi.waitFor(async () => {
-    await expect(loader.loadCollection({})).resolves.toMatchObject({
+    await expect(
+      loader.loadCollection({ collection: "test" }),
+    ).resolves.toMatchObject({
       entries: [
         { id: `${MAIN_DID}/main`, data: { title: "Main refreshed" } },
         { id: `${ALT_DID}/alt`, data: { title: "Alt warm" } },
@@ -241,7 +249,7 @@ test("keeps each source on its own refresh schedule", async () => {
   // floor and must not.
   alt.seed(COLLECTION, titled("alt", "Alt recovered"));
   now = 1_011 + SOURCE_RETRY_TTL_MS - 1;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   await vi.waitFor(() => expect(calls.count(MAIN_PDS, LIST_RECORDS)).toBe(3));
   await cache.whenIdle();
   expect(calls.count(ALT_PDS, LIST_RECORDS)).toBe(2);
@@ -249,9 +257,11 @@ test("keeps each source on its own refresh schedule", async () => {
   // One tick later the floor has elapsed: alt retries and recovers while
   // main stays fresh.
   now = 1_011 + SOURCE_RETRY_TTL_MS;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   await vi.waitFor(async () => {
-    await expect(loader.loadCollection({})).resolves.toMatchObject({
+    await expect(
+      loader.loadCollection({ collection: "test" }),
+    ).resolves.toMatchObject({
       entries: [
         { id: `${MAIN_DID}/main`, data: { title: "Main refreshed" } },
         { id: `${ALT_DID}/alt`, data: { title: "Alt recovered" } },
@@ -289,7 +299,7 @@ test("preserves the cold-start error when every source fails", async () => {
     transform: byDidAndRkey,
   });
 
-  const result = await loader.loadCollection({});
+  const result = await loader.loadCollection({ collection: "test" });
 
   expect(result).toHaveProperty("error");
   if (!("error" in result) || !result.error) {
@@ -327,17 +337,19 @@ test("serves every last-good record set when every warm source fails", async () 
     transform: byDidAndRkey,
   });
 
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   main.failOnce.listRecords(UNAVAILABLE);
   alt.failOnce.listRecords(UNAVAILABLE);
   now = 1_002;
-  await loader.loadCollection({});
+  await loader.loadCollection({ collection: "test" });
   await vi.waitFor(() => {
     expect(calls.count(MAIN_PDS, LIST_RECORDS)).toBe(2);
     expect(calls.count(ALT_PDS, LIST_RECORDS)).toBe(2);
   });
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [
       { id: `${MAIN_DID}/main`, data: { title: "Main warm" } },
       { id: `${ALT_DID}/alt`, data: { title: "Alt warm" } },
@@ -390,7 +402,9 @@ test("preserves source order and last-value dedupe when every source is healthy"
     }),
   });
 
-  await expect(loader.loadCollection({})).resolves.toMatchObject({
+  await expect(
+    loader.loadCollection({ collection: "test" }),
+  ).resolves.toMatchObject({
     entries: [
       { id: "first", data: { title: "First" } },
       { id: "shared", data: { title: "New shared" } },

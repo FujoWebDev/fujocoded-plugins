@@ -1,7 +1,11 @@
 import { createMockRepoIdentity } from "@fujocoded/msw-atproto";
 
+import { createAtProtoCache } from "../../src/cache/index.ts";
 import { server } from "./server.ts";
 import { mockGetRecord, mockListRecords, type FakeRecord } from "./handlers.ts";
+
+export const createTestAtProtoCache = () =>
+  createAtProtoCache(globalThis.fetch);
 
 export const PDS = "https://pds.example.test";
 

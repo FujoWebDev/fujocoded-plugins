@@ -57,12 +57,12 @@ describe("toHostedBlob", () => {
 
   test("encodes did and cid so they survive URL parsing", () => {
     const result = toHostedBlob({
-      repo: { did: "did:web:example.com", pds: "https://pds.example.test" },
+      repo: { did: "did:web:example.test", pds: "https://pds.example.test" },
       blob: SAMPLE,
     });
     const url = new URL(result.url);
 
-    expect(url.searchParams.get("did")).toBe("did:web:example.com");
+    expect(url.searchParams.get("did")).toBe("did:web:example.test");
     expect(url.searchParams.get("cid")).toBe(SAMPLE.ref.$link);
   });
 });

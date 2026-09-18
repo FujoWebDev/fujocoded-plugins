@@ -2,10 +2,13 @@ import { createMockRepoIdentity, FAKE_CID } from "@fujocoded/msw-atproto";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createAtProtoCache } from "../../src/cache/index.ts";
 import { atProtoLiveLoader } from "../../src/loaders/live.ts";
 import { server } from "../msw/server.ts";
-import { installScriptedRepo, PDS } from "../msw/install.ts";
+import {
+  createTestAtProtoCache,
+  installScriptedRepo,
+  PDS,
+} from "../msw/install.ts";
 
 // Unwraps a loadCollection result so a loader error fails the test with the
 // actual error instead of an `expected false to equal [...]` diff.
@@ -46,7 +49,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -57,7 +60,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    await loader.loadCollection({});
+    await loader.loadCollection({ collection: "test" });
 
     expect(requestLog).toEqual([{ limit: "100", cursor: null }]);
     expect(cursorCalls).toEqual([null]);
@@ -81,7 +84,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -93,7 +96,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       { id: "one", data: { title: "A" } },
@@ -118,7 +121,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -130,7 +133,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    await loader.loadCollection({});
+    await loader.loadCollection({ collection: "test" });
 
     expect(requestLog).toEqual([{ limit: "5" }]);
   });
@@ -150,7 +153,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -163,7 +166,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       { id: "two", data: { title: "B" } },
@@ -188,7 +191,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -200,7 +203,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       { id: "one", data: { title: "Page one entry" } },
@@ -237,7 +240,7 @@ describe("atProtoLiveLoader", () => {
     );
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -248,7 +251,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(callCount).toBe(1);
     expect(entriesOf(result)).toEqual([
@@ -282,7 +285,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         {
           repo: "did:plc:bobatan",
@@ -301,7 +304,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(result)).toEqual([
       { id: "did:plc:bobatan/alpha", data: { title: "Bobatan page one" } },

@@ -28,6 +28,9 @@
     "package.json"
   ],
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "module": "dist/index.js",
   "exports": {
     ".": {
@@ -49,18 +52,19 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@atproto/api": "^0.17.3",
-    "@atproto/identity": "^0.4.8",
-    "@atproto/syntax": "^0.4.2"
+    "@atproto/api": "^0.20.42",
+    "@atproto/identity": "^0.5.10",
+    "@atproto/syntax": "^0.7.5"
   },
   "devDependencies": {
     "@fujocoded/msw-atproto": "^0.0.1",
-    "astro": "^5.16.14",
+    "astro": "^7.3.1",
     "msw": "^2.13.4",
+    "multiformats": "^13.4.2",
     "tsdown": "^0.14.2",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "astro": "^5.13.0 || ^6.0.0"
+    "astro": "^5.13.0 || ^6.0.0 || ^7.0.0"
   }
 }

@@ -2,11 +2,11 @@ import { createMockRepoIdentity, FAKE_CID } from "@fujocoded/msw-atproto";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createAtProtoCache } from "../../src/cache/index.ts";
 import { atProtoLiveLoader } from "../../src/loaders/live.ts";
 import { server } from "../msw/server.ts";
 import { failingGetRecord } from "../msw/handlers.ts";
 import {
+  createTestAtProtoCache,
   installScriptedRecord,
   installScriptedRepo,
   PDS,
@@ -28,7 +28,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -40,6 +40,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const result = await loader.loadEntry({
+      collection: "test",
       filter: { id: "opening-keynote", rkey: "record-123" },
     });
 
@@ -69,6 +70,7 @@ describe("atProtoLiveLoader", () => {
         createdAt: string;
       }
     >({
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:passthrough-live",
         collection: "place.stream.livestream",
@@ -76,6 +78,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const result = await loader.loadEntry({
+      collection: "test",
       filter: { id: "stream-1" },
     });
 
@@ -136,7 +139,7 @@ describe("atProtoLiveLoader", () => {
     );
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "bobatan.fujocoded.dev", collection: "site.standard.document" },
         {
@@ -151,6 +154,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const result = await loader.loadEntry({
+      collection: "test",
       filter: {
         id: "alt/shared-rkey",
         rkey: "shared-rkey",
@@ -188,7 +192,7 @@ describe("atProtoLiveLoader", () => {
     server.use(failingGetRecord(PDS));
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -199,8 +203,9 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    await loader.loadCollection({});
+    await loader.loadCollection({ collection: "test" });
     const result = await loader.loadEntry({
+      collection: "test",
       filter: { id: "opening-keynote", rkey: "record-123" },
     });
 

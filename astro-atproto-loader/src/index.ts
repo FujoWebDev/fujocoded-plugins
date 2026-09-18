@@ -7,6 +7,7 @@ export type {
   OnInitialLoadError,
 } from "./loaders/live.ts";
 export { defineAtProtoCollection } from "./loaders/static.ts";
+export { createAtProtoCache } from "./cache/index.ts";
 
 export { toNamespacedEntry } from "./utils.ts";
 export type {

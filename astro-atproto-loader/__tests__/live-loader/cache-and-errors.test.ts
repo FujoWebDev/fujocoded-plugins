@@ -6,10 +6,9 @@ import {
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { createAtProtoCache } from "../../src/cache/index.ts";
 import { atProtoLiveLoader } from "../../src/loaders/live.ts";
 import { server } from "../msw/server.ts";
-import { PDS } from "../msw/install.ts";
+import { createTestAtProtoCache, PDS } from "../msw/install.ts";
 
 const TEST_REPO = "did:plc:testrepo";
 const CALENDAR_COLLECTION = "community.lexicon.calendar.event";
@@ -88,7 +87,7 @@ describe("atProtoLiveLoader", () => {
     vi.spyOn(Date, "now").mockImplementation(() => now);
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: "did:plc:testrepo",
         collection: "community.lexicon.calendar.event",
@@ -100,9 +99,9 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const first = await loader.loadCollection({});
+    const first = await loader.loadCollection({ collection: "test" });
     now = 1_005;
-    const stale = await loader.loadCollection({});
+    const stale = await loader.loadCollection({ collection: "test" });
 
     expect(entriesOf(first)).toMatchObject([
       { data: { title: "Initial title" } },
@@ -117,7 +116,7 @@ describe("atProtoLiveLoader", () => {
     resolveSecondFetch?.();
 
     await vi.waitFor(async () => {
-      const refreshed = await loader.loadCollection({});
+      const refreshed = await loader.loadCollection({ collection: "test" });
       expect(entriesOf(refreshed)).toMatchObject([
         { data: { title: "Refreshed title" } },
       ]);
@@ -129,7 +128,7 @@ describe("atProtoLiveLoader", () => {
 
     let shouldThrow = false;
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -140,12 +139,14 @@ describe("atProtoLiveLoader", () => {
       },
     });
 
-    await expect(loader.loadCollection({})).resolves.toMatchObject({
+    await expect(
+      loader.loadCollection({ collection: "test" }),
+    ).resolves.toMatchObject({
       entries: [{ id: "first", data: { title: "Initial title" } }],
     });
     shouldThrow = true;
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(errorOf(result)?.cause).toEqual(new Error("warm transform failed"));
   });
@@ -154,7 +155,7 @@ describe("atProtoLiveLoader", () => {
     installCalendarRepo();
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -164,7 +165,7 @@ describe("atProtoLiveLoader", () => {
       },
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(errorOf(result)?.cause).toEqual(new Error("cold transform failed"));
   });
@@ -177,7 +178,7 @@ describe("atProtoLiveLoader", () => {
       data: { title: "unused" },
     }));
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -188,7 +189,7 @@ describe("atProtoLiveLoader", () => {
       transform,
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(errorOf(result)?.cause).toEqual(new Error("groupBy failed"));
     expect(transform).not.toHaveBeenCalled();
@@ -205,7 +206,7 @@ describe("atProtoLiveLoader", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -217,7 +218,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(errorOf(result)?.message).toBe(
       "Failed to load the AtProto record from collection community.lexicon.calendar.event",
@@ -235,7 +236,7 @@ describe("atProtoLiveLoader", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -246,7 +247,7 @@ describe("atProtoLiveLoader", () => {
       }),
     });
 
-    const result = await loader.loadCollection({});
+    const result = await loader.loadCollection({ collection: "test" });
 
     expect(result).toMatchObject({ entries: [] });
   });
@@ -263,7 +264,7 @@ describe("atProtoLiveLoader", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     const loader = atProtoLiveLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
         repo: TEST_REPO,
         collection: CALENDAR_COLLECTION,
@@ -275,6 +276,7 @@ describe("atProtoLiveLoader", () => {
     });
 
     const result = await loader.loadEntry({
+      collection: "test",
       filter: { id: "opening-keynote", rkey: "record-123" },
     });
 

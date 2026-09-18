@@ -6,11 +6,11 @@ import {
   SOURCE_RETRY_TTL_MS,
 } from "../../src/cache/source-caches.ts";
 import {
-  createAtProtoCache,
   type AtProtoCache,
 } from "../../src/cache/index.ts";
 import { createFetchRecord } from "../../src/pipeline/fetch-record.ts";
 import { server } from "../msw/server.ts";
+import { createTestAtProtoCache } from "../msw/install.ts";
 import { trackXrpcRequests } from "../msw/track-requests.ts";
 
 const COLLECTION = "site.standard.document";
@@ -42,7 +42,7 @@ const readTitles = async (read: () => Promise<{ value: unknown }[][]>) => {
 
 describe("source cache retry behavior", () => {
   beforeEach(() => {
-    caches = createAtProtoCache();
+    caches = createTestAtProtoCache();
   });
 
   afterEach(async () => {
@@ -148,11 +148,11 @@ describe("source cache retry behavior", () => {
   });
 
   it("resolves whenIdle immediately when nothing is tracked", async () => {
-    await expect(createAtProtoCache().whenIdle()).resolves.toBeUndefined();
+    await expect(createTestAtProtoCache().whenIdle()).resolves.toBeUndefined();
   });
 
   it("waits out tracked refreshes, including failed and chained ones", async () => {
-    const cache = createAtProtoCache();
+    const cache = createTestAtProtoCache();
     let release!: () => void;
     const refresh = new Promise<void>((resolve) => {
       release = resolve;

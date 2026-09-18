@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { LoaderContext } from "astro/loaders";
 
-import { createAtProtoCache } from "../src/cache/index.ts";
 import { atProtoStaticLoader } from "../src/loaders/static.ts";
-import { installScriptedRepo } from "./msw/install.ts";
+import {
+  createTestAtProtoCache,
+  installScriptedRepo,
+} from "./msw/install.ts";
 
 // Minimal LoaderContext stand-in: only `store` and `parseData` drive the
 // static loader today; the rest are stubs so any new context usage fails
@@ -54,7 +56,7 @@ describe("atProtoStaticLoader", () => {
   test("loads a single source into the Astro data store", async () => {
     installScriptedRepo({
       did: "did:plc:staticrepo",
-      handle: "static.example.com",
+      handle: "static.example.test",
       collection: "site.standard.document",
       pages: [
         [
@@ -69,9 +71,9 @@ describe("atProtoStaticLoader", () => {
     const { store, parseData, context } = staticHarness();
 
     const loader = atProtoStaticLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "static.example.com",
+        repo: "static.example.test",
         collection: "site.standard.document",
       },
       transform: ({ value, rkey, repo }) => ({
@@ -86,12 +88,12 @@ describe("atProtoStaticLoader", () => {
     expect(store.clear).toHaveBeenCalledTimes(1);
     expect(parseData).toHaveBeenCalledWith({
       id: "did:plc:staticrepo/doc-1",
-      data: { title: "Static doc", repo: "static.example.com" },
+      data: { title: "Static doc", repo: "static.example.test" },
       filePath: undefined,
     });
     expect(store.set).toHaveBeenCalledWith({
       id: "did:plc:staticrepo/doc-1",
-      data: { title: "Static doc", repo: "static.example.com" },
+      data: { title: "Static doc", repo: "static.example.test" },
       body: "Hello from Astro",
       filePath: undefined,
     });
@@ -100,7 +102,7 @@ describe("atProtoStaticLoader", () => {
   test("defaults to passthrough entries for a single source when transform is omitted", async () => {
     installScriptedRepo({
       did: "did:plc:passthrough-static",
-      handle: "passthrough.example.com",
+      handle: "passthrough.example.test",
       collection: "place.stream.livestream",
       pages: [
         [
@@ -124,8 +126,9 @@ describe("atProtoStaticLoader", () => {
         createdAt: string;
       }
     >({
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "passthrough.example.com",
+        repo: "passthrough.example.test",
         collection: "place.stream.livestream",
       },
     });
@@ -154,7 +157,7 @@ describe("atProtoStaticLoader", () => {
   test("preserves Date values returned by parseData", async () => {
     installScriptedRepo({
       did: "did:plc:dates-static",
-      handle: "dates.example.com",
+      handle: "dates.example.test",
       collection: "place.stream.livestream",
       pages: [
         [
@@ -182,8 +185,9 @@ describe("atProtoStaticLoader", () => {
         createdAt: Date;
       }
     >({
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "dates.example.com",
+        repo: "dates.example.test",
         collection: "place.stream.livestream",
       },
     });
@@ -205,7 +209,7 @@ describe("atProtoStaticLoader", () => {
   test("surfaces schema parse failures from parseData", async () => {
     installScriptedRepo({
       did: "did:plc:staticrepo",
-      handle: "static.example.com",
+      handle: "static.example.test",
       collection: "site.standard.document",
       pages: [[{ rkey: "doc-1", value: { title: "Static doc" } }]],
     });
@@ -218,9 +222,9 @@ describe("atProtoStaticLoader", () => {
     });
 
     const loader = atProtoStaticLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       source: {
-        repo: "static.example.com",
+        repo: "static.example.test",
         collection: "site.standard.document",
       },
       transform: ({ value, rkey, repo }) => ({
@@ -274,7 +278,7 @@ describe("atProtoStaticLoader", () => {
     const { store, context } = staticHarness();
 
     const loader = atProtoStaticLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "bobatan.fujocoded.dev", collection: "site.standard.document" },
         {
@@ -322,7 +326,7 @@ describe("atProtoStaticLoader", () => {
     const { store, context } = staticHarness();
 
     const loader = atProtoStaticLoader({
-      cache: createAtProtoCache(),
+      cache: createTestAtProtoCache(),
       sources: [
         { repo: "bobatan.fujocoded.dev", collection: "site.standard.document" },
         {
