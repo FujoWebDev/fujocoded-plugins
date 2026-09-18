@@ -45,7 +45,7 @@ export const toRecordContext = async (
 };
 
 /**
- * Run a source's optional `parseRecord` over a record value. It it throws, 
+ * Run a source's optional `parseRecord` over a record value. It it throws,
  * leave the expected resolution to the parent cller.
  */
 export const parseRecordValue = ({

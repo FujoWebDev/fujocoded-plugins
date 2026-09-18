@@ -28,9 +28,6 @@
     "package.json"
   ],
   "type": "module",
-  "engines": {
-    "node": ">=22.12.0"
-  },
   "module": "dist/index.js",
   "exports": {
     ".": {
@@ -66,5 +63,8 @@
   },
   "peerDependencies": {
     "astro": "^5.13.0 || ^6.0.0 || ^7.0.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

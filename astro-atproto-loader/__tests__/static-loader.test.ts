@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { LoaderContext } from "astro/loaders";
 
 import { atProtoStaticLoader } from "../src/loaders/static.ts";
-import {
-  createTestAtProtoCache,
-  installScriptedRepo,
-} from "./msw/install.ts";
+import { createTestAtProtoCache, installScriptedRepo } from "./msw/install.ts";
 
 // Minimal LoaderContext stand-in: only `store` and `parseData` drive the
 // static loader today; the rest are stubs so any new context usage fails

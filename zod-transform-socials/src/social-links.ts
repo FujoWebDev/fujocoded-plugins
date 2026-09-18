@@ -124,9 +124,10 @@ type CUSTOM_TYPES = keyof typeof CUSTOM_PROFILE_MATCHES;
 export const createSocialLinks = (config: CreateSocialLinksConfig = {}) => {
   const socialLinks = new SocialLinksLib();
 
-  for (const [platform, matches] of Object.entries(
-    CUSTOM_PROFILE_MATCHES,
-  ) as [CUSTOM_TYPES, ProfileMatch[]][]) {
+  for (const [platform, matches] of Object.entries(CUSTOM_PROFILE_MATCHES) as [
+    CUSTOM_TYPES,
+    ProfileMatch[],
+  ][]) {
     socialLinks.addProfile(platform, matches);
   }
 

@@ -83,7 +83,7 @@ export const createAtProtoCache = (fetch?: Fetch): AtProtoCache => {
       // handling before the promise reaches us, so all we track here is *when*
       // it settles. Without the catch, we'd have an unhandled rejection if the
       // refresh fails, which is not what we want.
-      const settled = refresh.catch(() => { });
+      const settled = refresh.catch(() => {});
       pendingRefreshes.add(settled);
       void settled.finally(() => pendingRefreshes.delete(settled));
     },

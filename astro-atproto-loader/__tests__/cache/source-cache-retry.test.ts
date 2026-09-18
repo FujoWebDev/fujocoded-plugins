@@ -5,9 +5,7 @@ import {
   createSourceCaches,
   SOURCE_RETRY_TTL_MS,
 } from "../../src/cache/source-caches.ts";
-import {
-  type AtProtoCache,
-} from "../../src/cache/index.ts";
+import { type AtProtoCache } from "../../src/cache/index.ts";
 import { createFetchRecord } from "../../src/pipeline/fetch-record.ts";
 import { server } from "../msw/server.ts";
 import { createTestAtProtoCache } from "../msw/install.ts";
