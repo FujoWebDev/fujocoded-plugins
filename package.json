@@ -7,9 +7,9 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "release": "npm run build && changeset publish --provenance",
     "sherif": "npx sherif@latest --ignore-rule non-existant-packages --fail-on-warnings",
     "lint": "oxlint --type-aware",
@@ -17,7 +17,7 @@
     "lint:ci": "oxlint --type-aware --deny-warnings",
     "format": "oxfmt && prettier --write \"**/*.astro\"",
     "format:check": "oxfmt --check && prettier --check \"**/*.astro\"",
-    "check": "npm run format:check && npm run lint:ci && npm run sherif && npm run typecheck && npm run build",
+    "check": "npm run format:check && npm run lint:ci && npm run sherif && npm run typecheck && npm run test && npm run build",
     "fix": "npm run format && npm run lint:fix"
   },
   "devDependencies": {
@@ -31,7 +31,8 @@
     "oxlint": "^1.61.0",
     "oxlint-tsgolint": "^0.22.1",
     "prettier": "^3.8.3",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "turbo": "^2.11.7"
   },
   "packageManager": "npm@11.5.1"
 }

@@ -42,7 +42,7 @@
     "build": "tsdown",
     "build:component": "npm run build",
     "validate": " npx publint",
-    "test": "vitest",
+    "test": "vitest run",
     "publish:patch": "npm run build && npm version patch && npm publish",
     "typecheck": "tsc --noEmit"
   },

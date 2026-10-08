@@ -63,6 +63,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm test
+
       # Mode 1: push to main — create/update Release PR, or publish all.
       # createGithubReleases is the action default (true); declared explicitly
       # so every action step in this workflow is uniform.

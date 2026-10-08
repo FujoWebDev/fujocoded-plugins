@@ -49,7 +49,7 @@
   "scripts": {
     "build": "tsup index.ts middleware.ts --format cjs,esm --dts --clean --external 'fujocoded:dev-only-routes'",
     "validate": " npx publint",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

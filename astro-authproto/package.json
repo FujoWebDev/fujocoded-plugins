@@ -65,7 +65,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch src/",
     "validate": "npx publint",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
