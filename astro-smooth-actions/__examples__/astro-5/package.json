@@ -10,13 +10,13 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/node": "^9.0.0",
+    "@astrojs/node": "^9.5.2",
     "@fujocoded/astro-smooth-actions": "file:../..",
-    "astro": "^5.0.0",
+    "astro": "^5.18.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "typescript": "^5.9.3"
   }
 }

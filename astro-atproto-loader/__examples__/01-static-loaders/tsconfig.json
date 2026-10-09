@@ -1,5 +1,14 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "exclude": ["dist"],
+  "compilerOptions": {
+    // Symlinks loader from the monorepo. Otherwise, the example would
+    // resolve the loader's own development copy of astro instead of the example's.
+    "paths": {
+      "astro": ["./node_modules/astro"],
+      "astro/content/config": ["./node_modules/astro/dist/content/config"],
+      "astro/loaders": ["./node_modules/astro/dist/content/loaders/index"]
+    }
+  }
 }

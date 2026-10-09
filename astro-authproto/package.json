@@ -66,7 +66,7 @@
     "dev": "tsdown --watch src/",
     "validate": "npx publint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && astro check --noSync --tsconfig tsconfig.astro.json"
   },
   "dependencies": {
     "@atproto/api": "^0.17.3",

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["astro/client"]
+  },
+  "include": [
+    "src/components/**/*.astro",
+    "src/types.d.ts",
+    "src/virtual-modules.d.ts"
+  ]
+}

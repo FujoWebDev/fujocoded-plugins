@@ -26,7 +26,7 @@ const sprite = await getEntry("sprites-static", "self");
         <div>
           <h2>
             {sprite?.id} —{" "}
-            {new Intl.DateTimeFormat().format(sprite?.data.createdAt)}
+            {new Intl.DateTimeFormat().format(sprite?.data.updatedAt)}
           </h2>
           <img src={sprite?.data.spriteSheet.url} alt={"sprite sheet"} />
         </div>

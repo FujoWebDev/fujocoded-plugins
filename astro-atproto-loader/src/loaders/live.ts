@@ -247,8 +247,9 @@ type LiveBaseConfig<
   ) => MaybePromise<boolean>;
 } & AtProtoRecordFilterOptions<Sources>;
 
-type LiveCollection<Schema extends SchemaLike> = ReturnType<
-  typeof defineLiveCollection
+type LiveCollection<Schema extends SchemaLike> = Omit<
+  ReturnType<typeof defineLiveCollection>,
+  "schema"
 > & {
   schema: Schema;
 };

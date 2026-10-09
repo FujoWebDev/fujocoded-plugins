@@ -4,10 +4,14 @@ import authProto, {
   LOGGED_IN_DID_TEMPLATE,
   REDIRECT_TO_REFERER_TEMPLATE,
 } from "@fujocoded/authproto";
+import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
   output: "server",
+  adapter: node({
+    mode: "standalone",
+  }),
   session: {
     driver: "fs",
   },
@@ -16,6 +20,7 @@ export default defineConfig({
       applicationName: "Authproto test",
       applicationDomain: "fujocoded.com",
       defaultDevUser: "essentialrandom.bsky.social",
+      driver: { name: "memory" },
       scopes: {
         email: true,
         directMessages: true,

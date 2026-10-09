@@ -1,17 +1,19 @@
 {
   "name": "examples-read-bsky-profile",
   "version": "0.0.1",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",
     "@atproto/api": "^0.18.16",
     "@fujocoded/authproto": "file:..",
-    "astro": "^5.16.14"
+    "astro": "^5.18.1"
   }
 }

@@ -77,20 +77,21 @@ const statuses = response?.data.records ?? [];
   import { actions } from "astro:actions";
 
   // Get all buttons with class 'delete'
-  const buttons = document.querySelectorAll("button.delete");
+  const buttons = document.querySelectorAll<HTMLButtonElement>("button.delete");
 
   //Handle clicks on each button
   buttons.forEach((button) => {
-    button.addEventListener("click", async function (e) {
-      //console.log("Deleting record with cid " + this.id + ".")
-      const { data, error } = await actions.deleteStatus({
-        status_id: this.id,
+    button.addEventListener("click", async () => {
+      //console.log("Deleting record with cid " + button.id + ".")
+      const { data } = await actions.deleteStatus({
+        status_id: button.id,
       });
       //if (!error) console.log(data);
-      if (data.response != null) {
-        this.disabled = true;
+      if (data?.response != null) {
+        button.disabled = true;
 
-        const parent_row = this.parentNode;
+        const parent_row = button.parentElement;
+        if (!parent_row) return;
         const span = document.createElement("span");
         span.className = "delete_response";
         const span_response = document.createTextNode(
@@ -98,7 +99,8 @@ const statuses = response?.data.records ?? [];
         );
         span.appendChild(span_response);
         parent_row.appendChild(span);
-        parent_row.closest("table").className = "deleted";
+        const table = parent_row.closest("table");
+        if (table) table.className = "deleted";
       }
     });
   });

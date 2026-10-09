@@ -38,6 +38,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
+    "typecheck:examples": "node ../.github/scripts/typecheck-examples.mjs",
     "validate": " npx publint"
   },
   "devDependencies": {

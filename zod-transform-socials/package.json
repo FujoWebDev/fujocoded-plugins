@@ -51,6 +51,7 @@
     "test": "vitest run",
     "test:compat": "npm run build && node --experimental-strip-types scripts/check-compat.ts",
     "typecheck": "tsc --noEmit",
+    "typecheck:examples": "node ../.github/scripts/typecheck-examples.mjs",
     "validate": " npx publint"
   },
   "dependencies": {

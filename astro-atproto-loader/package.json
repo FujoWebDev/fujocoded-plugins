@@ -45,6 +45,7 @@
     "dev": "tsdown --watch src/",
     "validate": "npx publint",
     "typecheck": "tsc --noEmit",
+    "typecheck:examples": "node ../.github/scripts/typecheck-examples.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

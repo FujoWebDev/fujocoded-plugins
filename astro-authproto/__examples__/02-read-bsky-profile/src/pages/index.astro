@@ -50,14 +50,18 @@ const display_profile = await agent.app.bsky.actor.getProfile({
       </tr>
       <tr>
         <td>Avatar</td>
-        <td
-          ><Image
-            src={display_profile.data.avatar}
-            width="50"
-            height="50"
-            alt={`${display_profile.data.displayName}'s avatar.`}
-          /></td
-        >
+        <td>
+          {
+            display_profile.data.avatar && (
+              <Image
+                src={display_profile.data.avatar}
+                width="50"
+                height="50"
+                alt={`${display_profile.data.displayName}'s avatar.`}
+              />
+            )
+          }
+        </td>
       </tr>
       <tr>
         <td>Created At</td>

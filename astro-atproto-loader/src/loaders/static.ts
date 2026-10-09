@@ -108,8 +108,9 @@ type StaticBaseConfig<
   onSourceError?: OnSourceError;
 } & AtProtoRecordFilterOptions<Sources>;
 
-type StaticCollection<Schema extends SchemaLike> = ReturnType<
-  typeof defineCollection
+type StaticCollection<Schema extends SchemaLike> = Omit<
+  ReturnType<typeof defineCollection>,
+  "schema"
 > & {
   schema: Schema;
 };

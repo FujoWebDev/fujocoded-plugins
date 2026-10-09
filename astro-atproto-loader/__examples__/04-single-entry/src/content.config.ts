@@ -11,7 +11,7 @@ const sprites = defineAtProtoCollection({
     collection: "actor.rpg.sprite",
   },
   outputSchema: z.object({
-    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     spriteSheet: z.object({
       url: z.url(),
       mimeType: z.string(),
@@ -19,7 +19,7 @@ const sprites = defineAtProtoCollection({
     }),
   }),
   transform: ({ repo, rkey, value }) => {
-    const v = value as { spriteSheet: unknown; createdAt: unknown };
+    const v = value as { spriteSheet: unknown; updatedAt: unknown };
 
     // Drop the record if spriteSheet is not a blob
     if (!isAtBlob(v.spriteSheet)) return undefined;
@@ -27,7 +27,7 @@ const sprites = defineAtProtoCollection({
     return {
       id: rkey,
       data: {
-        createdAt: v.createdAt,
+        updatedAt: v.updatedAt,
         spriteSheet: toHostedBlob({ repo, blob: v.spriteSheet }),
       },
     };

@@ -1,12 +1,14 @@
 {
   "name": "examples-atproto-static-posts",
   "version": "0.0.1",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@fujocoded/astro-atproto-loader": "file:../..",

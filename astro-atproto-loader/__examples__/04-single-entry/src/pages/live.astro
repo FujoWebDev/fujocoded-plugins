@@ -26,7 +26,7 @@ const { entry, error } = await getLiveEntry("sprites-live", "self");
         <div>
           <h2>
             {entry.id} —{" "}
-            {new Intl.DateTimeFormat().format(entry.data.createdAt)}
+            {new Intl.DateTimeFormat().format(entry.data.updatedAt)}
           </h2>
           <img src={entry.data.spriteSheet.url} alt={"sprite sheet"} />
         </div>
