@@ -1,5 +1,15 @@
 # @fujocoded/astro-atproto-loader
 
+## 0.2.4
+
+### Patch Changes
+
+- [`7af4907`](https://github.com/FujoWebDev/fujocoded-plugins/commit/7af49077832344c06fb8345a537f219742fd7898) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Fix the type of the `schema` on collections from `defineAtProtoCollection` and
+  `defineAtProtoLiveCollection`. It's now exactly the given `outputSchema` instead of
+  an intersection with Astro's own schema type, so the entry data gets typed correctly.
+
 ## 0.2.3
 
 ### Patch Changes
