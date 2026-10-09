@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/astro-atproto-loader",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Astro loaders (live and static) for reading AtProto records into Astro content collections.",
   "keywords": [
     "astro",
