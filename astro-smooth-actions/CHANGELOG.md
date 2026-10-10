@@ -1,5 +1,15 @@
 # @fujocoded/astro-smooth-actions
 
+## 0.0.2
+
+### Patch Changes
+
+- [`56d8883`](https://github.com/FujoWebDev/fujocoded-plugins/commit/56d88835853a6f5cca191ba9fed5352f81f4361a) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Keep stored action results typed on Astro 6 and 7. `SerializedActionResult`
+  now comes from the public `astro:actions` API and works on every supported
+  Astro version.
+
 ## 0.0.1
 
 ### Patch Changes

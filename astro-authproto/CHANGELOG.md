@@ -1,5 +1,17 @@
 # @fujocoded/authproto
 
+## 0.4.1
+
+### Patch Changes
+
+- [`56d8883`](https://github.com/FujoWebDev/fujocoded-plugins/commit/56d88835853a6f5cca191ba9fed5352f81f4361a) Thanks [@essential-randomness](https://github.com/essential-randomness)!
+
+  Support Astro 7!
+  - The `astro` peer dependency now accepts `^7.0.0`, and `@astrojs/db` now
+    accepts `^0.21.0`.
+  - Drop the `drizzle-orm` peer dependency. `@astrojs/db` brings its own.
+  - Remove the deprecated `astro-integration-kit` dependency.
+
 ## 0.4.0
 
 ### Minor Changes
