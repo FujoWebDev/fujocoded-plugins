@@ -1,6 +1,6 @@
 {
   "name": "@fujocoded/astro-ao3-loader",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Allows loading a series of AO3 works for the Astro Content Layer",
   "keywords": [
     "astro-loader",
