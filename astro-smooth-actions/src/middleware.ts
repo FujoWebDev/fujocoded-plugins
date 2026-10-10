@@ -1,5 +1,4 @@
 import { ACTION_QUERY_PARAMS, getActionContext } from "astro:actions";
-import type { SerializedActionResult } from "astro/actions/runtime/shared.js";
 import type { APIContext, MiddlewareHandler } from "astro";
 import {
   isInputStorageEnabledForAction,
@@ -7,16 +6,16 @@ import {
   type ActionInput,
 } from "./input.js";
 
-type ActionSessionEntry = {
-  name: string;
-  result: SerializedActionResult;
-  input?: ActionInput;
-};
-
 type ActionContext = ReturnType<typeof getActionContext>;
 type ActionContextWithHelpers = ActionContext & {
   setActionResult: NonNullable<ActionContext["setActionResult"]>;
   serializeActionResult: NonNullable<ActionContext["serializeActionResult"]>;
+};
+
+type ActionSessionEntry = {
+  name: string;
+  result: ReturnType<ActionContextWithHelpers["serializeActionResult"]>;
+  input?: ActionInput;
 };
 
 const getActionName = (action: {
@@ -129,25 +128,14 @@ const deleteStoredAction = ({
 
 const writeStoredAction = ({
   context,
-  actionName,
-  result,
-  input,
-}: {
-  context: APIContext;
-  actionName: string;
-  result: SerializedActionResult;
-  input?: ActionInput;
-}): string | undefined => {
+  ...entry
+}: { context: APIContext } & ActionSessionEntry): string | undefined => {
   if (!context.session) return undefined;
 
   const newSessionId = crypto.randomUUID();
 
   try {
-    context.session.set(getSessionKey(newSessionId), {
-      name: actionName,
-      result,
-      input,
-    });
+    context.session.set(getSessionKey(newSessionId), entry);
     context.cookies.set(ACTION_SESSION_COOKIE, newSessionId, {
       path: "/",
       httpOnly: true,
@@ -230,7 +218,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     const serializedResult = serializeActionResult(result);
     const newSessionId = writeStoredAction({
       context,
-      actionName: action.name,
+      name: action.name,
       result: serializedResult,
       input,
     });

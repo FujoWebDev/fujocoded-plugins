@@ -6,7 +6,13 @@ type ActionInput = Record<string, string | string[] | null>;
 
 type ActionSessionEntry = {
   name: string;
-  result: import("astro/actions/runtime/shared.js").SerializedActionResult;
+  result: ReturnType<
+    NonNullable<
+      ReturnType<
+        typeof import("astro:actions").getActionContext
+      >["serializeActionResult"]
+    >
+  >;
   input?: ActionInput;
 };
 

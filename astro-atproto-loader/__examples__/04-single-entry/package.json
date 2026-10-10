@@ -11,9 +11,9 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.6",
+    "@astrojs/node": "^11.1.7",
     "@fujocoded/astro-atproto-loader": "file:../..",
-    "astro": "^6.2.1"
+    "astro": "^7.3.8"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -58,7 +58,7 @@ npm install @fujocoded/astro-ao3-loader
 
 The configuration steps are the same for each [loader](#what-can-fujocodedastro-ao3-loader-do). In this example, we'll use the `worksLoader` to get information from a list of works specified in `src/content/ao3/works.yaml`.
 
-1. Set up [a content collection](https://docs.astro.build/en/guides/content-collections/#defining-collections) in `src/content/config.ts` that uses your chosen loader.
+1. Set up [a content collection](https://docs.astro.build/en/guides/content-collections/#defining-collections) in `src/content.config.ts` that uses your chosen loader.
 
    ```ts
    import { defineCollection } from "astro:content";

@@ -74,28 +74,22 @@
     "@atproto/jwk-jose": "^0.1.4",
     "@atproto/oauth-client": "^0.7.5",
     "@atproto/oauth-client-node": "^0.4.3",
-    "astro-integration-kit": "^0.20.0",
     "unstorage": "^1.16.1"
   },
   "devDependencies": {
-    "@astrojs/db": "^0.17.1",
+    "@astrojs/db": "^0.21.0",
     "@fujocoded/msw-atproto": "^0.0.1",
-    "drizzle-orm": "^0.42.0",
     "glob": "^13.0.6",
     "msw": "^2.13.4",
     "tsdown": "^0.17.2",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@astrojs/db": "^0.17.1 || ^0.20.0",
-    "astro": "^5.13.0 || ^6.0.0",
-    "drizzle-orm": "^0.42.0"
+    "@astrojs/db": "^0.17.1 || ^0.20.0 || ^0.21.0",
+    "astro": "^5.13.0 || ^6.0.0 || ^7.0.0"
   },
   "peerDependenciesMeta": {
     "@astrojs/db": {
-      "optional": true
-    },
-    "drizzle-orm": {
       "optional": true
     }
   }

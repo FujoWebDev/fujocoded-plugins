@@ -14,7 +14,7 @@
 //      doesn't have to refetch them and can put them straight into the markup.
 //   5. The final schema is what `getLiveCollection("sharedReposts")` resolves to
 //      on the page side, after Zod validates the transform's output.
-import { z } from "astro:content";
+import { z } from "astro/zod";
 import { AtUri } from "@atproto/syntax";
 import { defineAtProtoLiveCollection } from "@fujocoded/astro-atproto-loader";
 

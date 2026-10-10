@@ -3,7 +3,7 @@ import { worksLoader, seriesLoader } from "@fujocoded/astro-ao3-loader";
 
 /**
  * You can configure content collections in Astro by exporting
- * "collections" from `src/content/config`, like you see here.
+ * "collections" from `src/content.config.ts`, like you see here.
  *
  * This loader exports two collections:
  * - fanfictions, which uses our worksLoader

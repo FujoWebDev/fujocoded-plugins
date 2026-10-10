@@ -1,8 +1,7 @@
-import type { AstroIntegration, InjectedRoute } from "astro";
+import type { AstroIntegration, InjectedRoute, ViteUserConfig } from "astro";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
-import { addVirtualImports } from "astro-integration-kit";
 import {
   getConfig,
   getHooksImport,
@@ -51,6 +50,25 @@ const checkPathGitignored = (
     return null;
   }
 };
+
+type VitePlugin = NonNullable<ViteUserConfig["plugins"]>[number];
+
+const createServerVirtualModulesPlugin = (
+  modules: Record<string, string>,
+): VitePlugin => ({
+  name: "vite-plugin-authproto-config",
+  resolveId(id) {
+    if (id in modules) {
+      return `\0${id}`;
+    }
+  },
+  load(id, options) {
+    if (!id.startsWith("\0") || !options?.ssr) {
+      return;
+    }
+    return modules[id.slice(1)];
+  },
+});
 
 export const LOGGED_IN_DID_TEMPLATE = "{loggedInUser.did}";
 export const LOGGED_IN_HANDLE_TEMPLATE = "{loggedInUser.handle}";
@@ -117,30 +135,25 @@ export default (
       addAtProtoRoutes(injectRoute);
 
       // Make configuration values available throughout the application
-      addVirtualImports(setupParams, {
-        name: "authproto-config",
-        imports: [
-          {
-            id: "fujocoded:authproto/config",
-            content: getConfig({
-              options: configOptions,
-              isDev: process.env.NODE_ENV === "development",
-              devPort: config.server?.port,
-              devServerHost: config.server?.host,
+      setupParams.updateConfig({
+        vite: {
+          plugins: [
+            createServerVirtualModulesPlugin({
+              "fujocoded:authproto/config": getConfig({
+                options: configOptions,
+                isDev: process.env.NODE_ENV === "development",
+                devPort: config.server?.port,
+                devServerHost: config.server?.host,
+              }),
+              "fujocoded:authproto/stores": getStoresImport(
+                configOptions.driver?.name,
+              ),
+              "fujocoded:authproto/hooks": getHooksImport(
+                configOptions.resolveScopesEntrypoint,
+              ),
             }),
-            context: "server",
-          },
-          {
-            id: "fujocoded:authproto/stores",
-            content: getStoresImport(configOptions.driver?.name),
-            context: "server",
-          },
-          {
-            id: "fujocoded:authproto/hooks",
-            content: getHooksImport(configOptions.resolveScopesEntrypoint),
-            context: "server",
-          },
-        ],
+          ],
+        },
       });
 
       addMiddleware({

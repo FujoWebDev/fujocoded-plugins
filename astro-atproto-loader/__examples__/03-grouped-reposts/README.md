@@ -12,10 +12,8 @@ reposted, with the original post hydrated for display.
 
 > [!IMPORTANT]
 >
-> Astro live collections are still experimental. This example needs
-> `experimental.liveContentCollections: true` in `astro.config.mjs`, plus a
-> server-capable adapter such as `@astrojs/node`, because live collections are
-> rendered on demand.
+> Live collections need a server-capable adapter such as `@astrojs/node`,
+> because live collections are rendered on demand.
 
 ## What's going on
 

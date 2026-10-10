@@ -11,7 +11,7 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/db": "^0.17.2",
+    "@astrojs/db": "^0.21.0",
     "@astrojs/node": "^9.5.2",
     "@atproto/api": "^0.18.16",
     "@fujocoded/authproto": "file:..",
