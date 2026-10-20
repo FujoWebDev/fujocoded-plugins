@@ -62,7 +62,7 @@ const CUSTOM_PROFILE_MATCHES = {
   ],
   neocities: [
     {
-      match: "https?://([a-z0-9-]+)\\.neocities\\.org",
+      match: "https?://([a-z0-9-]+)\\.neocities\\.org/?",
       group: 1,
     },
   ],
