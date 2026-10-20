@@ -34,6 +34,12 @@ describe("Platform detection across socials", () => {
       icon: "lucide:cat",
     },
     {
+      url: "https://boba-tan.neocities.org/",
+      platform: "neocities",
+      username: "boba-tan",
+      icon: "lucide:cat",
+    },
+    {
       url: "https://archiveofourown.org/users/boba-tan",
       platform: "archiveofourown",
       username: "boba-tan",
