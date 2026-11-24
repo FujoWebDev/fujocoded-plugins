@@ -11,7 +11,7 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@fujocoded/astro-ao3-loader": "file:../..",
+    "@fujocoded/astro-ao3-loader": "*",
     "astro": "^5.18.1"
   }
 }

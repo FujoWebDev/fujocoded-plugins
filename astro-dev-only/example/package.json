@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.4.0",
-    "@fujocoded/astro-dev-only": "file:..",
+    "@fujocoded/astro-dev-only": "*",
     "astro": "^5.12.9"
   }
 }

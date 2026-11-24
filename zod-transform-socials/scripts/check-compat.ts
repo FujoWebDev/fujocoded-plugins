@@ -3,12 +3,13 @@
  * installing a freshly packed tarball, without trusting the workspace source (bad mistake!!).
  *
  * For each example we:
- * 1. Copy the example into a temp workspace (skipping `node_modules`, build output, and the local `.npmrc`)
+ * 1. Copy the example into a temp workspace (skipping `node_modules` and build output)
  * 2. Rewrite its `package.json` to depend on the packed tarball
  * 3. Run `npm install --ignore-scripts`, then the example's verification commands
  *
  * Going through `npm pack` catches packaging bugs (missing `files`, wrong `exports`,
  * stale `dist/`) that a workspace-linked install would hide.
+ * Uses npm on purpose, to install like a registry consumer.
  */
 import {
   cpSync,
@@ -34,7 +35,6 @@ const SKIP_ON_COPY = new Set([
   "dist",
   ".astro",
   "package-lock.json",
-  ".npmrc",
 ]);
 
 const run = (
@@ -76,6 +76,8 @@ const rewriteDependencyToTarball = (
     throw new Error(`${pkgPath} does not depend on ${PACKAGE_NAME}`);
   }
   pkg.dependencies[PACKAGE_NAME] = `file:${tarball}`;
+  // dependenciesMeta is pnpm-workspace-only
+  delete pkg.dependenciesMeta;
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 };
 

@@ -41,6 +41,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-to-hast": "^13.2.0"
   },
   "devDependencies": {

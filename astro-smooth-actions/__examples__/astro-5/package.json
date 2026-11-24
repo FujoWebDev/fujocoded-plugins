@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",
-    "@fujocoded/astro-smooth-actions": "file:../..",
+    "@fujocoded/astro-smooth-actions": "*",
     "astro": "^5.18.1",
     "zod": "^3.25.76"
   },

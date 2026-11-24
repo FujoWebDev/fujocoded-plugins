@@ -51,11 +51,17 @@
     "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
+    "@types/mdast": "^4.0.4",
     "@types/react": "^19.0.10",
     "mdast-util-mdx": "^3.0.0",
+    "memfs": "^4.17.0",
     "remark": "^15.0.1",
     "remark-mdx": "^3.1.0",
     "tsdown": "^0.17.2",
+    "typescript": "^5.5.2",
+    "unified": "^11.0.4",
+    "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.0",
     "vitest": "^3.0.5"
   },
   "prefix": "./"

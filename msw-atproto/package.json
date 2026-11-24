@@ -45,7 +45,7 @@
     "dev": "tsdown --watch src/",
     "test": "vitest --run",
     "typecheck": "tsc --noEmit",
-    "validate": "npx publint"
+    "validate": "pnpm dlx publint"
   },
   "dependencies": {
     "@atproto/common-web": "^0.4.7",
@@ -54,6 +54,7 @@
     "multiformats": "^13.4.2"
   },
   "devDependencies": {
+    "@atproto/identity": "^0.4.0",
     "msw": "^2.13.4",
     "tsdown": "^0.14.2",
     "vitest": "^3.2.4"

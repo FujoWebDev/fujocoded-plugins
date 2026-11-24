@@ -1,0 +1,18 @@
+packages:
+  - "*"
+  - "*/__example__"
+  - "*/example"
+  - "*/__examples__"
+  - "*/__examples__/*"
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+
+# Re-sync injected deps after build so examples get the fresh dist/.
+syncInjectedDepsAfterScripts:
+  - build
+
+# Examples depend on "*"; always link the local package for it.
+linkWorkspacePackages: true
+preferWorkspacePackages: true

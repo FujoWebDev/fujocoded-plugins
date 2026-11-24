@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.4.4",
-    "@fujocoded/astro-alt-text-toolkit": "file:..",
-    "astro": "^5.12.9"
+    "@fujocoded/astro-alt-text-toolkit": "workspace:*",
+    "astro": "^5.12.9",
+    "sharp": "^0.35.5"
   }
 }

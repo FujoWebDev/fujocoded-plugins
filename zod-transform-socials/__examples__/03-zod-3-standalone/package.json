@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fujocoded/zod-transform-socials": "file:../..",
+    "@fujocoded/zod-transform-socials": "*",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -18,5 +18,10 @@
   },
   "overrides": {
     "zod": "^3.25.76"
+  },
+  "dependenciesMeta": {
+    "@fujocoded/zod-transform-socials": {
+      "injected": true
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   assertVersionedReleasePackage,
@@ -61,22 +61,14 @@ export const findRepoRoot = (fromDir) => {
   let dir = fromDir;
 
   while (dir !== dirname(dir)) {
-    const packageJsonPath = join(dir, "package.json");
-
-    if (!existsSync(packageJsonPath)) {
-      dir = dirname(dir);
-      continue;
-    }
-
-    const packageJson = readJson(packageJsonPath);
-    if (packageJson.workspaces) {
+    if (existsSync(join(dir, "pnpm-workspace.yaml"))) {
       return dir;
     }
 
     dir = dirname(dir);
   }
 
-  throw new Error("Could not find repo root package.json with workspaces.");
+  throw new Error("Could not find repo root (no pnpm-workspace.yaml).");
 };
 
 const assertCleanTree = (repoRoot) => {
@@ -125,71 +117,18 @@ const removeUnrelatedChangesets = ({ dryRun, pkg, repoRoot }) => {
   }
 };
 
-const findLockfilePackageDirs = (rootDir) => {
-  const packageDirs = new Set();
-
-  if (
-    existsSync(join(rootDir, "package.json")) &&
-    existsSync(join(rootDir, "package-lock.json"))
-  ) {
-    packageDirs.add(rootDir);
-  }
-
-  const visit = (dir) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name === "node_modules" || entry.name.startsWith(".")) {
-        continue;
-      }
-
-      if (!entry.isDirectory()) {
-        continue;
-      }
-
-      const path = join(dir, entry.name);
-      if (
-        existsSync(join(path, "package.json")) &&
-        existsSync(join(path, "package-lock.json"))
-      ) {
-        packageDirs.add(path);
-      }
-
-      visit(path);
-    }
-  };
-
-  visit(rootDir);
-  return [...packageDirs].sort((a, b) => a.localeCompare(b));
-};
-
-const refreshLockfiles = ({ dryRun, pkg, repoRoot }) => {
-  if (dryRun) {
-    console.log("[dry-run] Would refresh package-lock files.");
-    return;
-  }
-
-  run("npm", ["install", "--package-lock-only", "--ignore-scripts"], {
+// One lockfile covers packages and examples.
+const refreshLockfile = ({ dryRun, repoRoot }) => {
+  run("pnpm", ["install", "--lockfile-only", "--ignore-scripts"], {
     cwd: repoRoot,
+    dryRun,
   });
-
-  for (const packageDir of findLockfilePackageDirs(pkg.absoluteDir)) {
-    run(
-      "npm",
-      [
-        "install",
-        "--package-lock-only",
-        "--ignore-scripts",
-        "--prefix",
-        packageDir,
-      ],
-      { cwd: repoRoot },
-    );
-  }
 };
 
 const runFocusedChecks = ({ dryRun, pkg, repoRoot }) => {
   for (const scriptName of ["typecheck", "test", "build", "test:e2e"]) {
     if (pkg.scripts[scriptName]) {
-      run("npm", ["run", scriptName, "-w", pkg.name], {
+      run("pnpm", ["--filter", pkg.name, "run", scriptName], {
         cwd: repoRoot,
         dryRun,
       });
@@ -234,7 +173,7 @@ export const prepareRelease = async ({
 
   logStep(`Versioning ${pkg.name}.`);
   removeUnrelatedChangesets({ dryRun: options.dryRun, pkg, repoRoot });
-  run("npx", ["changeset", "version"], {
+  run("pnpm", ["exec", "changeset", "version"], {
     cwd: repoRoot,
     dryRun: options.dryRun,
     env: envWithGithubToken(repoRoot),
@@ -259,8 +198,8 @@ export const prepareRelease = async ({
     assertVersionedReleasePackage(pkg, { repoRoot });
   }
 
-  logStep(`Refreshing lockfiles for ${pkg.name}.`);
-  refreshLockfiles({ dryRun: options.dryRun, pkg, repoRoot });
+  logStep(`Refreshing the lockfile for ${pkg.name}.`);
+  refreshLockfile({ dryRun: options.dryRun, repoRoot });
 
   logStep(`Running focused checks for ${pkg.name}.`);
   runFocusedChecks({ dryRun: options.dryRun, pkg, repoRoot });
@@ -281,7 +220,7 @@ export const prepareRelease = async ({
 
   outro(`Prepared ${branchName}.`);
   note(
-    `npm --prefix .changeset run release:dispatch -- ${pkg.name} --branch=${branchName}`,
+    `pnpm --dir .changeset run release:dispatch ${pkg.name} --branch=${branchName}`,
     "When the branch is committed and clean, run",
   );
 };
@@ -292,7 +231,6 @@ export const dispatchRelease = async (context) =>
     helpers: {
       assertCleanTree,
       capture,
-      findLockfilePackageDirs,
       getBranchName,
       run,
     },
@@ -316,7 +254,6 @@ export const syncBackRelease = async (context) =>
     helpers: {
       assertCleanTree,
       capture,
-      findLockfilePackageDirs,
       getBranchName,
       run,
     },

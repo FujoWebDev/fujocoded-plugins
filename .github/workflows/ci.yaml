@@ -30,29 +30,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Format check
-        run: npm run format:check
+        run: pnpm run format:check
 
       - name: Lint
-        run: npm run lint:ci
+        run: pnpm run lint:ci
 
       - name: Workspace consistency
-        run: npm run sherif
+        run: pnpm run sherif
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Test
-        run: npm test
+        run: pnpm test
 
       - name: Build
-        run: npm run build
+        run: pnpm run build

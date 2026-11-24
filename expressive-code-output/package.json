@@ -47,7 +47,9 @@
   "devDependencies": {
     "@expressive-code/core": "^0.41.3",
     "@expressive-code/plugin-frames": "^0.41.3",
+    "@types/hast": "^3.0.4",
     "hast-util-select": "^6.0.4",
+    "hast-util-to-html": "^9.0.0",
     "prettier": "^3.6.2",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",

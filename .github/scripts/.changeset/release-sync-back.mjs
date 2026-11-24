@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import { join } from "node:path";
 import parseChangeset from "@changesets/parse";
 import { resolveReleasePackage } from "./release-packages.mjs";
 
@@ -35,35 +34,15 @@ const findTargetChangesetsForPackage = ({
       ).releases.some((release) => release.name === packageName),
     );
 
-const releaseCarryForwardFiles = ({
-  findLockfilePackageDirs,
-  pkg,
-  repoRoot,
-  sourceBranch,
-}) =>
-  [
-    "package-lock.json",
-    `${pkg.dir}/package.json`,
-    `${pkg.dir}/CHANGELOG.md`,
-    ...findLockfilePackageDirs(pkg.absoluteDir).map((dir) =>
-      join(dir, "package-lock.json").slice(repoRoot.length + 1),
-    ),
-  ]
+const releaseCarryForwardFiles = ({ pkg, repoRoot, sourceBranch }) =>
+  ["pnpm-lock.yaml", `${pkg.dir}/package.json`, `${pkg.dir}/CHANGELOG.md`]
     .filter((file, index, files) => files.indexOf(file) === index)
     .filter((file) =>
       gitPathExists({ path: file, ref: sourceBranch, repoRoot }),
     );
 
-const getSyncBackPlan = ({
-  capture,
-  findLockfilePackageDirs,
-  pkg,
-  repoRoot,
-  sourceBranch,
-  target,
-}) => {
+const getSyncBackPlan = ({ capture, pkg, repoRoot, sourceBranch, target }) => {
   const releaseFiles = releaseCarryForwardFiles({
-    findLockfilePackageDirs,
     pkg,
     repoRoot,
     sourceBranch,
@@ -153,7 +132,7 @@ const maybeCommitSyncBack = async ({
 };
 
 const syncBackLaterCommand = ({ branchName, pkg, target }) =>
-  `npm --prefix .changeset run release:sync-back -- ${pkg.name} --target=${target} --branch=${branchName} --commit`;
+  `pnpm --dir .changeset run release:sync-back ${pkg.name} --target=${target} --branch=${branchName} --commit`;
 
 export const maybeSyncBackAfterDispatch = async ({
   confirmYes,
@@ -194,10 +173,9 @@ export const maybeSyncBackAfterDispatch = async ({
     return;
   }
 
-  const { capture, findLockfilePackageDirs, run } = helpers;
+  const { capture, run } = helpers;
   const plan = getSyncBackPlan({
     capture,
-    findLockfilePackageDirs,
     pkg,
     repoRoot,
     sourceBranch,
@@ -242,13 +220,7 @@ export const syncBackRelease = async ({
   packageNameOrDir,
   repoRoot,
 }) => {
-  const {
-    assertCleanTree,
-    capture,
-    findLockfilePackageDirs,
-    getBranchName,
-    run,
-  } = helpers;
+  const { assertCleanTree, capture, getBranchName, run } = helpers;
 
   assertCleanTree(repoRoot);
 
@@ -275,7 +247,6 @@ export const syncBackRelease = async ({
 
   const plan = getSyncBackPlan({
     capture,
-    findLockfilePackageDirs,
     pkg,
     repoRoot,
     sourceBranch,

@@ -157,8 +157,8 @@ const release = async (packageNameOrDir, options) => {
         [
           `The normal release flow will publish ${pkg.name} when its changeset lands on main.`,
           `To release just this package later:`,
-          `  npm --prefix .changeset run release:prepare -- ${pkg.name} --commit`,
-          `  npm --prefix .changeset run release:dispatch -- ${pkg.name}`,
+          `  pnpm --dir .changeset run release:prepare ${pkg.name} --commit`,
+          `  pnpm --dir .changeset run release:dispatch ${pkg.name}`,
         ].join("\n"),
         "Left for normal flow",
       );

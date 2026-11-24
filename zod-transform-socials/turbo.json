@@ -2,8 +2,12 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
-    "typecheck:examples": {
-      "dependsOn": ["build"]
+    "build": {
+      // Examples use pnpm `injected: true` (copied into node_modules, not symlinked),
+      // so pnpm only refreshes their copy when `pnpm run build` actually executes
+      // (via syncInjectedDepsAfterScripts in pnpm-workspace.yaml). A Turbo cache hit
+      // restores dist/ without invoking pnpm, leaving examples with stale files.
+      "cache": false
     }
   }
 }

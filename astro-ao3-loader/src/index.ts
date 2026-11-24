@@ -22,7 +22,7 @@ const loadItems = async <T extends { id: string | number }>(
   setFetcher(getFetcher(logger));
 
   const file = readFileSync(config.yamlPath, { encoding: "utf-8" });
-  const ids = z.string({ coerce: true }).array().parse(parse(file));
+  const ids = z.coerce.string().array().parse(parse(file));
 
   const tracker = getProgressTracker({
     logger,

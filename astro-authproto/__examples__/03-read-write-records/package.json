@@ -14,7 +14,8 @@
     "@astrojs/db": "^0.21.0",
     "@astrojs/node": "^9.5.2",
     "@atproto/api": "^0.18.16",
-    "@fujocoded/authproto": "file:..",
+    "@atproto/common-web": "^0.4.21",
+    "@fujocoded/authproto": "*",
     "astro": "^5.18.1"
   }
 }
