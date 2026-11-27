@@ -9,14 +9,14 @@ need to understand the release modes or debug an unexpected failure.
 
 ## Quick reference
 
-| I want to...                                           | Section                                                             | Command                                                                                              |
-| ------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Ship a changeset through the normal main-merge flow    | [Regular flow](#regular-flow-release-everything-at-once)            | `npx changeset`; merge PR; merge the Release PR                                                      |
-| Ship one package immediately                           | [Single-package flow](#single-package-flow-release-one-package-now) | `cd .changeset && npm run release -- @fujocoded/<pkg>`                                               |
-| Publish a beta/prerelease of all packages              | [Prerelease flow](#prerelease-flow-ship-betas-of-everything)        | `npx changeset pre enter <tag>` + `npx changeset version`, then dispatch workflow `mode: prerelease` |
-| Set up a brand-new package for NPM Trusted Publishing  | [New-package setup](#new-package-setup)                             | `cd .changeset && npm run release:trust -- @fujocoded/<pkg>`                                         |
-| See which packages lack Trusted Publishing (read-only) | [Every package at once](#every-package-at-once)                     | `cd .changeset && npm run release:trust -- --all --dry-run`                                          |
-| Configure Trusted Publishing everywhere it is missing  | [Every package at once](#every-package-at-once)                     | `cd .changeset && npm run release:trust -- --all`                                                    |
+| I want to...                                           | Section                                                             | Command                                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Ship a changeset through the normal main-merge flow    | [Regular flow](#regular-flow-release-everything-at-once)            | `pnpm changeset`; merge PR; merge the Release PR                                                       |
+| Ship one package immediately                           | [Single-package flow](#single-package-flow-release-one-package-now) | `cd .changeset && pnpm run release @fujocoded/<pkg>`                                                   |
+| Publish a beta/prerelease of all packages              | [Prerelease flow](#prerelease-flow-ship-betas-of-everything)        | `pnpm changeset pre enter <tag>` + `pnpm changeset version`, then dispatch workflow `mode: prerelease` |
+| Set up a brand-new package for NPM Trusted Publishing  | [New-package setup](#new-package-setup)                             | `cd .changeset && pnpm run release:trust @fujocoded/<pkg>`                                             |
+| See which packages lack Trusted Publishing (read-only) | [Every package at once](#every-package-at-once)                     | `cd .changeset && pnpm run release:trust --all --dry-run`                                              |
+| Configure Trusted Publishing everywhere it is missing  | [Every package at once](#every-package-at-once)                     | `cd .changeset && pnpm run release:trust --all`                                                        |
 
 ## Regular flow
 
@@ -27,7 +27,7 @@ once.
 1. Add a changeset describing what changed:
 
    ```bash
-   npx changeset
+   pnpm changeset
    ```
 
 2. Commit the changeset and merge your feature PR to `main`.
@@ -52,13 +52,13 @@ package that has a pending changeset.
 
 > [!NOTE]
 > There is no dedicated `.changeset` helper script for prereleases. This flow
-> uses `npx changeset` directly on a branch, then dispatches the `Release`
+> uses `pnpm changeset` directly on a branch, then dispatches the `Release`
 > workflow with `mode: prerelease`.
 
 1. On a branch, enter changesets pre mode with the tag you want:
 
    ```bash
-   npx changeset pre enter beta
+   pnpm changeset pre enter beta
    ```
 
    This writes `.changeset/pre.json`. Commit it.
@@ -66,7 +66,7 @@ package that has a pending changeset.
 2. Version the packages:
 
    ```bash
-   npx changeset version
+   pnpm changeset version
    ```
 
    In pre mode this converts pending changesets into prerelease versions (for
@@ -87,7 +87,7 @@ package that has a pending changeset.
 When you are ready to ship stable, exit pre mode and use the regular flow:
 
 ```bash
-npx changeset pre exit
+pnpm changeset pre exit
 ```
 
 > [!IMPORTANT]
@@ -103,7 +103,7 @@ section assume you are inside the `.changeset` directory:
 
 ```bash
 cd .changeset
-npm run release -- @fujocoded/astro-smooth-actions
+pnpm run release @fujocoded/astro-smooth-actions
 ```
 
 This command:
@@ -131,7 +131,7 @@ If you choose to release, it then:
 Try and witness it (without edits):
 
 ```bash
-npm run release -- @fujocoded/astro-smooth-actions --dry-run
+pnpm run release @fujocoded/astro-smooth-actions --dry-run
 ```
 
 > [!IMPORTANT]
@@ -152,7 +152,7 @@ trust setup automatically. To run it by itself:
 
 ```bash
 cd .changeset
-npm run release:trust -- @fujocoded/astro-smooth-actions
+pnpm run release:trust @fujocoded/astro-smooth-actions
 ```
 
 > [!WARNING]
@@ -200,7 +200,7 @@ To see which packages are missing Trusted Publishing, without changing anything:
 
 ```bash
 cd .changeset
-npm run release:trust -- --all --dry-run
+pnpm run release:trust --all --dry-run
 ```
 
 This is read-only. It prints the trust commands it would run and a per-package
@@ -210,7 +210,7 @@ To actually configure the ones that are missing it:
 
 ```bash
 cd .changeset
-npm run release:trust -- --all
+pnpm run release:trust --all
 ```
 
 This **writes to npm**: every package without Trusted Publishing gets it
@@ -230,7 +230,7 @@ All the steps that make up `release` are available separately.
 
 ```bash
 cd .changeset
-npm run release:prepare -- @fujocoded/astro-smooth-actions --commit
+pnpm run release:prepare @fujocoded/astro-smooth-actions --commit
 ```
 
 This creates a temporary branch `release/<pkg>`, removes unrelated pending
@@ -250,7 +250,7 @@ under the package and runs focused checks.
 
 ```bash
 cd .changeset
-npm run release:dispatch -- @fujocoded/astro-smooth-actions --target main
+pnpm run release:dispatch @fujocoded/astro-smooth-actions --target main
 ```
 
 This pushes the versioned branch, dispatches `release.yaml` with
@@ -264,7 +264,7 @@ branch afterwards:
 
 ```bash
 cd .changeset
-npm run release:sync-back -- @fujocoded/astro-smooth-actions --target main --branch release/astro-smooth-actions-0.1.0 --commit
+pnpm run release:sync-back @fujocoded/astro-smooth-actions --target main --branch release/astro-smooth-actions-0.1.0 --commit
 ```
 
 ## How releasing works

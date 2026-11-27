@@ -186,7 +186,7 @@ Runnable examples live in
 Run them from the repo root:
 
 ```sh
-npm test --workspace @fujocoded/msw-atproto -- __examples__
+pnpm --filter @fujocoded/msw-atproto test -- __examples__
 ```
 
 Pick the file that matches your needs:

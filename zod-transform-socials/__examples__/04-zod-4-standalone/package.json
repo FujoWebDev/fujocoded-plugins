@@ -9,11 +9,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fujocoded/zod-transform-socials": "file:../..",
+    "@fujocoded/zod-transform-socials": "*",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22.19.19",
     "typescript": "^5.5.4"
+  },
+  "dependenciesMeta": {
+    "@fujocoded/zod-transform-socials": {
+      "injected": true
+    }
   }
 }

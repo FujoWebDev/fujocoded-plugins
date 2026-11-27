@@ -4,3 +4,4 @@ test-results/
 .vscode/
 .astro
 .turbo/
+package-lock.json

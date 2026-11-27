@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",
-    "@fujocoded/authproto": "file:..",
+    "@fujocoded/authproto": "*",
     "astro": "^5.18.1"
   }
 }

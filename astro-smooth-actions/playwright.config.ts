@@ -31,7 +31,7 @@ export default defineConfig({
     },
   })),
   webServer: astroExamples.map(({ version, port }) => ({
-    command: `npm --prefix __examples__/${exampleName(version)} run dev -- --host ${host} --port ${port}`,
+    command: `pnpm --dir __examples__/${exampleName(version)} run dev --host ${host} --port ${port}`,
     cwd: packageRoot,
     url: exampleUrl(port),
     reuseExistingServer: !env.CI,

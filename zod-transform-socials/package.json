@@ -49,10 +49,9 @@
   "scripts": {
     "build": "tsup src/index.ts src/zod4.ts --format cjs,esm --dts --clean",
     "test": "vitest run",
-    "test:compat": "npm run build && node --experimental-strip-types scripts/check-compat.ts",
+    "test:compat": "pnpm run build && node --experimental-strip-types scripts/check-compat.ts",
     "typecheck": "tsc --noEmit",
-    "typecheck:examples": "node ../.github/scripts/typecheck-examples.mjs",
-    "validate": " npx publint"
+    "validate": "pnpm dlx publint"
   },
   "dependencies": {
     "social-links": "^1.14.0"

@@ -243,7 +243,7 @@ const executeTrustPlan = (
 ) => {
   if (options?.dryRun) {
     if (action === "bootstrap") {
-      run("npm", ["run", "build"], { cwd: pkg.absoluteDir, dryRun: true });
+      run("pnpm", ["run", "build"], { cwd: pkg.absoluteDir, dryRun: true });
       run("npm", ["publish", "--access", "public"], {
         cwd: pkg.absoluteDir,
         dryRun: true,
@@ -258,7 +258,7 @@ const executeTrustPlan = (
 
   if (action === "bootstrap") {
     logStep(`Building ${pkg.name}.`);
-    const build = spawnSync("npm", ["run", "build"], {
+    const build = spawnSync("pnpm", ["run", "build"], {
       cwd: pkg.absoluteDir,
       stdio: "inherit",
     });

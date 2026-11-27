@@ -16,7 +16,7 @@ export default defineConfig([
   {
     name: "components",
     entry: ["src/components.ts"],
-    copy: [{ from: "src/components/", to: "dist/components/" }],
+    copy: [{ from: "src/components/", to: "dist" }],
     external: astroFileExternal,
     clean: true,
     ...COMMON_CONFIG,
@@ -34,9 +34,7 @@ export default defineConfig([
     // tsdown rewrites inline `import("x")` types into top-level `import * as`
     // statements, which turns the file into a module and stops TypeScript from
     // registering the `declare module "fujocoded:authproto/*"` ambient blocks.
-    copy: [
-      { from: "src/virtual-modules.d.ts", to: "dist/virtual-modules.d.ts" },
-    ],
+    copy: [{ from: "src/virtual-modules.d.ts", to: "dist" }],
     external: astroFileExternal,
     ...COMMON_CONFIG,
   },

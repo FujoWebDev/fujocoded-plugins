@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.1.7",
-    "@fujocoded/astro-atproto-loader": "file:../..",
+    "@fujocoded/astro-atproto-loader": "*",
     "astro": "^7.3.8"
   },
   "engines": {

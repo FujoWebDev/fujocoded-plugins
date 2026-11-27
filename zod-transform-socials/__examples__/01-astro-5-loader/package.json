@@ -12,9 +12,14 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@fujocoded/zod-transform-socials": "file:../..",
+    "@fujocoded/zod-transform-socials": "*",
     "astro": "^5.18.1",
     "typescript": "^5.9.3",
     "zod": "^3.25.76"
+  },
+  "dependenciesMeta": {
+    "@fujocoded/zod-transform-socials": {
+      "injected": true
+    }
   }
 }

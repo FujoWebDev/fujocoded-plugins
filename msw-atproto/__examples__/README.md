@@ -19,5 +19,5 @@ Pick the file that matches your test:
 Run the example suite from the repo root:
 
 ```sh
-npm test --workspace @fujocoded/msw-atproto -- __examples__
+pnpm --filter @fujocoded/msw-atproto test -- __examples__
 ```

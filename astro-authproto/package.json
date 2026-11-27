@@ -82,6 +82,7 @@
     "glob": "^13.0.6",
     "msw": "^2.13.4",
     "tsdown": "^0.17.2",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
