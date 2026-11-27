@@ -16,12 +16,12 @@
     "@types/node": "^22.19.19",
     "typescript": "^5.5.4"
   },
-  "overrides": {
-    "zod": "^3.25.76"
-  },
   "dependenciesMeta": {
     "@fujocoded/zod-transform-socials": {
       "injected": true
     }
+  },
+  "overrides": {
+    "zod": "^3.25.76"
   }
 }
